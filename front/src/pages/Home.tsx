@@ -11,8 +11,8 @@ const Home: React.FC = () => {
             <header className="top-bar">
                 <div className="spacer" />
                 <div className="auth-buttons">
-                    <button onClick={() => navigate('/login')}>Login</button>
-                    <button onClick={() => navigate('/signup')}>Sign Up</button>
+                    <button onClick={() => navigate('/authentication?mode=login')}>Login</button>
+                    <button onClick={() => {navigate('/authentication?mode=signup')}}>Sign Up</button>
                 </div>
             </header>
 
