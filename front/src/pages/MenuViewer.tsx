@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ShoppingCart, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface MenuItem {
     id: number;
@@ -57,6 +58,7 @@ const menuItems: MenuItem[] = [
 function MenuViewer() {
     const [cartCount, setCartCount] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
+    const { isLoggedIn } = useAuth();
 
     const filteredMenu = menuItems.filter((item) =>
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -80,14 +82,19 @@ function MenuViewer() {
                             <span className="ml-1 text-gray-700">4.8</span>
                             <span className="text-gray-500 text-sm ml-1">(342 reviews)</span>
                         </div>
-                        <div className="relative">
-                            <ShoppingCart className="w-6 h-6 text-gray-700" />
-                            {cartCount > 0 && (
-                                <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                                    {cartCount}
-                                </span>
-                            )}
-                        </div>
+                        {isLoggedIn ? (
+                            <>
+                                <div className="relative">
+                                    <ShoppingCart className="w-6 h-6 text-gray-700" />
+                                    {cartCount > 0 && (
+                                        <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                            {cartCount}
+                                        </span>
+                                    )}
+                                </div>
+                            </>
+                        ) : (<></>)}
+                        
                     </div>
                 </div>
             </header>
@@ -121,7 +128,14 @@ function MenuViewer() {
                                 <div className="mt-4 flex items-center justify-between">
                                     <span className="text-gray-900 font-medium">${item.price.toFixed(2)}</span>
                                     <button
-                                        onClick={() => setCartCount(prev => prev + 1)}
+                                        onClick={() => {
+                                            if (isLoggedIn) {
+                                                setCartCount(prev => prev + 1)
+                                            }
+                                            else {
+                                                alert( 'Please sign in!' );
+                                            }
+                                        }}
                                         className="bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
                                     >
                                         Add to Cart
