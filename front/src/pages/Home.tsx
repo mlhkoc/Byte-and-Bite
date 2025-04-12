@@ -199,10 +199,12 @@ interface RestaurantCardProps {
 }
 
 function RestaurantCard({ restaurant, onFavoriteToggle }: RestaurantCardProps) {
+    const navigate = useNavigate();
+
     return (
         <button
             onClick={() => navigate(`/${restaurant.id}/menu`)}
-            className="relative bg-white rounded-lg overflow-hidden shadow-md w-full"
+            className="relative bg-white rounded-lg overflow-hidden shadow-md w-full text-left"
         >
             <img
                 src={restaurant.image}
@@ -210,12 +212,15 @@ function RestaurantCard({ restaurant, onFavoriteToggle }: RestaurantCardProps) {
                 className="w-full h-48 object-cover"
             />
             <div className="p-4 relative">
-                <button
-                    onClick={() => onFavoriteToggle(restaurant.id)}
-                    className="absolute top-2 right-2 text-red-500"
+                <div
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onFavoriteToggle(restaurant.id);
+                    }}
+                    className="absolute top-2 right-2 text-red-500 cursor-pointer"
                 >
                     <Heart fill={restaurant.isFavorite ? 'red' : 'none'} />
-                </button>
+                </div>
                 <h3 className="text-lg font-semibold">{restaurant.name}</h3>
                 <div className="text-sm text-gray-500 mb-2">{restaurant.cuisine}</div>
                 <div className="flex items-center gap-4 text-sm text-gray-600">
@@ -224,7 +229,7 @@ function RestaurantCard({ restaurant, onFavoriteToggle }: RestaurantCardProps) {
                 </div>
                 <div className="mt-2 text-sm text-gray-500">Rating: {restaurant.rating}</div>
             </div>
-        </div>
+        </button>
     );
 }
 
