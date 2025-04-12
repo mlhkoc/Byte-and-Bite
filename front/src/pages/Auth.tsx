@@ -35,10 +35,7 @@ function Auth() {
     const [emailError, setEmailError] = useState<string>('');
     const [phoneNumberError, setPhoneNumberError] = useState<string>('');
 
-    // Sample hardcoded users (you can replace this with a real authentication service)
-    const users = [
-        { email: 'test@example.com', password: 'Test@123' }
-    ];
+
 
     const formatPhoneNumber = (value: string) => {
         const cleaned = value.replace(/\D/g, '');
@@ -66,7 +63,6 @@ function Auth() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         if (!showLogin) {
             const passwordRegex = /^(?=.*[A-Z])(?=.*\W).{8,}$/;
             if (!passwordRegex.test(formData.password)) {
@@ -85,32 +81,51 @@ function Auth() {
                 setPhoneNumberError('Please enter a valid phone number (e.g., 555 123 45 67).');
                 return;
             }
+            const response = await fetch('http://localhost:8080/api/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+                credentials: 'include'
+            });
+            if (response.ok) {
+                setIsLoggedIn(true);
+                navigate('/');
+            } else {
+                const errorData = await response.json();
+                alert(errorData.message || 'Signup failed.');
+            }
+
         }
 
         if (showLogin) {
             // Login logic (simple hardcoded check for now)
-            const user = users.find(
-                (user) => user.email === formData.email && user.password === formData.password
-            );
+            try {
+                const params = new URLSearchParams();
+                params.append('username', formData.email);
+                params.append('password', formData.password);
 
-            if (user) {
-                // If login successful, navigate to Welcome page
-                setIsLoggedIn(true); 
-                navigate('/');
-            } else {
-                // Show error if credentials are incorrect
-                setEmailError('Invalid email or password.');
+                const response = await fetch('http://localhost:8080/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: params.toString(),
+                    credentials: 'include', // crucial for session cookie to be sent
+                });
+
+                if (response.ok) {
+                    setIsLoggedIn(true);
+                    navigate('/');
+                } else {
+                    setEmailError('Invalid credentials.');
+                }
+            } catch (err) {
+                console.error('Login error:', err);
             }
         }
 
-        try {
-            // Handling form submission for sign up
-            console.log('Form submitted:', formData);
-            setIsLoggedIn(true); 
-            navigate('/');
-        } catch (error) {
-            console.error('Error submitting form:', error);
-        }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

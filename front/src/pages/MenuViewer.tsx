@@ -1,7 +1,8 @@
-import { useState } from 'react';
+    import {useEffect, useState} from 'react';
 import { ShoppingCart, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+    import {useParams} from "react-router-dom";
 
 interface MenuItem {
     id: number;
@@ -11,59 +12,27 @@ interface MenuItem {
     image: string;
 }
 
-const menuItems: MenuItem[] = [
-    {
-        id: 1,
-        name: 'Classic Cheeseburger',
-        description: 'Juicy beef patty with melted cheddar, fresh vegetables, and our special sauce',
-        price: 12.99,
-        image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80'
-    },
-    {
-        id: 2,
-        name: 'Grilled Chicken Salad',
-        description: 'Fresh mixed greens with grilled chicken breast, avocado, and balsamic dressing',
-        price: 14.99,
-        image: 'https://images.unsplash.com/photo-1546793665-c74683f339c1?auto=format&fit=crop&w=800&q=80'
-    },
-    {
-        id: 3,
-        name: 'Margherita Pizza',
-        description: 'Traditional Italian pizza with fresh mozzarella, tomatoes, and basil',
-        price: 16.99,
-        image: 'https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?auto=format&fit=crop&w=800&q=80'
-    },
-    {
-        id: 4,
-        name: 'Tuna Poke Bowl',
-        description: 'Fresh tuna, rice, avocado, and seaweed with house-made poke sauce',
-        price: 18.99,
-        image: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?auto=format&fit=crop&w=800&q=80'
-    },
-    {
-        id: 5,
-        name: 'Shrimp Pad Thai',
-        description: 'Stir-fried rice noodles with shrimp, tofu, eggs, and traditional sauce',
-        price: 15.99,
-        image: 'https://images.unsplash.com/photo-1559314809-0d155014e29e?auto=format&fit=crop&w=800&q=80'
-    },
-    {
-        id: 6,
-        name: 'Chocolate Lava Cake',
-        description: 'Warm chocolate cake with molten center, served with vanilla ice cream',
-        price: 8.99,
-        image: 'https://images.unsplash.com/photo-1624353365286-3f8d62daad51?auto=format&fit=crop&w=800&q=80'
-    }
-];
-
 function MenuViewer() {
+
+    const { restaurantId } = useParams();
+    const [foods, setFoods] = useState<MenuItem[]>([]);
+
+    useEffect(() => {
+        if (!restaurantId) return;
+
+        fetch(`http://localhost:8080/api/${restaurantId}/menu`)
+            .then((res) => res.json())
+            .then((data) => setFoods(data))
+            .catch((err) => console.error("Failed to fetch menu:", err));
+    }, [restaurantId]);
+
     const [searchQuery, setSearchQuery] = useState("");
     const { isLoggedIn } = useAuth();
     const { items, addToCart, setIsCartOpen } = useCart();
 
     const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
-    const filteredMenu = menuItems.filter((item) =>
+    const filteredMenu = foods.filter((item) =>
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
