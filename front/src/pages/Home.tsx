@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import { Search, SlidersHorizontal, ShoppingCart, User, Pizza, Merge as Burger, Fish, Drumstick, IceCream, Heart, Clock, DollarSign } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -22,76 +22,17 @@ function Home() {
     const { items, setIsCartOpen } = useCart();
     const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
-    const [restaurants, setRestaurants] = useState<Restaurant[]>([
-        {
-            id: 1,
-            name: "Burger House",
-            cuisine: "American",
-            price: "$$",
-            rating: 4.7,
-            deliveryTime: "20-30 min",
-            minOrder: "$20",
-            image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=800",
-            isFavorite: true
-        },
-        {
-            id: 2,
-            name: "Thai Delight",
-            cuisine: "Thai",
-            price: "$$",
-            rating: 4.6,
-            deliveryTime: "25-35 min",
-            minOrder: "$18",
-            image: "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&q=80&w=800",
-            isFavorite: true
-        },
-        {
-            id: 3,
-            name: "Pizza Palace",
-            cuisine: "Italian",
-            price: "$$",
-            rating: 4.9,
-            deliveryTime: "25-35 min",
-            minOrder: "$15",
-            image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800",
-            isFavorite: false
-        },
-        {
-            id: 4,
-            name: "Sushi Master",
-            cuisine: "Japanese",
-            price: "$$$",
-            rating: 4.9,
-            deliveryTime: "30-40 min",
-            minOrder: "$25",
-            image: "https://images.unsplash.com/photo-1579027989536-b7b1f875659b?auto=format&fit=crop&q=80&w=800",
-            isFavorite: false
-        },
-        {
-            id: 5,
-            name: "Kral Döner",
-            cuisine: "Döner",
-            price: "$",
-            rating: 4.5,
-            deliveryTime: "20-25 min",
-            minOrder: "$10",
-            image: "https://images.deliveryhero.io/image/fd-tr/LH/lx5b-listing.jpg",
-            isFavorite: false
-        },
-        {
-            id: 6,
-            name: "Ocakbaşı Kebap",
-            cuisine: "Kebap",
-            price: "$$",
-            rating: 4.8,
-            deliveryTime: "30-40 min",
-            minOrder: "$22",
-            image: "https://media.istockphoto.com/id/1408897449/tr/foto%C4%9Fraf/adana-kebab-served-in-a-wooden-cutting-board-isolated-on-wooden-background-side-view.jpg?s=612x612&w=0&k=20&c=cD4HT1eEb4BFfIbRTvaJ90QjAs6xnDB-Ih0dO_x4ngQ=",
-            isFavorite: false
-        }
+    const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+    useEffect(() => {
+        fetch('http://localhost:8080/api/restaurants', {
+            method: 'GET',
+            credentials: 'include',
+        })
+            .then((res) => res.json())
+            .then((data) => setRestaurants(data))
+            .catch((err) => console.error("Failed to fetch restaurants", err));
+    }, []);
 
-
-    ]);
 
     const categories = [
         { name: "Pizza", icon: <Pizza className="w-6 h-6" />, cuisine: "Italian" },
@@ -259,7 +200,10 @@ interface RestaurantCardProps {
 
 function RestaurantCard({ restaurant, onFavoriteToggle }: RestaurantCardProps) {
     return (
-        <div className="bg-white shadow rounded-xl overflow-hidden">
+        <button
+            onClick={() => navigate(`/${restaurant.id}/menu`)}
+            className="relative bg-white rounded-lg overflow-hidden shadow-md w-full"
+        >
             <img
                 src={restaurant.image}
                 alt={restaurant.name}
