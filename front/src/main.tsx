@@ -10,6 +10,7 @@ import { AuthProvider } from './context/AuthContext.tsx';
 import Restaurant from './Restaurant.tsx';
 import { CartProvider } from './context/CartContext';
 import { CartModal } from './components/CartModal';
+import Checkout from './pages/Checkout.tsx';
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
@@ -21,6 +22,7 @@ createRoot(document.getElementById('root')!).render(
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/:restaurantId/menu" element={<MenuViewer />} />
                     <Route path="/restaurant" element={<Restaurant />} />
+                    <Route path="/checkout" element={<Checkout />} />
                 </Routes>
                 <CartModal />
             </BrowserRouter>
