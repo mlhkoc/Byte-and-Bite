@@ -236,6 +236,11 @@ function Auth() {
                                 <button onClick={toggleView} className="text-orange-600 hover:text-orange-500 font-medium">
                                     Create Account
                                 </button>
+                                <div className="mt-2 text-gray-600"> {/* alt satır için margin ekledim bura sonrası silinecek.*/}
+                                    <span>Sadece aşağıdaki test credentialleri ile giriş yapılabilir şu an!</span><br />
+                                    <span>Email: <strong>test@example.com</strong></span><br />
+                                    <span>Password: <strong>Test@123</strong></span>
+                                </div>
                             </div>
                         </div>
                     ) : (
