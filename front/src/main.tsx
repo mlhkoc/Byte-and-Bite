@@ -7,6 +7,8 @@ import Home from './pages/Home.tsx';
 import MenuViewer from './pages/MenuViewer.tsx';    
 import './index.css';
 import { AuthProvider } from './context/AuthContext.tsx';
+import Restaurant from './Restaurant.tsx';
+
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
@@ -16,6 +18,8 @@ createRoot(document.getElementById('root')!).render(
                     <Route path="/" element={<Home />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/menu" element={<MenuViewer />} />
+                    <Route path="/restaurant" element={<Restaurant />} />
+
                 </Routes>
             </BrowserRouter>
         </AuthProvider>

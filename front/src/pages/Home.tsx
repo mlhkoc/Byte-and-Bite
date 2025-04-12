@@ -176,13 +176,15 @@ function Home() {
 
             {/* Sign Up Buttons - Fixed Position at the Bottom */}
             <div className="fixed bottom-4 left-4 flex gap-4">
-                <button className="px-3 py-1.5 bg-orange-300 text-white text-xs rounded-lg hover:bg-orange-400">
+                <button
+                    onClick={() => navigate('/restaurant')}
+                    className="px-3 py-1.5 bg-orange-300 text-white text-xs rounded-lg hover:bg-orange-400"
+                >
                     Join as Restaurant
                 </button>
                 <button className="px-3 py-1.5 bg-orange-700 text-white text-xs rounded-lg hover:bg-orange-800">
                     Join as Courier
                 </button>
-
             </div>
         </div>
     );
