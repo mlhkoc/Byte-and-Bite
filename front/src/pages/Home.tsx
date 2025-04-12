@@ -75,6 +75,7 @@ function Home() {
     ];
 
     const { isLoggedIn } = useAuth();
+    const [searchTerm, setSearchTerm] = useState('');
 
     const toggleFavorite = (restaurantId: number) => {
         setRestaurants(restaurants.map(restaurant =>
@@ -85,6 +86,10 @@ function Home() {
     };
 
     const favoriteRestaurants = restaurants.filter(r => r.isFavorite);
+
+    const filteredRestaurants = restaurants.filter(r =>
+        r.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-6">
@@ -122,6 +127,8 @@ function Home() {
                         type="text"
                         placeholder="Search for restaurants or dishes"
                         className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
                 <button className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">
@@ -165,13 +172,17 @@ function Home() {
             <div>
                 <h2 className="text-xl font-semibold mb-4">All Restaurants</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {restaurants.map(restaurant => (
-                        <RestaurantCard
-                            key={restaurant.id}
-                            restaurant={restaurant}
-                            onFavoriteToggle={toggleFavorite}
-                        />
-                    ))}
+                    {filteredRestaurants.length > 0 ? (
+                        filteredRestaurants.map(restaurant => (
+                            <RestaurantCard
+                                key={restaurant.id}
+                                restaurant={restaurant}
+                                onFavoriteToggle={toggleFavorite}
+                            />
+                        ))
+                    ) : (
+                        <div className="text-gray-500">No matching restaurants found.</div>
+                    )}
                 </div>
             </div>
 
