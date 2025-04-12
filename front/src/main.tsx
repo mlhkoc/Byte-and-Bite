@@ -8,20 +8,23 @@ import MenuViewer from './pages/MenuViewer.tsx';
 import './index.css';
 import { AuthProvider } from './context/AuthContext.tsx';
 import Restaurant from './Restaurant.tsx';
-
+import { CartProvider } from './context/CartContext';
+import { CartModal } from './components/CartModal';
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <AuthProvider>
+            <CartProvider>
             <BrowserRouter>
                 <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/menu" element={<MenuViewer />} />
                     <Route path="/restaurant" element={<Restaurant />} />
-
                 </Routes>
+                <CartModal />
             </BrowserRouter>
+            </CartProvider>
         </AuthProvider>
     </StrictMode>
 );

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ShoppingCart, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
 interface MenuItem {
     id: number;
@@ -56,9 +57,11 @@ const menuItems: MenuItem[] = [
 ];
 
 function MenuViewer() {
-    const [cartCount, setCartCount] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
     const { isLoggedIn } = useAuth();
+    const { items, addToCart, setIsCartOpen } = useCart();
+
+    const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
     const filteredMenu = menuItems.filter((item) =>
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -72,8 +75,8 @@ function MenuViewer() {
                 <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
                     <div className="flex items-center space-x-2">
                         <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=50&h=50&q=80"
-                            alt="Restaurant logo"
-                            className="w-10 h-10 rounded-full object-cover" />
+                             alt="Restaurant logo"
+                             className="w-10 h-10 rounded-full object-cover" />
                         <h1 className="text-xl font-semibold text-gray-900">Downtown Delights Restaurant</h1>
                     </div>
                     <div className="flex items-center space-x-4">
@@ -82,19 +85,19 @@ function MenuViewer() {
                             <span className="ml-1 text-gray-700">4.8</span>
                             <span className="text-gray-500 text-sm ml-1">(342 reviews)</span>
                         </div>
-                        {isLoggedIn ? (
-                            <>
-                                <div className="relative">
-                                    <ShoppingCart className="w-6 h-6 text-gray-700" />
-                                    {cartCount > 0 && (
-                                        <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                                            {cartCount}
-                                        </span>
-                                    )}
-                                </div>
-                            </>
-                        ) : (<></>)}
-                        
+                        {isLoggedIn && (
+                            <button
+                                onClick={() => setIsCartOpen(true)}
+                                className="relative"
+                            >
+                                <ShoppingCart className="w-6 h-6 text-gray-700" />
+                                {cartCount > 0 && (
+                                    <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                        {cartCount}
+                                    </span>
+                                )}
+                            </button>
+                        )}
                     </div>
                 </div>
             </header>
@@ -130,10 +133,14 @@ function MenuViewer() {
                                     <button
                                         onClick={() => {
                                             if (isLoggedIn) {
-                                                setCartCount(prev => prev + 1)
-                                            }
-                                            else {
-                                                alert( 'Please sign in!' );
+                                                addToCart({
+                                                    id: item.id,
+                                                    name: item.name,
+                                                    price: item.price,
+                                                    image: item.image
+                                                });
+                                            } else {
+                                                alert('Please sign in!');
                                             }
                                         }}
                                         className="bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
