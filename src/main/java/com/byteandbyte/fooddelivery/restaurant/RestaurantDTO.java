@@ -1,0 +1,21 @@
+package com.byteandbyte.fooddelivery.restaurant;
+
+
+import lombok.*;
+
+import static java.lang.Math.max;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class RestaurantDTO {
+    private Long id;
+    private String name;
+    private String cuisine;
+    private double rating;
+    private String deliveryTime;
+    private double minOrder;
+    private String image;
+
+}

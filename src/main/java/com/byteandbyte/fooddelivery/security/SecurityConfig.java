@@ -15,6 +15,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -86,9 +87,21 @@ public class SecurityConfig {
                                             Authentication authentication) throws IOException, ServletException {
             // Redirect to a specific URL after login
             response.setStatus(HttpServletResponse.SC_OK);  // 200 OK
-            response.getWriter().write("Login successful"); // Optional: write a message to the response body
+            response.setContentType("application/json");
+
+
+            String role = authentication.getAuthorities().stream()
+                    .findFirst()
+                    .map(auth -> auth.getAuthority().replace("ROLE_", "")) // optional cleanup
+                    .orElse("UNKNOWN");
+
+            String username = authentication.getName();
+
+            // Send a simple JSON response
+            String json = String.format("{\"username\": \"%s\", \"role\": \"%s\"}", username, role);
+            response.getWriter().write(json);
+        }
 
         }
-    }
 
 }

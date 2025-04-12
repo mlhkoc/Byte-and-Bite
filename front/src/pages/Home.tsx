@@ -199,6 +199,8 @@ interface RestaurantCardProps {
 }
 
 function RestaurantCard({ restaurant, onFavoriteToggle }: RestaurantCardProps) {
+    const navigate = useNavigate();
+
     return (
         <button
             onClick={() => navigate(`/${restaurant.id}/menu`)}
@@ -209,22 +211,34 @@ function RestaurantCard({ restaurant, onFavoriteToggle }: RestaurantCardProps) {
                 alt={restaurant.name}
                 className="w-full h-48 object-cover"
             />
-            <div className="p-4 relative">
-                <button
-                    onClick={() => onFavoriteToggle(restaurant.id)}
-                    className="absolute top-2 right-2 text-red-500"
-                >
-                    <Heart fill={restaurant.isFavorite ? 'red' : 'none'} />
-                </button>
-                <h3 className="text-lg font-semibold">{restaurant.name}</h3>
-                <div className="text-sm text-gray-500 mb-2">{restaurant.cuisine}</div>
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {restaurant.deliveryTime}</span>
-                    <span className="flex items-center gap-1"><DollarSign className="w-4 h-4" /> {restaurant.minOrder}</span>
+            <button
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onFavoriteToggle(restaurant.id);
+                }}
+                className={`absolute top-4 right-4 p-2 rounded-full ${restaurant.isFavorite ? 'bg-red-500 text-white' : 'bg-white text-gray-600'}`}
+            >
+                <Heart className="w-5 h-5" fill={restaurant.isFavorite ? "currentColor" : "none"} />
+            </button>
+            <div className="p-4">
+                <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">{restaurant.name}</h3>
+                    <div className="flex items-center">
+                        <span className="text-yellow-400">★</span>
+                        <span className="ml-1">{restaurant.rating}</span>
+                    </div>
                 </div>
-                <div className="mt-2 text-sm text-gray-500">Rating: {restaurant.rating}</div>
+                <div className="text-gray-600 text-sm mb-2">
+                    {restaurant.cuisine} • {restaurant.price}
+                </div>
+                <div className="flex items-center text-sm text-gray-500">
+                    <Clock className="w-4 h-4 mr-1" />
+                    <span className="mr-3">{restaurant.deliveryTime}</span>
+                    <DollarSign className="w-4 h-4 mr-1" />
+                    <span>Min. {restaurant.minOrder}</span>
+                </div>
             </div>
-        </div>
+        </button>
     );
 }
 
