@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Search, SlidersHorizontal, ShoppingCart, User, Pizza, Merge as Burger, Fish, Drumstick, IceCream, Heart, Clock, DollarSign } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.jpg';
 
 interface Restaurant {
     id: number;
@@ -89,7 +90,7 @@ function Home() {
         <div className="max-w-7xl mx-auto px-4 py-6">
             {/* Header */}
             <div className="flex justify-between items-center mb-8">
-                <div className="text-2xl font-bold">Logo</div>
+                <img src={logo} alt="Logo" className="h-10 w-auto" />
                 <div className="flex gap-4">
                     {isLoggedIn ? (
                         <>
