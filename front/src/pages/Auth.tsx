@@ -12,6 +12,8 @@ interface FormData {
     phoneNumber: string;
     agreeToTerms: boolean;
     rememberMe: boolean;
+    role: 'customer' | 'restaurant';
+    restaurantName?: string;
 }
 
 function Auth() {
@@ -28,14 +30,15 @@ function Auth() {
         password: '',
         phoneNumber: '',
         agreeToTerms: false,
-        rememberMe: false
+        rememberMe: false,
+        role: 'customer',
+        restaurantName: ''
     });
 
     const [passwordError, setPasswordError] = useState<string>('');
     const [emailError, setEmailError] = useState<string>('');
     const [phoneNumberError, setPhoneNumberError] = useState<string>('');
 
-    // Sample hardcoded users (you can replace this with a real authentication service)
     const users = [
         { email: 'test@example.com', password: 'Test@123' }
     ];
@@ -57,11 +60,7 @@ function Auth() {
 
     useEffect(() => {
         const mode = searchParams.get('mode');
-        if (mode === 'signup') {
-            setShowLogin(false);
-        } else {
-            setShowLogin(true);
-        }
+        setShowLogin(mode !== 'signup');
     }, [searchParams]);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -88,37 +87,40 @@ function Auth() {
         }
 
         if (showLogin) {
-            // Login logic (simple hardcoded check for now)
             const user = users.find(
                 (user) => user.email === formData.email && user.password === formData.password
             );
 
             if (user) {
-                // If login successful, navigate to Welcome page
-                setIsLoggedIn(true); 
+                setIsLoggedIn(true);
                 navigate('/');
             } else {
-                // Show error if credentials are incorrect
                 setEmailError('Invalid email or password.');
             }
-        }
-
-        try {
-            // Handling form submission for sign up
+        } else {
             console.log('Form submitted:', formData);
-            setIsLoggedIn(true); 
-            navigate('/');
-        } catch (error) {
-            console.error('Error submitting form:', error);
+            setIsLoggedIn(true);
+            if (formData.role === 'restaurant') {
+                navigate('/restaurant', { state: { restaurantName: formData.restaurantName } });
+            } else {
+                navigate('/');
+            }
         }
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value, type, checked } = e.target;
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const target = e.target as HTMLInputElement;
+        const { name, value, type, checked } = target;
+
         setFormData(prev => ({
             ...prev,
-            [name]: type === 'checkbox' ? checked : name === 'phoneNumber' ? formatPhoneNumber(value) : value,
+            [name]: type === 'checkbox'
+                ? checked
+                : name === 'phoneNumber'
+                    ? formatPhoneNumber(value)
+                    : value,
         }));
+
 
         if (name === 'password' && !showLogin) {
             const passwordRegex = /^(?=.*[A-Z])(?=.*\W).{8,}$/;
@@ -169,8 +171,7 @@ function Auth() {
         }}>
             <div className="max-w-md w-full mx-4">
                 <div className={`bg-white rounded-2xl shadow-xl overflow-hidden transition-all duration-500 ${animationClass}`}>
-                    {/* Login Form */}
-                    {showLogin && (
+                    {showLogin ? (
                         <div className="p-8">
                             <h2 className="text-2xl font-bold text-center mb-2">Welcome to Byte and Bite</h2>
                             <p className="text-gray-600 text-center text-sm mb-8">Your favorite meals are just a few clicks away</p>
@@ -225,29 +226,19 @@ function Auth() {
                                     <a href="#" className="text-sm text-orange-600 hover:text-orange-500">Forgot password?</a>
                                 </div>
 
-                                <button
-                                    type="submit"
-                                    className="w-full bg-black text-white py-2 rounded-md hover:bg-gray-900 transition-colors"
-                                >
+                                <button type="submit" className="w-full bg-black text-white py-2 rounded-md hover:bg-gray-900 transition-colors">
                                     Login
                                 </button>
                             </form>
 
                             <div className="mt-6 text-center text-sm">
                                 <span className="text-gray-600">New to Byte and Bite? </span>
-                                <button
-                                    type="button"
-                                    onClick={toggleView}
-                                    className="text-orange-600 hover:text-orange-500 font-medium"
-                                >
+                                <button onClick={toggleView} className="text-orange-600 hover:text-orange-500 font-medium">
                                     Create Account
                                 </button>
                             </div>
                         </div>
-                    )}
-
-                    {/* Sign Up Form */}
-                    {!showLogin && (
+                    ) : (
                         <div className="p-8">
                             <div className="text-center">
                                 <div className="flex justify-center">
@@ -330,6 +321,40 @@ function Auth() {
                                         />
                                         {phoneNumberError && <p className="text-red-500 text-sm">{phoneNumberError}</p>}
                                     </div>
+
+                                    {/* ROLE SELECTION START */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">
+                                            What is your role?
+                                        </label>
+                                        <select
+                                            name="role"
+                                            value={formData.role}
+                                            onChange={handleChange}
+                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                        >
+                                            <option value="customer">Customer</option>
+                                            <option value="restaurant">Restaurant</option>
+                                        </select>
+                                    </div>
+
+                                    {formData.role === 'restaurant' && (
+                                        <div>
+                                            <label htmlFor="restaurantName" className="block text-sm font-medium text-gray-700">
+                                                Restaurant Name
+                                            </label>
+                                            <input
+                                                id="restaurantName"
+                                                name="restaurantName"
+                                                type="text"
+                                                required
+                                                value={formData.restaurantName}
+                                                onChange={handleChange}
+                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                            />
+                                        </div>
+                                    )}
+                                    {/* ROLE SELECTION END */}
 
                                     <div>
                                         <label className="inline-flex items-center">

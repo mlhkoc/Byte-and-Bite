@@ -239,7 +239,7 @@ function Home() {
             {/* Sign Up Buttons */}
             <div className="fixed bottom-4 left-4 flex gap-4">
                 <button
-                    onClick={() => navigate('/restaurant')}
+                    onClick={() => navigate('/auth')}
                     className="px-3 py-1.5 bg-orange-300 text-white text-xs rounded-lg hover:bg-orange-400"
                 >
                     Join as Restaurant
