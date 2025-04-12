@@ -3,6 +3,7 @@ import { Eye, EyeOff, Utensils } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import backgroundImage from '../assets/bnb.jpg';
 import { useSearchParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 interface FormData {
     fullName: string;
@@ -19,6 +20,7 @@ function Auth() {
     const [showLogin, setShowLogin] = useState(true);
     const [animationClass, setAnimationClass] = useState('fade-in');
     const [searchParams] = useSearchParams();
+    const { setIsLoggedIn } = useAuth();
 
     const [formData, setFormData] = useState<FormData>({
         fullName: '',
@@ -93,7 +95,8 @@ function Auth() {
 
             if (user) {
                 // If login successful, navigate to Welcome page
-                navigate('/welcome');
+                setIsLoggedIn(true); 
+                navigate('/');
             } else {
                 // Show error if credentials are incorrect
                 setEmailError('Invalid email or password.');
@@ -103,7 +106,8 @@ function Auth() {
         try {
             // Handling form submission for sign up
             console.log('Form submitted:', formData);
-            navigate('/welcome');
+            setIsLoggedIn(true); 
+            navigate('/');
         } catch (error) {
             console.error('Error submitting form:', error);
         }
