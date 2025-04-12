@@ -56,6 +56,12 @@ const menuItems: MenuItem[] = [
 
 function MenuViewer() {
     const [cartCount, setCartCount] = useState(0);
+    const [searchQuery, setSearchQuery] = useState("");
+
+    const filteredMenu = menuItems.filter((item) =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.description.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -92,6 +98,8 @@ function MenuViewer() {
                     <input
                         type="text"
                         placeholder="Search for food..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                 </div>
@@ -100,7 +108,7 @@ function MenuViewer() {
             {/* Menu Grid */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {menuItems.map((item) => (
+                    {filteredMenu.map((item) => (
                         <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                             <img
                                 src={item.image}
