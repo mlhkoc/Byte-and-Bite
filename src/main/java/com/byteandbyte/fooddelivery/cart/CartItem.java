@@ -21,7 +21,7 @@ public class CartItem {
 
     @ManyToOne
     @JoinColumn(name = "food_id")
-    private Food foodIem;
+    private Food foodItem;
 
     private int quantity;
     private double price;
