@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Search, SlidersHorizontal, ShoppingCart, User, Pizza, Merge as Burger, Fish, Drumstick, IceCream, Heart, Clock, DollarSign } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.jpg';
 
 interface Restaurant {
@@ -18,6 +19,8 @@ interface Restaurant {
 
 function Home() {
     const navigate = useNavigate();
+    const { items, setIsCartOpen } = useCart();
+    const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
     const [restaurants, setRestaurants] = useState<Restaurant[]>([
         {
@@ -99,8 +102,16 @@ function Home() {
                 <div className="flex gap-4">
                     {isLoggedIn ? (
                         <>
-                            <button className="p-2 hover:bg-gray-100 rounded-full">
+                            <button
+                                onClick={() => setIsCartOpen(true)}
+                                className="p-2 hover:bg-gray-100 rounded-full relative"
+                            >
                                 <ShoppingCart className="w-6 h-6" />
+                                {cartCount > 0 && (
+                                    <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                        {cartCount}
+                                    </span>
+                                )}
                             </button>
                             <button className="p-2 hover:bg-gray-100 rounded-full">
                                 <User className="w-6 h-6" />
@@ -209,12 +220,10 @@ interface RestaurantCardProps {
 
 function RestaurantCard({ restaurant, onFavoriteToggle }: RestaurantCardProps) {
     const navigate = useNavigate();
-    
+
     return (
         <button
-            //onClick={() => alert(`Go to details for ${restaurant.name}`)} // Tıklama işlemi buraya eklenebilir
             onClick={() => navigate("/menu")}
-            
             className="relative bg-white rounded-lg overflow-hidden shadow-md w-full"
         >
             <img
@@ -224,7 +233,7 @@ function RestaurantCard({ restaurant, onFavoriteToggle }: RestaurantCardProps) {
             />
             <button
                 onClick={(e) => {
-                    e.stopPropagation(); // Favori butonunun tıklanmasını engellemek için
+                    e.stopPropagation();
                     onFavoriteToggle(restaurant.id);
                 }}
                 className={`absolute top-4 right-4 p-2 rounded-full ${restaurant.isFavorite ? 'bg-red-500 text-white' : 'bg-white text-gray-600'}`}
@@ -252,7 +261,5 @@ function RestaurantCard({ restaurant, onFavoriteToggle }: RestaurantCardProps) {
         </button>
     );
 }
-
-
 
 export default Home;
