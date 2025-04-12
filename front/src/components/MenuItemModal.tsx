@@ -15,6 +15,7 @@ export function MenuItemModal({ isOpen, onClose, onSave, item }: MenuItemModalPr
         price: 0,
         description: '',
         image: '',
+        available: true,
     });
 
     useEffect(() => {
@@ -26,6 +27,7 @@ export function MenuItemModal({ isOpen, onClose, onSave, item }: MenuItemModalPr
                 price: 0,
                 description: '',
                 image: '',
+                available: true,
             });
         }
     }, [item]);
@@ -33,7 +35,7 @@ export function MenuItemModal({ isOpen, onClose, onSave, item }: MenuItemModalPr
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-md">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold">
@@ -94,6 +96,19 @@ export function MenuItemModal({ isOpen, onClose, onSave, item }: MenuItemModalPr
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             required
                         />
+                    </div>
+
+                    <div className="flex items-center">
+                        <input
+                            id="available"
+                            type="checkbox"
+                            checked={formData.available}
+                            onChange={(e) => setFormData({ ...formData, available: e.target.checked })}
+                            className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                        />
+                        <label htmlFor="available" className="ml-2 block text-sm text-gray-700">
+                            Available
+                        </label>
                     </div>
 
                     <div className="flex justify-end space-x-3 mt-6">
