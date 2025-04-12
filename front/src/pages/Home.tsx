@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Search, SlidersHorizontal, ShoppingCart, User, Pizza, Merge as Burger, Fish, Drumstick, IceCream, Heart, Clock, DollarSign } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 
 interface Restaurant {
     id: number;
@@ -16,6 +16,8 @@ interface Restaurant {
 }
 
 function Home() {
+    const navigate = useNavigate();
+
     const [restaurants, setRestaurants] = useState<Restaurant[]>([
         {
             id: 1,
@@ -192,9 +194,13 @@ interface RestaurantCardProps {
 }
 
 function RestaurantCard({ restaurant, onFavoriteToggle }: RestaurantCardProps) {
+    const navigate = useNavigate();
+    
     return (
         <button
-            onClick={() => alert(`Go to details for ${restaurant.name}`)} // Tıklama işlemi buraya eklenebilir
+            //onClick={() => alert(`Go to details for ${restaurant.name}`)} // Tıklama işlemi buraya eklenebilir
+            onClick={() => navigate("/menu")}
+            
             className="relative bg-white rounded-lg overflow-hidden shadow-md w-full"
         >
             <img
