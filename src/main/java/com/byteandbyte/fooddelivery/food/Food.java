@@ -17,6 +17,8 @@ public class Food {
     private String name;
     private double price;
     private String description;
+    private String image;
+    private boolean available;
 
     @ManyToOne
     @JoinColumn(name = "menu_id")

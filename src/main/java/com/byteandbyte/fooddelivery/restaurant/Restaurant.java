@@ -22,7 +22,10 @@ public class Restaurant {
     private String address;
     private String phone;
     private String email;
-    private String cuisineType;
+    private String cuisine;
+    private double minOrder;
+    private String deliveryTime;
+    private String image;
     private double rating;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
