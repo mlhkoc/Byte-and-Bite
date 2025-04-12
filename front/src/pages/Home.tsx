@@ -35,15 +35,19 @@ function Home() {
 
 
     const categories = [
-        { name: "Pizza", icon: <Pizza className="w-6 h-6" /> },
-        { name: "Burgers", icon: <Burger className="w-6 h-6" /> },
-        { name: "Sushi", icon: <Fish className="w-6 h-6" /> },
-        { name: "Chicken", icon: <Drumstick className="w-6 h-6" /> },
-        { name: "Desserts", icon: <IceCream className="w-6 h-6" /> }
+        { name: "Pizza", icon: <Pizza className="w-6 h-6" />, cuisine: "Italian" },
+        { name: "Burgers", icon: <Burger className="w-6 h-6" />, cuisine: "American" },
+        { name: "Sushi", icon: <Fish className="w-6 h-6" />, cuisine: "Japanese" },
+        { name: "Chicken", icon: <Drumstick className="w-6 h-6" />, cuisine: "Chicken" },
+        { name: "Desserts", icon: <IceCream className="w-6 h-6" />, cuisine: "Desserts" },
+        { name: "Döner", icon: <Drumstick className="w-6 h-6" />, cuisine: "Döner" },
+        { name: "Kebap", icon: <Drumstick className="w-6 h-6" />, cuisine: "Kebap" },
+        { name: "Thai", icon: <Fish className="w-6 h-6" />, cuisine: "Thai" }
     ];
 
     const { isLoggedIn } = useAuth();
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
     const toggleFavorite = (restaurantId: number) => {
         setRestaurants(restaurants.map(restaurant =>
@@ -56,7 +60,8 @@ function Home() {
     const favoriteRestaurants = restaurants.filter(r => r.isFavorite);
 
     const filteredRestaurants = restaurants.filter(r =>
-        r.name.toLowerCase().includes(searchTerm.toLowerCase())
+        r.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (selectedCategory ? r.cuisine === selectedCategory : true)
     );
 
     return (
@@ -112,6 +117,7 @@ function Home() {
                 </button>
             </div>
 
+
             {/* Categories */}
             <div className="mb-8">
                 <h2 className="text-xl font-semibold mb-4">Categories</h2>
@@ -119,7 +125,16 @@ function Home() {
                     {categories.map((category, index) => (
                         <button
                             key={index}
-                            className="flex flex-col items-center p-4 bg-gray-100 rounded-full min-w-[80px] hover:bg-gray-200"
+                            onClick={() =>
+                                setSelectedCategory(prev =>
+                                    prev === category.cuisine ? null : category.cuisine
+                                )
+                            }
+                            className={`flex flex-col items-center p-4 min-w-[80px] rounded-full transition-colors ${
+                                selectedCategory === category.cuisine
+                                    ? 'bg-orange-300 text-white'
+                                    : 'bg-gray-100 hover:bg-gray-200'
+                            }`}
                         >
                             {category.icon}
                             <span className="text-sm mt-1">{category.name}</span>
@@ -162,10 +177,10 @@ function Home() {
                 </div>
             </div>
 
-            {/* Sign Up Buttons - Fixed Position at the Bottom */}
+            {/* Sign Up Buttons */}
             <div className="fixed bottom-4 left-4 flex gap-4">
                 <button
-                    onClick={() => navigate('/restaurant')}
+                    onClick={() => navigate('/auth')}
                     className="px-3 py-1.5 bg-orange-300 text-white text-xs rounded-lg hover:bg-orange-400"
                 >
                     Join as Restaurant
@@ -184,8 +199,6 @@ interface RestaurantCardProps {
 }
 
 function RestaurantCard({ restaurant, onFavoriteToggle }: RestaurantCardProps) {
-    const navigate = useNavigate();
-
     return (
         <button
             onClick={() => navigate(`/${restaurant.id}/menu`)}
@@ -196,34 +209,22 @@ function RestaurantCard({ restaurant, onFavoriteToggle }: RestaurantCardProps) {
                 alt={restaurant.name}
                 className="w-full h-48 object-cover"
             />
-            <button
-                onClick={(e) => {
-                    e.stopPropagation();
-                    onFavoriteToggle(restaurant.id);
-                }}
-                className={`absolute top-4 right-4 p-2 rounded-full ${restaurant.isFavorite ? 'bg-red-500 text-white' : 'bg-white text-gray-600'}`}
-            >
-                <Heart className="w-5 h-5" fill={restaurant.isFavorite ? "currentColor" : "none"} />
-            </button>
-            <div className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-lg font-semibold">{restaurant.name}</h3>
-                    <div className="flex items-center">
-                        <span className="text-yellow-400">★</span>
-                        <span className="ml-1">{restaurant.rating}</span>
-                    </div>
+            <div className="p-4 relative">
+                <button
+                    onClick={() => onFavoriteToggle(restaurant.id)}
+                    className="absolute top-2 right-2 text-red-500"
+                >
+                    <Heart fill={restaurant.isFavorite ? 'red' : 'none'} />
+                </button>
+                <h3 className="text-lg font-semibold">{restaurant.name}</h3>
+                <div className="text-sm text-gray-500 mb-2">{restaurant.cuisine}</div>
+                <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {restaurant.deliveryTime}</span>
+                    <span className="flex items-center gap-1"><DollarSign className="w-4 h-4" /> {restaurant.minOrder}</span>
                 </div>
-                <div className="text-gray-600 text-sm mb-2">
-                    {restaurant.cuisine} • {restaurant.price}
-                </div>
-                <div className="flex items-center text-sm text-gray-500">
-                    <Clock className="w-4 h-4 mr-1" />
-                    <span className="mr-3">{restaurant.deliveryTime}</span>
-                    <DollarSign className="w-4 h-4 mr-1" />
-                    <span>Min. {restaurant.minOrder}</span>
-                </div>
+                <div className="mt-2 text-sm text-gray-500">Rating: {restaurant.rating}</div>
             </div>
-        </button>
+        </div>
     );
 }
 
