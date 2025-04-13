@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.jpg';
+import {fetchCartItems} from "../components/CartApi.tsx";
 
 interface Restaurant {
     id: number;
@@ -19,8 +20,13 @@ interface Restaurant {
 
 function Home() {
     const navigate = useNavigate();
-    const { items, setIsCartOpen } = useCart();
+    const { items, setIsCartOpen, setItems} = useCart();
     const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
+    useEffect(() => {
+        fetchCartItems().then(fetchedItems => setItems(fetchedItems));
+    }, []);
+
 
     const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
     useEffect(() => {
@@ -32,6 +38,8 @@ function Home() {
             .then((data) => setRestaurants(data))
             .catch((err) => console.error("Failed to fetch restaurants", err));
     }, []);
+
+
 
 
     const categories = [
@@ -56,6 +64,20 @@ function Home() {
                 : restaurant
         ));
     };
+    useEffect(() => {
+        if (isLoggedIn) {
+            fetchCartItems();
+        }
+    }, [isLoggedIn]);
+    useEffect(() => {
+        fetch('http://localhost:8080/api/restaurants', {
+            method: 'GET',
+            credentials: 'include',
+        })
+            .then((res) => res.json())
+            .then((data) => setRestaurants(data))
+            .catch((err) => console.error("Failed to fetch restaurants", err));
+    }, []);
 
     const favoriteRestaurants = restaurants.filter(r => r.isFavorite);
 

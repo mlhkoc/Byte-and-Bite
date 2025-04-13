@@ -97,6 +97,7 @@ public class SecurityConfig {
 
             String username = authentication.getName();
 
+
             // Send a simple JSON response
             String json = String.format("{\"username\": \"%s\", \"role\": \"%s\"}", username, role);
             response.getWriter().write(json);

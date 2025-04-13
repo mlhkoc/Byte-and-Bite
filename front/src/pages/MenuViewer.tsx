@@ -3,11 +3,12 @@ import { ShoppingCart, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
     import {useParams} from "react-router-dom";
+    import {fetchCartItems} from "../components/CartApi.tsx";
 
 interface MenuItem {
     id: number;
     name: string;
-    description: string;
+    image: string;
     price: number;
 }
 
@@ -15,6 +16,7 @@ function MenuViewer() {
 
     const { restaurantId } = useParams();
     const [foods, setFoods] = useState<MenuItem[]>([]);
+
 
     useEffect(() => {
         if (!restaurantId) return;
@@ -30,13 +32,18 @@ function MenuViewer() {
 
     const [searchQuery, setSearchQuery] = useState("");
     const { isLoggedIn } = useAuth();
-    const { items, addToCart, setIsCartOpen } = useCart();
+    const { items, addToCart, setIsCartOpen , setItems} = useCart();
+
+    useEffect(() => {
+        fetchCartItems().then(fetchedItems => setItems(fetchedItems));
+    }, []);
+
 
     const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
     const filteredMenu = foods.filter((item) =>
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.description.toLowerCase().includes(searchQuery.toLowerCase())
+        item.image.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
@@ -92,13 +99,13 @@ function MenuViewer() {
                     {filteredMenu.map((item) => (
                         <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                             <img
-                                src={item.description}
+                                src={item.image}
                                 alt={item.name}
                                 className="w-full h-48 object-cover"
                             />
                             <div className="p-4">
                                 <h3 className="text-lg font-semibold text-gray-900">{item.name}</h3>
-                                <p className="mt-1 text-gray-600 text-sm">{item.description}</p>
+                                <p className="mt-1 text-gray-600 text-sm">{item.image}</p>
                                 <div className="mt-4 flex items-center justify-between">
                                     <span className="text-gray-900 font-medium">${item.price.toFixed(2)}</span>
                                     <button
@@ -108,7 +115,7 @@ function MenuViewer() {
                                                     id: item.id,
                                                     name: item.name,
                                                     price: item.price,
-                                                    image: item.description
+                                                    image: item.image
                                                 });
                                             } else {
                                                 alert('Please sign in!');

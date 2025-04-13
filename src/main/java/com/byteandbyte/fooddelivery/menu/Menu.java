@@ -3,6 +3,7 @@ package com.byteandbyte.fooddelivery.menu;
 import java.util.List;
 import com.byteandbyte.fooddelivery.food.Food;
 import com.byteandbyte.fooddelivery.restaurant.Restaurant;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,6 +22,7 @@ public class Menu {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "restaurant_id")
+    @JsonIgnore
     private Restaurant restaurant; // Menu belongs to one restaurant
 
     @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true)
