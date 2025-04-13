@@ -3,6 +3,7 @@ import { ShoppingCart, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
     import {useParams} from "react-router-dom";
+    import {fetchCartItems} from "../components/CartApi.tsx";
 
 interface MenuItem {
     id: number;
@@ -15,6 +16,7 @@ function MenuViewer() {
 
     const { restaurantId } = useParams();
     const [foods, setFoods] = useState<MenuItem[]>([]);
+
 
     useEffect(() => {
         if (!restaurantId) return;
@@ -30,7 +32,12 @@ function MenuViewer() {
 
     const [searchQuery, setSearchQuery] = useState("");
     const { isLoggedIn } = useAuth();
-    const { items, addToCart, setIsCartOpen } = useCart();
+    const { items, addToCart, setIsCartOpen , setItems} = useCart();
+
+    useEffect(() => {
+        fetchCartItems().then(fetchedItems => setItems(fetchedItems));
+    }, []);
+
 
     const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
 

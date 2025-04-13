@@ -1,10 +1,19 @@
 import { X, Plus, Minus, Trash2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
+import {useEffect} from "react";
+import {fetchCartItems} from "./CartApi.tsx";
+
 
 export function CartModal() {
-    const { items, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, total } = useCart();
+    const username = localStorage.getItem("user");
+
+    const { items, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, total, setItems } = useCart();
     const navigate = useNavigate();
+    useEffect(() => {
+        fetchCartItems().then(fetchedItems => setItems(fetchedItems));
+    }, []);
+
 
     if (!isCartOpen) return null;
 
@@ -78,7 +87,7 @@ export function CartModal() {
                         className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors"
                         onClick={() => {
                             setIsCartOpen(false);
-                            navigate('/checkout');
+                            navigate(`/checkout/${username}`);
                         }}
                     >
                         Checkout

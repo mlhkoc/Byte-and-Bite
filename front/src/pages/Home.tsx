@@ -20,8 +20,13 @@ interface Restaurant {
 
 function Home() {
     const navigate = useNavigate();
-    const { items, setIsCartOpen } = useCart();
+    const { items, setIsCartOpen, setItems} = useCart();
     const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
+    useEffect(() => {
+        fetchCartItems().then(fetchedItems => setItems(fetchedItems));
+    }, []);
+
 
     const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
     useEffect(() => {

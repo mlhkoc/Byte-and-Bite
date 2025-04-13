@@ -17,6 +17,7 @@ interface CartContextType {
     clearCartItems: () => void;
     isCartOpen: boolean;
     setIsCartOpen: (isOpen: boolean) => void;
+    setItems: React.Dispatch<React.SetStateAction<CartItem[]>>;
     total: number;
 }
 
@@ -40,19 +41,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             },
             credentials: 'include',
             body: JSON.stringify(item),
-        }).then(fetchCartItems)
+        });
         if (!response.ok) throw new Error('Failed to add item to cart');
         const updatedItems = await fetchCartItems();
         setItems(updatedItems);
     });
 
-    const removeFromCart = (id: number) => {
-        removeCartItem(id).then(() => fetchCartItems());
-
+    const removeFromCart = async (id: number) => {
+        await removeCartItem(id);
+        const updatedItems = await fetchCartItems();
+        setItems(updatedItems);
     };
 
-    const updateQuantity = (id: number, quantity: number) => {
-        updateCartQuantity(id, quantity).then(() => fetchCartItems());
+    const updateQuantity = async (id: number, quantity: number) => {
+        await updateCartQuantity(id, quantity);
+        const updatedItems = await fetchCartItems();
+        setItems(updatedItems);
     };
 
     const clearCartItems = async () => {
@@ -75,6 +79,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             clearCartItems,
             isCartOpen,
             setIsCartOpen,
+            setItems,
             total
         }}>
             {children}
