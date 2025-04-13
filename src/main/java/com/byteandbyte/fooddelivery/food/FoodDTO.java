@@ -15,4 +15,6 @@ public class FoodDTO {
     private String name;
     private String description;
     private Double price;
+    private boolean available;
+    private String image;
 }

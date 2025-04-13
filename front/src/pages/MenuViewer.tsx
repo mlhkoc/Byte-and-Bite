@@ -18,8 +18,6 @@ function MenuViewer() {
 
     useEffect(() => {
         if (!restaurantId) return;
-        console.log(restaurantId);
-
 
         fetch(`http://localhost:8080/api/${restaurantId}/menu`, {
             method: 'GET',

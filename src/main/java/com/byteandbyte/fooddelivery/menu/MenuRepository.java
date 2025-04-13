@@ -10,5 +10,8 @@ import java.util.List;
 public interface MenuRepository extends JpaRepository<Menu, Long> {
 
     List<Menu> findByRestaurantId(Long restaurantId);
+    List<Menu> findByRestaurantEmail(String email);
+
+
 
 }
