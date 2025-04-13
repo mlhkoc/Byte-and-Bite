@@ -227,7 +227,6 @@ function RestaurantCard({ restaurant, onFavoriteToggle }: RestaurantCardProps) {
                     <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {restaurant.deliveryTime}</span>
                     <span className="flex items-center gap-1"><DollarSign className="w-4 h-4" /> {restaurant.minOrder}</span>
                 </div>
-                <div className="mt-2 text-sm text-gray-500">Rating: {restaurant.rating}</div>
             </div>
         </button>
     );

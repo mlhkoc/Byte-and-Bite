@@ -9,7 +9,6 @@ interface MenuItem {
     name: string;
     description: string;
     price: number;
-    image: string;
 }
 
 function MenuViewer() {
@@ -20,7 +19,10 @@ function MenuViewer() {
     useEffect(() => {
         if (!restaurantId) return;
 
-        fetch(`http://localhost:8080/api/${restaurantId}/menu`)
+        fetch(`http://localhost:8080/api/${restaurantId}/menu`, {
+            method: 'GET',
+            credentials: 'include',
+        })
             .then((res) => res.json())
             .then((data) => setFoods(data))
             .catch((err) => console.error("Failed to fetch menu:", err));
@@ -90,7 +92,7 @@ function MenuViewer() {
                     {filteredMenu.map((item) => (
                         <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                             <img
-                                src={item.image}
+                                src={item.description}
                                 alt={item.name}
                                 className="w-full h-48 object-cover"
                             />
@@ -106,7 +108,7 @@ function MenuViewer() {
                                                     id: item.id,
                                                     name: item.name,
                                                     price: item.price,
-                                                    image: item.image
+                                                    image: item.description
                                                 });
                                             } else {
                                                 alert('Please sign in!');

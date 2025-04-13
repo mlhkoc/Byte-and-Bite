@@ -21,8 +21,7 @@ createRoot(document.getElementById('root')!).render(
                     <Route path="/" element={<Home />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/:restaurantId/menu" element={<MenuViewer />} />
-                    <Route path="/restaurant" element={<Restaurant />} />
-                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/restaurant/:restaurantMail" element={<Restaurant />} />
                 </Routes>
                 <CartModal />
             </BrowserRouter>
