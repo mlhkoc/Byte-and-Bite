@@ -23,4 +23,8 @@ public class OrderItem {
 
     private int quantity;
     private double price;
+
+    public void setFoodItem(Food foodItem) {
+
+    }
 }

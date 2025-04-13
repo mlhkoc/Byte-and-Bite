@@ -93,8 +93,7 @@ function Auth() {
                 if (formData.role === 'restaurant') {
                     navigate('/restaurant', { state: { restaurantName: formData.restaurantName } });
                 }
-                setIsLoggedIn(true);
-                navigate('/');
+                navigate('/auth');
             } else {
                 const errorData = await response.json();
                 alert(errorData.message || 'Signup failed.');
@@ -125,6 +124,8 @@ function Auth() {
                         const role = data.role;
 
                         if (role === "CUSTOMER") {
+                            const username = data.username;
+                            localStorage.setItem('user', username);
                             navigate('/');
                         } else if (role === "RESTAURANT") {
 

@@ -3,7 +3,6 @@ package com.byteandbyte.fooddelivery.restaurant;
 
 import lombok.*;
 
-import static java.lang.Math.max;
 
 @Getter
 @Setter

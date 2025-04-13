@@ -1,23 +1,29 @@
 import {useEffect, useState} from 'react';
-import { Plus, Edit2, Trash2, Search } from 'lucide-react';
-import { MenuItem } from '../types';
-import { MenuItemModal } from './MenuItemModal';
+import {Edit2, Plus, Search, Trash2} from 'lucide-react';
+import {MenuItem} from '../types';
+import {MenuItemModal} from './MenuItemModal';
 import {useParams} from "react-router-dom";
+import {fetchCartItems} from "./CartApi.tsx";
 
 export function MenuManagement() {
     const [items, setItems] = useState<MenuItem[]>([]);
     const {restaurantMail} = useParams();
 
-    useEffect(() => {
+    const fetchMenuItems = async () => {
         if (!restaurantMail) return;
+        try {
+            const res = await fetch(`http://localhost:8080/api/${restaurantMail}`, {
+                method: 'GET',
+                credentials: 'include',
+            });
+            return await res.json();
+        } catch (err) {
+            console.error("Failed to fetch menu:", err);
+        }
+    };
 
-        fetch(`http://localhost:8080/api/${restaurantMail}`, {
-            method: 'GET',
-            credentials: 'include',
-        })
-            .then((res) => res.json())
-            .then((data) => setItems(data))
-            .catch((err) => console.error("Failed to fetch menu:", err));
+    useEffect(() => {
+        fetchMenuItems().then(fetchedMenuItems => setItems(fetchedMenuItems))
     }, [restaurantMail]);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -37,6 +43,8 @@ export function MenuManagement() {
         if (response.ok) {
             console.log(response)
             console.log('Food added:', newFood);
+            const updatedItems = await fetchMenuItems();
+            setItems(updatedItems);
         } else {
             console.error('Failed to add food');
         }
@@ -53,8 +61,8 @@ export function MenuManagement() {
         });
         console.log(restaurantMail)
         if (response.ok) {
-            console.log(response)
-            console.log('Food updated:', newFood);
+            const updatedItems = await fetchMenuItems();
+            setItems(updatedItems);
         } else {
             console.error('Failed to add food');
         }
@@ -67,7 +75,8 @@ export function MenuManagement() {
         });
 
         if (response.ok) {
-            console.log('Food deleted');
+            const updatedItems = await fetchMenuItems();
+            setItems(updatedItems);
         } else {
             console.error('Failed to delete food');
         }

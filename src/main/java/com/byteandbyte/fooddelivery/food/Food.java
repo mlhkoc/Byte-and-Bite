@@ -1,5 +1,6 @@
 package com.byteandbyte.fooddelivery.food;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import com.byteandbyte.fooddelivery.menu.Menu;
@@ -22,6 +23,7 @@ public class Food {
 
     @ManyToOne
     @JoinColumn(name = "menu_id")
+    @JsonIgnore
     private Menu menu; // A food item belongs to one menu
 
 

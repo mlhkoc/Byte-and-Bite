@@ -1,6 +1,7 @@
 package com.byteandbyte.fooddelivery.cart;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import com.byteandbyte.fooddelivery.customer.Customer;
@@ -18,6 +19,7 @@ public class Cart {
     private Long id;
 
     @OneToOne
+    @JsonIgnore
     private Customer customer;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)

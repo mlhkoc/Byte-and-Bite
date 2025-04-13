@@ -20,7 +20,7 @@ interface PaymentMethod {
 
 export default function Checkout() {
     const navigate = useNavigate();
-    const { items, total, clearCart } = useCart();
+    const { items, total, clearCartItems } = useCart();
     const [deliveryForm, setDeliveryForm] = useState<DeliveryForm>({
         streetAddress: '',
         apartment: '',
@@ -31,6 +31,8 @@ export default function Checkout() {
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>({
         type: 'card',
     });
+
+    const customerEmail = localStorage.getItem("user");
 
     const handleDeliveryFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value, type, checked } = e.target as HTMLInputElement;
@@ -48,12 +50,31 @@ export default function Checkout() {
         }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Here you would typically handle the order submission to your backend
-        alert('Order placed successfully!');
-        clearCart();
-        navigate('/');
+        try {
+            const response = await fetch(`http://localhost:8080/api/order/${customerEmail}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify(items), // only if backend needs it
+            });
+
+            if (response.ok) {
+                alert('Order placed successfully!');
+                clearCartItems();
+                navigate('/');
+            } else {
+                const errorText = await response.text();
+                alert("Failed to place order.");
+                console.error(errorText);
+            }
+        } catch (err) {
+            console.error("Network error:", err);
+            alert("Something went wrong.");
+        }
     };
 
     return (
