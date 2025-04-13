@@ -10,6 +10,7 @@ import { AuthProvider } from './context/AuthContext.tsx';
 import Restaurant from './Restaurant.tsx';
 import { CartProvider } from './context/CartContext';
 import { CartModal } from './components/CartModal';
+import Checkout from './pages/Checkout.tsx';
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
