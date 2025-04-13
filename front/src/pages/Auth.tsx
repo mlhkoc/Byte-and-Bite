@@ -90,6 +90,9 @@ function Auth() {
                 credentials: 'include'
             });
             if (response.ok) {
+                if (formData.role === 'restaurant') {
+                    navigate('/restaurant', { state: { restaurantName: formData.restaurantName } });
+                }
                 setIsLoggedIn(true);
                 navigate('/');
             } else {
@@ -100,33 +103,43 @@ function Auth() {
         }
 
         if (showLogin) {
-            // Login logic (simple hardcoded check for now)
             try {
                 const params = new URLSearchParams();
                 params.append('username', formData.email);
                 params.append('password', formData.password);
 
-                const response = await fetch('http://localhost:8080/login', {
+                fetch('http://localhost:8080/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
                     body: params.toString(),
                     credentials: 'include', // crucial for session cookie to be sent
-                });
+                }).then((response) => {
+                    if (!response.ok) throw new Error("Login failed");
+                    return response.json();
+                })
+                    .then((data) => {
+                        setIsLoggedIn(true);
 
-                if (response.ok) {
-                    setIsLoggedIn(true);
-                    navigate('/');
-                } else {
-                    setEmailError('Invalid credentials.');
-                }
-            } catch (err) {
-                console.error('Login error:', err);
+                        const role = data.role;
+
+                        if (role === "CUSTOMER") {
+                            navigate('/');
+                        } else if (role === "RESTAURANT") {
+
+                            navigate(`/restaurant/${data.username}`);
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Login error:", error);
+                    });
+
+            }catch (error){
             }
         }
 
-    };
+        };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const target = e.target as HTMLInputElement;
