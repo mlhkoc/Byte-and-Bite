@@ -20,7 +20,7 @@ interface PaymentMethod {
 
 export default function Checkout() {
     const navigate = useNavigate();
-    const { items, total, clearCart } = useCart();
+    const { items, total, clearCartItems } = useCart();
     const [deliveryForm, setDeliveryForm] = useState<DeliveryForm>({
         streetAddress: '',
         apartment: '',
@@ -52,7 +52,7 @@ export default function Checkout() {
         e.preventDefault();
         // Here you would typically handle the order submission to your backend
         alert('Order placed successfully!');
-        clearCart();
+        clearCartItems();
         navigate('/');
     };
 

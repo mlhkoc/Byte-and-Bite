@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import {clearCart, fetchCartItems, removeCartItem, updateCartQuantity} from "../components/CartApi.tsx";
 
 interface CartItem {
     id: number;
@@ -13,7 +14,7 @@ interface CartContextType {
     addToCart: (item: Omit<CartItem, 'quantity'>) => void;
     removeFromCart: (id: number) => void;
     updateQuantity: (id: number, quantity: number) => void;
-    clearCart: () => void;
+    clearCartItems: () => void;
     isCartOpen: boolean;
     setIsCartOpen: (isOpen: boolean) => void;
     total: number;
@@ -24,47 +25,43 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
     const [items, setItems] = useState<CartItem[]>([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const username = localStorage.getItem("user");
 
-    // Load cart from localStorage on mount
     useEffect(() => {
-        const savedCart = localStorage.getItem('cart');
-        if (savedCart) {
-            setItems(JSON.parse(savedCart));
-        }
+        fetchCartItems().then(fetchedItems => setItems(fetchedItems));
     }, []);
 
-    // Save cart to localStorage whenever it changes
-    useEffect(() => {
-        localStorage.setItem('cart', JSON.stringify(items));
-    }, [items]);
 
-    const addToCart = (item: Omit<CartItem, 'quantity'>) => {
-        setItems(currentItems => {
-            const existingItem = currentItems.find(i => i.id === item.id);
-            if (existingItem) {
-                return currentItems.map(i =>
-                    i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
-                );
-            }
-            return [...currentItems, { ...item, quantity: 1 }];
-        });
-    };
+    const addToCart = (async (item: Omit<CartItem, 'quantity'>) => {
+        const response = await fetch(`http://localhost:8080/api/cart/${username}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify(item),
+        }).then(fetchCartItems)
+        if (!response.ok) throw new Error('Failed to add item to cart');
+        const updatedItems = await fetchCartItems();
+        setItems(updatedItems);
+    });
 
     const removeFromCart = (id: number) => {
-        setItems(currentItems => currentItems.filter(item => item.id !== id));
+        removeCartItem(id).then(() => fetchCartItems());
+
     };
 
     const updateQuantity = (id: number, quantity: number) => {
-        if (quantity < 1) return;
-        setItems(currentItems =>
-            currentItems.map(item =>
-                item.id === id ? { ...item, quantity } : item
-            )
-        );
+        updateCartQuantity(id, quantity).then(() => fetchCartItems());
     };
 
-    const clearCart = () => {
-        setItems([]);
+    const clearCartItems = async () => {
+        try {
+            await clearCart(); // Await for the API call result
+            setItems([]);
+        } catch (error) {
+            console.error('Error clearing cart:', error);
+        }
     };
 
     const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -75,7 +72,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             addToCart,
             removeFromCart,
             updateQuantity,
-            clearCart,
+            clearCartItems,
             isCartOpen,
             setIsCartOpen,
             total

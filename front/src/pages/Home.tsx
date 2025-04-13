@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.jpg';
+import {fetchCartItems} from "../components/CartApi.tsx";
 
 interface Restaurant {
     id: number;
@@ -34,6 +35,8 @@ function Home() {
     }, []);
 
 
+
+
     const categories = [
         { name: "Pizza", icon: <Pizza className="w-6 h-6" />, cuisine: "Italian" },
         { name: "Burgers", icon: <Burger className="w-6 h-6" />, cuisine: "American" },
@@ -56,6 +59,20 @@ function Home() {
                 : restaurant
         ));
     };
+    useEffect(() => {
+        if (isLoggedIn) {
+            fetchCartItems();
+        }
+    }, [isLoggedIn]);
+    useEffect(() => {
+        fetch('http://localhost:8080/api/restaurants', {
+            method: 'GET',
+            credentials: 'include',
+        })
+            .then((res) => res.json())
+            .then((data) => setRestaurants(data))
+            .catch((err) => console.error("Failed to fetch restaurants", err));
+    }, []);
 
     const favoriteRestaurants = restaurants.filter(r => r.isFavorite);
 

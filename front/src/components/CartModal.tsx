@@ -37,7 +37,7 @@ export function CartModal() {
                                     />
                                     <div className="flex-1">
                                         <h3 className="font-medium">{item.name}</h3>
-                                        <p className="text-gray-600">${item.price.toFixed(2)}</p>
+                                        <p className="text-gray-600">${item.price.toFixed(4)}</p>
                                         <div className="flex items-center space-x-2 mt-2">
                                             <button
                                                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
@@ -61,7 +61,7 @@ export function CartModal() {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        ${(item.price * item.quantity).toFixed(2)}
+                                        ${(item.price * item.quantity).toFixed(4)}
                                     </div>
                                 </div>
                             ))}
@@ -72,7 +72,7 @@ export function CartModal() {
                 <div className="border-t p-4">
                     <div className="flex justify-between items-center mb-4">
                         <span className="font-semibold">Total</span>
-                        <span className="font-semibold">${total.toFixed(2)}</span>
+                        <span className="font-semibold">${total.toFixed(4)}</span>
                     </div>
                     <button
                         className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors"
