@@ -1,6 +1,7 @@
 package com.byteandbyte.fooddelivery.auth;
 
 import com.byteandbyte.fooddelivery.customer.CustomerService;
+import com.byteandbyte.fooddelivery.restaurant.Restaurant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,16 +32,29 @@ public class AuthController {
             String passwordHash = (String) payload.get("password");
             String phone = (String) payload.get("phoneNumber");
             String name = (String) payload.get("fullName");
+            boolean isCustomer = (payload.get("role")=="customer");
+            String restaurantName = (String) payload.get("restaurantName");
 
-            // Manually create the Customer object
-            Customer customer = new Customer();
-            customer.setEmail(email);
-            customer.setPasswordHash(passwordHash);
-            customer.setPhone(phone);
-            customer.setName(name);
+            if (isCustomer) {
+                Customer customer = new Customer();
+                customer.setEmail(email);
+                customer.setPasswordHash(passwordHash);
+                customer.setPhone(phone);
+                customer.setName(name);
+                authService.registerNewCustomer(customer);
+                return ResponseEntity.ok("User registered!");
+            }
 
-            authService.registerNewCustomer(customer);
-            return ResponseEntity.ok("User registered!");
+            else {
+                Restaurant restaurant = new Restaurant();
+                restaurant.setEmail(email);
+                restaurant.setPasswordHash(passwordHash);
+                restaurant.setPhone(phone);
+                restaurant.setName(restaurantName);
+                authService.registerNewRestaurant(restaurant);
+                return ResponseEntity.ok("User registered!");
+            }
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to register user");
         }

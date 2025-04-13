@@ -1,54 +1,77 @@
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import { Plus, Edit2, Trash2, Search } from 'lucide-react';
 import { MenuItem } from '../types';
 import { MenuItemModal } from './MenuItemModal';
+import {useParams} from "react-router-dom";
 
 export function MenuManagement() {
-    const [items, setItems] = useState<MenuItem[]>([
-        {
-            id: '1',
-            name: 'Margherita Pizza',
-            price: 14.99,
-            description: 'Fresh tomatoes, mozzarella, basil, and olive oil',
-            image: 'https://images.unsplash.com/photo-1604068549290-dea0e4a305ca',
-            available: true,
-        },
-        {
-            id: '2',
-            name: 'Carbonara',
-            price: 16.99,
-            description: 'Spaghetti with eggs, pecorino cheese, pancetta, black pepper',
-            image: 'https://images.unsplash.com/photo-1612874742237-6526221588e3',
-            available: true,
-        },
-        {
-            id: '3',
-            name: 'Tiramisu',
-            price: 8.99,
-            description: 'Classic Italian dessert with coffee, mascarpone, and cocoa',
-            image: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9',
-            available: false,
-        },
-    ]);
+    const [items, setItems] = useState<MenuItem[]>([]);
+    const {restaurantMail} = useParams();
+
+    useEffect(() => {
+        if (!restaurantMail) return;
+
+        fetch(`http://localhost:8080/api/${restaurantMail}`, {
+            method: 'GET',
+            credentials: 'include',
+        })
+            .then((res) => res.json())
+            .then((data) => setItems(data))
+            .catch((err) => console.error("Failed to fetch menu:", err));
+    }, [restaurantMail]);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
 
-    const handleAddItem = (item: MenuItem) => {
-        setItems([...items, { ...item, id: Date.now().toString() }]);
-        setIsModalOpen(false);
+    const handleAddItem =  async (newFood: MenuItem) => {
+        const response = await fetch(`http://localhost:8080/api/${restaurantMail}`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newFood),
+        });
+        console.log(restaurantMail)
+        if (response.ok) {
+            console.log(response)
+            console.log('Food added:', newFood);
+        } else {
+            console.error('Failed to add food');
+        }
     };
 
-    const handleEditItem = (item: MenuItem) => {
-        setItems(items.map((i) => (i.id === item.id ? item : i)));
-        setEditingItem(null);
+    const handleEditItem = async (newFood: MenuItem) => {
+        const response = await fetch(`http://localhost:8080/api/${restaurantMail}/${newFood.id}`, {
+            method: 'PUT',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newFood),
+        });
+        console.log(restaurantMail)
+        if (response.ok) {
+            console.log(response)
+            console.log('Food updated:', newFood);
+        } else {
+            console.error('Failed to add food');
+        }
     };
 
-    const handleDeleteItem = (id: string) => {
-        setItems(items.filter((item) => item.id !== id));
-    };
+    const handleDeleteItem =  async (id : string) => {
+        const response = await fetch(`http://localhost:8080/api/${restaurantMail}/${id}`, {
+            method: 'DELETE',
+            credentials: 'include',
+        });
 
+        if (response.ok) {
+            console.log('Food deleted');
+        } else {
+            console.error('Failed to delete food');
+        }
+    };
     const filteredAvailableItems = items.filter(
         (item) =>
             item.available &&

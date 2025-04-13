@@ -11,5 +11,8 @@ import java.util.List;
 public interface FoodRepository extends JpaRepository<Food, Long> {
     List<Food> findByMenuId(Long menuId);
 
+    void deleteById(Long id);
+    Food findById(long id);
+
 
 }
