@@ -134,6 +134,8 @@ function Auth() {
                     });
 
             }catch (error){
+                console.error("Unexpected login error:", error);
+                alert("An unexpected error occurred.");
             }
         }
 
