@@ -90,9 +90,6 @@ function Auth() {
                 credentials: 'include'
             });
             if (response.ok) {
-                if (formData.role === 'restaurant') {
-                    navigate('/restaurant', { state: { restaurantName: formData.restaurantName } });
-                }
                 navigate('/auth');
             } else {
                 const errorData = await response.json();

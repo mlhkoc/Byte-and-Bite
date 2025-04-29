@@ -32,7 +32,7 @@ public class AuthController {
             String passwordHash = (String) payload.get("password");
             String phone = (String) payload.get("phoneNumber");
             String name = (String) payload.get("fullName");
-            boolean isCustomer = (payload.get("role")=="customer");
+            boolean isCustomer = (payload.get("role").equals("customer"));
             String restaurantName = (String) payload.get("restaurantName");
 
             if (isCustomer) {
