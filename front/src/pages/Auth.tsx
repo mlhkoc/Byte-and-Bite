@@ -12,7 +12,7 @@ interface FormData {
     phoneNumber: string;
     agreeToTerms: boolean;
     rememberMe: boolean;
-    role: 'customer' | 'restaurant';
+    role: 'customer' | 'restaurant' | 'courier';
     restaurantName?: string;
 }
 
@@ -127,6 +127,9 @@ function Auth() {
                         } else if (role === "RESTAURANT") {
 
                             navigate(`/restaurant/${data.username}`);
+                        }
+                        else if (role == "COURIER"){
+                            navigate(`/${data.username}`);
                         }
                     })
                     .catch((error) => {
@@ -373,6 +376,8 @@ function Auth() {
                                         >
                                             <option value="customer">Customer</option>
                                             <option value="restaurant">Restaurant</option>
+                                            <option value="courier">Courier</option>
+
                                         </select>
                                     </div>
 
