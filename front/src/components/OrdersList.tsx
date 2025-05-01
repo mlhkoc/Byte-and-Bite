@@ -1,88 +1,24 @@
 import { Order, Courier } from '../types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { AssignCourierModal } from './AssignCourierModal.tsx';
 
 export function OrdersList() {
-    const [orders, setOrders] = useState<Order[]>([
-        {
-            id: '2847',
-            items: [
-                {
-                    menuItem: {
-                        id: '1',
-                        name: 'Margherita Pizza',
-                        price: 14.99,
-                        description: '',
-                        image: '',
-                        available: true,
-                    },
-                    quantity: 1,
-                },
-                {
-                    menuItem: {
-                        id: '2',
-                        name: 'Carbonara',
-                        price: 16.99,
-                        description: '',
-                        image: '',
-                        available: true,
-                    },
-                    quantity: 2,
-                },
-            ],
-            status: 'preparing',
-        },
-        {
-            id: '2846',
-            items: [
-                {
-                    menuItem: {
-                        id: '3',
-                        name: 'Tiramisu',
-                        price: 8.99,
-                        description: '',
-                        image: '',
-                        available: true,
-                    },
-                    quantity: 2,
-                },
-                {
-                    menuItem: {
-                        id: '2',
-                        name: 'Carbonara',
-                        price: 16.99,
-                        description: '',
-                        image: '',
-                        available: true,
-                    },
-                    quantity: 1,
-                },
-            ],
-            status: 'ready',
-            courier: {
-                id: '1',
-                name: 'Mike',
-                available: true,
-                avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e',
-            },
-        },
-    ]);
-
+    const [orders, setOrders] = useState<Order[]>([]);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
 
-    const handleAssignCourier = (order: Order, courier: Courier) => {
-        setOrders(
-            orders.map((o) =>
-                o.id === order.id ? { ...o, courier, status: 'ready' } : o
-            )
-        );
-        setIsAssignModalOpen(false);
-        setSelectedOrder(null);
-    };
+    useEffect(() => {
+        fetch("http://localhost:8080/api/orders/restaurant", {
+            method: "GET",
+            credentials: "include",
+        })
+            .then((res) => res.json())
+            .then((data) => setOrders(data))
+            .catch((err) => console.error("Failed to fetch orders", err));
+    }, []);
 
-    const handleCompleteOrder = (orderId: string) => {
+    const handleCompleteOrder = (orderId: number) => {
         setOrders(orders.filter((o) => o.id !== orderId));
     };
 
@@ -91,31 +27,27 @@ export function OrdersList() {
             <h2 className="text-xl font-semibold mb-6">Active Orders</h2>
             <div className="space-y-4">
                 {orders.map((order) => (
-                    <div
-                        key={order.id}
-                        className="border rounded-lg p-4 space-y-3"
-                    >
+                    <div key={order.id} className="border rounded-lg p-4 space-y-3">
                         <div className="flex justify-between items-start">
                             <div>
                                 <span className="text-sm text-gray-500">#{order.id}</span>
                                 <div className="mt-2 space-y-1">
                                     {order.items.map((item) => (
-                                        <div key={item.menuItem.id}>
+                                        <div key={item.foodId}>
                                             <span className="font-medium">{item.quantity}x</span>{' '}
-                                            {item.menuItem.name}
+                                            {item.foodName}
                                         </div>
                                     ))}
                                 </div>
                             </div>
                             <span
-                                className={`px-2 py-1 text-sm rounded ${
-                                    order.status === 'preparing'
+                                className={`px-2 py-1 text-sm rounded ${order.status === 'preparing'
                                         ? 'bg-yellow-100 text-yellow-800'
                                         : 'bg-green-100 text-green-800'
-                                }`}
+                                    }`}
                             >
-                {order.status === 'preparing' ? 'Preparing' : 'Ready'}
-              </span>
+                                {order.status === 'preparing' ? 'Preparing' : 'Ready'}
+                            </span>
                         </div>
 
                         <div className="flex justify-between items-center pt-3 border-t">
@@ -160,7 +92,15 @@ export function OrdersList() {
                 }}
                 onAssign={(courier) => {
                     if (selectedOrder) {
-                        handleAssignCourier(selectedOrder, courier);
+                        setOrders(
+                            orders.map((o) =>
+                                o.id === selectedOrder.id
+                                    ? { ...o, courier, status: 'ready' }
+                                    : o
+                            )
+                        );
+                        setIsAssignModalOpen(false);
+                        setSelectedOrder(null);
                     }
                 }}
             />

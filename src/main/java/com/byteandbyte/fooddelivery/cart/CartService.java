@@ -32,14 +32,23 @@ public class CartService {
     @Autowired
     private FoodRepository foodRepository;
 
-    public CartItemDTO toDTO(CartItem item){
+    public CartItemDTO toDTO(CartItem item) {
         long id = item.getFoodItem().getId();
         String name = item.getFoodItem().getName() != null ? item.getFoodItem().getName() : "";
         int quantity = item.getQuantity();
         double price = item.getPrice();
         String image = item.getFoodItem().getImage() != null ? item.getFoodItem().getImage() : "";
+        String restaurantMail = item.getFoodItem().getMenu().getRestaurant().getEmail();
 
-        return new CartItemDTO(id,name, quantity, price,image);
+        CartItemDTO dto = new CartItemDTO();
+        dto.setId(id);
+        dto.setName(name);
+        dto.setQuantity(quantity);
+        dto.setPrice(price);
+        dto.setImage(image);
+        dto.setRestaurantMail(restaurantMail); // ✅ Set it
+
+        return dto;
     }
 
 
