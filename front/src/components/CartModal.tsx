@@ -17,6 +17,8 @@ export function CartModal() {
 
     if (!isCartOpen) return null;
 
+    const restaurantMail = items[0]?.restaurantMail;
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end">
             <div className="bg-white w-full max-w-md h-full flex flex-col">
@@ -87,7 +89,7 @@ export function CartModal() {
                         className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors"
                         onClick={() => {
                             setIsCartOpen(false);
-                            navigate(`/checkout/${username}`);
+                            navigate(`/checkout/${restaurantMail}`);
                         }}
                     >
                         Checkout

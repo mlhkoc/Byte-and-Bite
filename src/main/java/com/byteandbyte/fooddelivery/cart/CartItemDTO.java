@@ -17,4 +17,5 @@ public class CartItemDTO {
     private int quantity;
     private double price;
     private String image;
+    private String restaurantMail;
 }
