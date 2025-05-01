@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useParams } from "react-router-dom";
 
 interface DeliveryForm {
     streetAddress: string;
@@ -33,6 +34,7 @@ export default function Checkout() {
     });
 
     const customerEmail = localStorage.getItem("user");
+    const { restaurantMail } = useParams();
 
     const handleDeliveryFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value, type, checked } = e.target as HTMLInputElement;
@@ -53,13 +55,36 @@ export default function Checkout() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const response = await fetch(`http://localhost:8080/api/order/${customerEmail}`, {
+            if (!restaurantMail) {
+                alert("Missing restaurant information.");
+                return;
+            }
+
+            // 1. Get restaurantId using restaurantMail (you must create this backend endpoint)
+            const restaurantId = await fetch(`http://localhost:8080/api/restaurant-id/${restaurantMail}`, {
+                credentials: "include"
+            }).then(res => {
+                if (!res.ok) throw new Error("Restaurant lookup failed");
+                return res.json();
+            });
+
+            // 2. Prepare the correct payload
+            const payload = {
+                restaurantId,
+                items: items.map(item => ({
+                    foodId: item.id,
+                    quantity: item.quantity
+                }))
+            };
+
+            // 3. Send order
+            const response = await fetch(`http://localhost:8080/api/orders/checkout`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 credentials: 'include',
-                body: JSON.stringify(items), // only if backend needs it
+                body: JSON.stringify(payload),
             });
 
             if (response.ok) {

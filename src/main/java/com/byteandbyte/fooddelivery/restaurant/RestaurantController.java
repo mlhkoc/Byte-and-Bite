@@ -56,5 +56,11 @@ public class RestaurantController {
         return toDTO(restaurant);
     }
 
+    @GetMapping("/restaurant-id/{mail}")
+    public Long getRestaurantIdByMail(@PathVariable String mail) {
+        return restaurantRepository.findByEmail(mail)
+                .orElseThrow(() -> new RuntimeException("Restaurant not found"))
+                .getId();
+    }
 
 }
