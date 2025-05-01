@@ -25,7 +25,7 @@ function Restaurant() {
     useEffect(() => {
         const fetchRestaurant = async () => {
             try {
-                const res = await fetch(`http://localhost:8080/api/restaurants/${restaurantMail}`, {
+                const res = await fetch(`http://localhost:8080/api/restaurants/mail/${restaurantMail}`, {
                     credentials: 'include',
                 });
                 const data = await res.json();

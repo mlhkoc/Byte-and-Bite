@@ -42,12 +42,19 @@ public class RestaurantController {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping("/restaurants/{restaurantMail}")
+    @GetMapping("/restaurants/mail/{restaurantMail}")
     public RestaurantDTO getRestaurant(@PathVariable String restaurantMail) {
         Restaurant restaurant = restaurantRepository.findByEmail(restaurantMail)
             .orElseThrow(() -> new RuntimeException("Restaurant not found"));
         return toDTO(restaurant);
     }
 
-    
+    @GetMapping("/restaurants/id/{restaurantId}")
+    public RestaurantDTO getRestaurant(@PathVariable Long restaurantId) {
+        Restaurant restaurant = restaurantRepository.findById( restaurantId )
+            .orElseThrow(() -> new RuntimeException("Restaurant not found"));
+        return toDTO(restaurant);
+    }
+
+
 }
