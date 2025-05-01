@@ -6,13 +6,14 @@ import PerformanceSummary from '../components/PerformanceSummary';
 import RecentDeliveries from '../components/RecentDeliveries';
 import { useUser } from '../context/UserContext';
 import { Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Dashboard: React.FC = () => {
-  const { isAuthenticated } = useUser();
+  const { isLoggedIn } = useAuth();
   
-  //if (!isAuthenticated) {
-  //  return <Navigate to="/signup" />;
-  //}
+  if (!isLoggedIn) {
+    return <Navigate to="/signup" />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">

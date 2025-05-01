@@ -29,7 +29,7 @@ createRoot(document.getElementById('root')!).render(
                     <Route path="/:restaurantId/menu" element={<MenuViewer />} />
                     <Route path="/restaurant/:restaurantMail" element={<Restaurant />} />
                     <Route path="/checkout/:restaurantMail" element={<Checkout />} />
-                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/courier/:courierMail" element={<Dashboard />} />
 
 
                 </Routes>
