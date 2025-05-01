@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,4 +41,20 @@ public class RestaurantController {
                 .stream().map(this::toDTO)
                 .collect(Collectors.toList());
     }
+
+    @GetMapping("/restaurants/mail/{restaurantMail}")
+    public RestaurantDTO getRestaurant(@PathVariable String restaurantMail) {
+        Restaurant restaurant = restaurantRepository.findByEmail(restaurantMail)
+            .orElseThrow(() -> new RuntimeException("Restaurant not found"));
+        return toDTO(restaurant);
+    }
+
+    @GetMapping("/restaurants/id/{restaurantId}")
+    public RestaurantDTO getRestaurant(@PathVariable Long restaurantId) {
+        Restaurant restaurant = restaurantRepository.findById( restaurantId )
+            .orElseThrow(() -> new RuntimeException("Restaurant not found"));
+        return toDTO(restaurant);
+    }
+
+
 }

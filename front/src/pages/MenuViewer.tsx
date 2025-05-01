@@ -1,4 +1,4 @@
-    import {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import { ShoppingCart, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -16,6 +16,29 @@ function MenuViewer() {
 
     const { restaurantId } = useParams();
     const [foods, setFoods] = useState<MenuItem[]>([]);
+
+    interface Restaurant {
+        id: number;
+        name: string;
+        cuisine: string;
+        rating: number;
+        deliveryTime: string;
+        minOrder: number;
+        image: string;
+    }
+
+    const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+
+    useEffect(() => {
+        if (!restaurantId) return;
+
+        fetch(`http://localhost:8080/api/restaurants/id/${restaurantId}`, {
+            credentials: 'include',
+        })
+            .then(res => res.json())
+            .then(data => setRestaurant(data))
+            .catch(err => console.error("Failed to fetch restaurant info:", err));
+    }, [restaurantId]);
 
 
     useEffect(() => {
@@ -46,6 +69,10 @@ function MenuViewer() {
         item.image.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+
+    // If we hold rating counts in the database in the future
+    // <span className="text-gray-500 text-sm ml-1">(342 reviews)</span>
+    // after the rating
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Header */}
@@ -55,13 +82,12 @@ function MenuViewer() {
                         <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=50&h=50&q=80"
                              alt="Restaurant logo"
                              className="w-10 h-10 rounded-full object-cover" />
-                        <h1 className="text-xl font-semibold text-gray-900">Downtown Delights Restaurant</h1>
+                        <h1 className="text-xl font-semibold text-gray-900">{restaurant ? restaurant.name : "Loading..."}</h1>
                     </div>
                     <div className="flex items-center space-x-4">
                         <div className="flex items-center text-yellow-400">
                             <Star className="w-5 h-5 fill-current" />
-                            <span className="ml-1 text-gray-700">4.8</span>
-                            <span className="text-gray-500 text-sm ml-1">(342 reviews)</span>
+                            <span className="ml-1 text-gray-700">{restaurant ? restaurant.rating : "Loading..."}</span>
                         </div>
                         {isLoggedIn && (
                             <button
