@@ -129,7 +129,7 @@ function Auth() {
                             navigate(`/restaurant/${data.username}`);
                         }
                         else if (role == "COURIER"){
-                            navigate(`/${data.username}`);
+                            navigate(`/courier/${data.username}`);
                         }
                     })
                     .catch((error) => {

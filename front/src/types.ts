@@ -32,3 +32,27 @@ export interface Order {
     status: 'preparing' | 'ready';
     courier?: Courier;
 }
+
+export interface User {
+    id: string;
+    name: string;
+    isAvailable: boolean;
+    role: 'courier' | 'customer' | 'restaurant';
+}
+
+export interface Delivery {
+    id: string;
+    restaurantName: string;
+    address: string;
+    distance: string;
+    amount: number;
+    status: 'pending' | 'accepted' | 'picked_up' | 'delivered' | 'completed';
+    completedAt?: string;
+    rating?: number;
+}
+
+export interface DailyPerformance {
+    earnings: number;
+    deliveries: number;
+    rating: number;
+}
