@@ -35,6 +35,8 @@ public class Order {
     @JoinColumn(name = "delivery_id")
     private Delivery delivery;
 
+    private String address;
+
 
     private LocalDateTime orderTime;
     private String status;

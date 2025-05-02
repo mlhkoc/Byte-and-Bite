@@ -27,6 +27,8 @@ public class Delivery {
 
     private String status;
 
+    private String address;
+
 
     private LocalDateTime deliveryDate;
 
