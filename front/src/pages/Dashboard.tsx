@@ -4,7 +4,6 @@ import DeliveryRequest from '../components/DeliveryRequest';
 import CurrentDelivery from '../components/CurrentDelivery';
 import PerformanceSummary from '../components/PerformanceSummary';
 import RecentDeliveries from '../components/RecentDeliveries';
-import { useUser } from '../context/UserContext';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 

@@ -30,6 +30,9 @@ public class Courier {
     private String passwordHash;
     private String phone;
 
+    private boolean isAvailable;
+
+
 
     @OneToMany(mappedBy = "courier", cascade = CascadeType.ALL)
     private List<Delivery> deliveries = new ArrayList<>();
