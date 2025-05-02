@@ -1,19 +1,18 @@
 import { X, Plus, Minus, Trash2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
-import {useEffect} from "react";
-import {fetchCartItems} from "./CartApi.tsx";
-
+import { useEffect } from "react";
+import { fetchCartItems } from "./CartApi.tsx";
 
 export function CartModal() {
     const username = localStorage.getItem("user");
 
     const { items, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, total, setItems } = useCart();
     const navigate = useNavigate();
+
     useEffect(() => {
         fetchCartItems().then(fetchedItems => setItems(fetchedItems));
     }, []);
-
 
     if (!isCartOpen) return null;
 
@@ -48,11 +47,12 @@ export function CartModal() {
                                     />
                                     <div className="flex-1">
                                         <h3 className="font-medium">{item.name}</h3>
-                                        <p className="text-gray-600">${item.price.toFixed(4)}</p>
+                                        <p className="text-gray-600">${item.price.toFixed(2)}</p>
                                         <div className="flex items-center space-x-2 mt-2">
                                             <button
-                                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                                                 className="p-1 hover:bg-gray-200 rounded"
+                                                disabled={item.quantity <= 1}
                                             >
                                                 <Minus className="w-4 h-4" />
                                             </button>
@@ -72,7 +72,7 @@ export function CartModal() {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        ${(item.price * item.quantity).toFixed(4)}
+                                        ${(item.price * item.quantity).toFixed(2)}
                                     </div>
                                 </div>
                             ))}
@@ -83,7 +83,7 @@ export function CartModal() {
                 <div className="border-t p-4">
                     <div className="flex justify-between items-center mb-4">
                         <span className="font-semibold">Total</span>
-                        <span className="font-semibold">${total.toFixed(4)}</span>
+                        <span className="font-semibold">${total.toFixed(2)}</span>
                     </div>
                     <button
                         className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors"
@@ -91,6 +91,7 @@ export function CartModal() {
                             setIsCartOpen(false);
                             navigate(`/checkout/${restaurantMail}`);
                         }}
+                        disabled={items.length === 0}
                     >
                         Checkout
                     </button>
