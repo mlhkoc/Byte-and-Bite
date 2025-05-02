@@ -22,19 +22,20 @@ createRoot(document.getElementById('root')!).render(
             <CartProvider>
             <BrowserRouter>
             <UserProvider>
-            <DeliveryProvider>
                 <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/:restaurantId/menu" element={<MenuViewer />} />
                     <Route path="/restaurant/:restaurantMail" element={<Restaurant />} />
                     <Route path="/checkout/:restaurantMail" element={<Checkout />} />
-                    <Route path="/courier/:courierMail" element={<Dashboard />} />
-
 
                 </Routes>
+                <DeliveryProvider>
+                        <Routes>
+                            <Route path="/courier/:courierMail" element={<Dashboard />} />
+                        </Routes>
+                </DeliveryProvider>
                 <CartModal />
-            </DeliveryProvider>
             </UserProvider>
             </BrowserRouter>
             </CartProvider>
