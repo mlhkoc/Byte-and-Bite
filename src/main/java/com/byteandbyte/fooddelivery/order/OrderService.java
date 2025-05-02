@@ -75,8 +75,8 @@ public class OrderService {
         Customer customer = customerRepository.findByEmail(customerEmail)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
         Restaurant restaurant = restaurantRepository.findById(dto.getRestaurantId()).orElseThrow();
-
         Order order = new Order();
+        order.setAddress(dto.getAddress());
         order.setCustomer(customer);
         order.setRestaurant(restaurant);
         order.setStatus("PENDING");
@@ -96,6 +96,7 @@ public class OrderService {
 
     public List<OrderDTO> getOrdersByRestaurant(Long restaurantId) {
         List<Order> orders = orderRepository.findByRestaurantId(restaurantId);
-        return orders.stream().map(OrderDTO::fromEntity).collect(Collectors.toList());
+
+        return orders.stream().filter(order -> order.getStatus().equals("PENDING")).map(OrderDTO::fromEntity).collect(Collectors.toList());
     }
 }
