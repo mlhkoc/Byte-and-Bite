@@ -4,6 +4,7 @@ import com.byteandbyte.fooddelivery.cart.CartItem;
 import com.byteandbyte.fooddelivery.order.Order;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.transaction.Transactional;
 import lombok.*;
 import com.byteandbyte.fooddelivery.order.Delivery;
 
@@ -35,6 +36,7 @@ public class Courier {
 
 
     @OneToMany(mappedBy = "courier", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Delivery> deliveries = new ArrayList<>();
 
 

@@ -19,12 +19,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const newAvailability = !isAvailable;
             setIsAvailable(newAvailability); // optimistic update
 
-            const response = await fetch('/api/couriers/me/availability', {
+            const response = await fetch('http://localhost:8080/api/couriers/me/availability', {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                     // Authorization: 'Bearer <token>' // eğer token gerekiyorsa
                 },
+                credentials: "include",
                 body: JSON.stringify({ isAvailable: newAvailability }),
             });
 

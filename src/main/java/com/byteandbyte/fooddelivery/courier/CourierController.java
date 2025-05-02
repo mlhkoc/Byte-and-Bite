@@ -13,10 +13,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @RestController
 @RequestMapping("/api/courier")
@@ -120,6 +123,25 @@ public class CourierController {
         orderRepository.save(order);
         courierRepository.save(courier);
         return null;
+    }
+
+    @GetMapping("/me/availability")
+    public ResponseEntity<?> getAvailability(Principal principal) {
+        // Your logic to get the availability status
+        Courier courier = courierRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Courier not found"));
+        return ResponseEntity.ok(courier.isAvailable());
+    }
+
+    @PostMapping("/me/availability")
+    public ResponseEntity<?> updateAvailability(@RequestBody Map<String, Boolean> availabilityPayload,
+            Principal principal) {
+        // Your logic to update the availability status
+        Courier courier = courierRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Courier not found"));
+        courier.setAvailable(availabilityPayload.get("isAvailable"));
+        courierRepository.save(courier);
+        return ResponseEntity.ok(courier);
     }
 
 
