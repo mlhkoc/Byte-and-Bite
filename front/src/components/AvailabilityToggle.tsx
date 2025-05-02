@@ -1,30 +1,67 @@
-import React from 'react';
-import { useUser } from '../context/UserContext';
+import React, { useState, useEffect } from 'react';
 
 const AvailabilityToggle: React.FC = () => {
-  const { user, toggleAvailability } = useUser();
-  
-  if (!user) return null;
+  const [isAvailable, setIsAvailable] = useState<boolean>();
+  const [loading, setLoading] = useState<boolean>();  // Yükleme durumu
+
+  // Fetch the current availability status when the component mounts
+  useEffect(() => {
+    const fetchAvailability = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/courier/me/availability', {
+          method: 'GET',
+          credentials: 'include',  // Include cookies for session-based auth
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setIsAvailable(data);  // Assuming the response contains the availability status
+        } else {
+          console.error('Failed to fetch availability:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error fetching availability:', error);
+      } finally {
+        setLoading(false);  // Veri alındıktan sonra yükleme durumu kapanır
+      }
+    };
+
+    fetchAvailability();
+  }, []);  // Yalnızca sayfa yüklendiğinde çalışacak
+
+
+  // Handle availability toggle (POST request to update status)
+  const toggleAvailability = async () => {
+    try {
+      const newAvailability = !isAvailable;
+      setIsAvailable(newAvailability);  // Optimistic update
+
+      const response = await fetch(`http://localhost:8080/api/courier/me/availability`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',  // Include cookies for session-based auth
+        body: JSON.stringify({ isAvailable: newAvailability }),  // Payload to update availability
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update availability');
+      }
+    } catch (error) {
+      setIsAvailable(isAvailable);  // Revert optimistic update
+      console.error('Error updating availability:', error);
+    }
+  };
 
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-sm font-medium">Availability Status:</span>
-      <button
-        onClick={toggleAvailability}
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-          user.isAvailable ? 'bg-green-600' : 'bg-gray-200'
-        }`}
-      >
-        <span
-          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-            user.isAvailable ? 'translate-x-6' : 'translate-x-1'
-          }`}
-        />
-        <span className="sr-only">Toggle Availability</span>
+    <div>
+      <div>
+        <span>{isAvailable ? "Available" : "Unavailable"}</span>
+      </div>
+      <button onClick={toggleAvailability}>
+        Toggle Availability
       </button>
-      <span className={`text-sm font-semibold ${user.isAvailable ? 'text-green-600' : 'text-gray-500'}`}>
-        {user.isAvailable ? 'Available' : 'Unavailable'}
-      </span>
     </div>
   );
 };
