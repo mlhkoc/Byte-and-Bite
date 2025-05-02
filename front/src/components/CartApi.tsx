@@ -11,7 +11,6 @@ export const fetchCartItems = async () => {
     return response.json();
 };
 
-
 export const updateCartQuantity = async (id: number, quantity: number) => {
     const response = await fetch(`http://localhost:8080/api/cart/${username}/${id}`, {
         method: 'PUT',

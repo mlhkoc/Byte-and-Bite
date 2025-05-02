@@ -8,6 +8,9 @@ import com.byteandbyte.fooddelivery.food.Food;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
+@Builder
 public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +27,5 @@ public class OrderItem {
     private int quantity;
     private double price;
 
-    public void setFoodItem(Food foodItem) {
 
-    }
 }

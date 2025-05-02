@@ -33,7 +33,6 @@ export default function Checkout() {
         type: 'card',
     });
 
-    const customerEmail = localStorage.getItem("user");
     const { restaurantMail } = useParams();
 
     const handleDeliveryFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -73,8 +72,11 @@ export default function Checkout() {
                 restaurantId,
                 items: items.map(item => ({
                     foodId: item.id,
-                    quantity: item.quantity
-                }))
+                    quantity: item.quantity,
+                    price: item.price
+                })),
+                total
+
             };
 
             // 3. Send order
