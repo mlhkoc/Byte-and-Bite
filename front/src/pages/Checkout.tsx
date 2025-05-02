@@ -67,14 +67,17 @@ export default function Checkout() {
                 return res.json();
             });
 
+            const address = deliveryForm.streetAddress+ " "+ deliveryForm.apartment+" "+deliveryForm.city;
+
             // 2. Prepare the correct payload
             const payload = {
                 restaurantId,
                 items: items.map(item => ({
                     foodId: item.id,
                     quantity: item.quantity,
-                    price: item.price
+                    price: item.price,
                 })),
+                address: address,
                 total
             };
 
