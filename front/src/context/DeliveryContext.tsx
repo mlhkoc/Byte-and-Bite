@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Delivery, DailyPerformance } from '../types';
 import { useAuth } from './AuthContext';
+import { useParams } from "react-router-dom";
 
 // Define allowed status values for type safety
 type DeliveryStatus = 'pending' | 'accepted' | 'picked_up' | 'delivered' | 'completed';
@@ -34,9 +35,15 @@ interface DeliveryContextType {
   markAsDelivered: () => void;
 }
 
+interface DeliveryProviderProps {
+  children: ReactNode;
+  courierEmail: string;
+}
+
+
 export const DeliveryContext = createContext<DeliveryContextType | undefined>(undefined);
 
-export const DeliveryProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const DeliveryProvider: React.FC<DeliveryProviderProps> = ({ children, courierEmail }) => {
   const [currentDelivery, setCurrentDelivery] = useState<Delivery | null>(null);
   const [newDeliveryRequest, setNewDeliveryRequest] = useState<Delivery | null>(null);
   const [recentDeliveries, setRecentDeliveries] = useState<Delivery[]>([]);
@@ -46,30 +53,35 @@ export const DeliveryProvider: React.FC<{ children: ReactNode }> = ({ children }
     rating: 0,
   });
 
-  const courierEmail = 'courier@example.com'; // Replace this with dynamic value
+  const fetchDeliveries = async (
+    courierEmail: string,
+    setRecentDeliveries: (data: any) => void,
+    setCurrentDelivery: (data: any) => void
+  ) => {
+    try {
+      const pastRes = await fetch(`http://localhost:8080/api/courier/${courierEmail}/deliveries?type=PAST`, {
+        credentials: 'include',
+      });
+      const pastData = await pastRes.json();
+      setRecentDeliveries(pastData);
+
+      const activeRes = await fetch(`http://localhost:8080/api/courier/${courierEmail}/deliveries?type=ACTIVE`, {
+        credentials: 'include',
+      });
+      const activeData = await activeRes.json();
+      console.log(activeData);
+      if (activeData.length > 0) {
+        setCurrentDelivery(activeData[0]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch deliveries:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchDeliveries = async () => {
-      try {
-        const pastRes = await fetch(`http://localhost:8080/api/courier/${courierEmail}/deliveries?type=PAST`, {
-          credentials: 'include',
-        });
-        const pastData = await pastRes.json();
-        setRecentDeliveries(pastData);
-
-        const activeRes = await fetch(`http://localhost:8080/api/courier/${courierEmail}/deliveries?type=ACTIVE`, {
-          credentials: 'include',
-        });
-        const activeData = await activeRes.json();
-        if (activeData.length > 0) {
-          setCurrentDelivery(activeData[0]);
-        }
-      } catch (error) {
-        console.error('Failed to fetch deliveries:', error);
-      }
-    };
-
-    fetchDeliveries();
+    if (courierEmail) {
+      fetchDeliveries(courierEmail, setRecentDeliveries, setCurrentDelivery);
+    }
   }, [courierEmail]);
 
   useEffect(() => {

@@ -2,6 +2,9 @@ package com.byteandbyte.fooddelivery.courier;
 
 import com.byteandbyte.fooddelivery.food.Food;
 import com.byteandbyte.fooddelivery.order.*;
+
+import jakarta.persistence.Id;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
@@ -43,8 +46,8 @@ public class CourierController {
                 .collect(Collectors.toList());
     }
 
-    @PostMapping("/{courierId}")
-    public ResponseEntity<?> assignCourier(@PathVariable Long courierId, @RequestBody OrderDTO orderDTO) {
+    @PostMapping("/id/{courierId}")
+    public ResponseEntity<?> assignCourier(@PathVariable Long courierId, @RequestBody Map<String, Object> payload) {
         Courier courier = courierRepository.findById(courierId).orElse(null);
         if (courier == null) {
             return ResponseEntity.notFound().build();
@@ -52,7 +55,8 @@ public class CourierController {
         Delivery delivery = new Delivery();
         delivery.setCourier(courier);
         delivery.setStatus("Picked Up");
-        Order order = orderRepository.getReferenceById(orderDTO.getId());
+        Long orderId = Long.parseLong(payload.get("id").toString());
+        Order order = orderRepository.getReferenceById(orderId);
         order.setDelivery(delivery);
         delivery.setOrder(order);;
         courier.getDeliveries().add(delivery);
@@ -67,12 +71,13 @@ public class CourierController {
     public List<DeliveryDTO> getDeliveries(@PathVariable String email, @RequestParam String type) {
         Courier courier = courierService.findByEmail(email);
         if (courier == null) {
+            System.out.println("COURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIER");
             throw  new UsernameNotFoundException("Courier Not Found!");
         }
 
         List<DeliveryDTO> deliveries =  courier.getDeliveries().stream().map(DeliveryDTO::toDTO).toList();
         if(type.equals("ACTIVE")){
-            return deliveries.stream().filter(deliveryDTObj -> deliveryDTObj.getStatus().equals("Pending")).collect(Collectors.toList());
+            return deliveries.stream().filter(deliveryDTObj -> deliveryDTObj.getStatus().equals("Picked Up")).collect(Collectors.toList());
         }
         else if (type.equals("PAST")){
             return deliveries.stream().filter(deliveryDTObj -> deliveryDTObj.getStatus().equals("Completed")).collect(Collectors.toList());

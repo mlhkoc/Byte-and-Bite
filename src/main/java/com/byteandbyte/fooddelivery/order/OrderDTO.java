@@ -28,6 +28,7 @@ public class OrderDTO {
 
     public static OrderDTO fromEntity(Order order) {
         OrderDTO dto = new OrderDTO();
+        dto.setId(order.getId());
         dto.setRestaurantId(order.getRestaurant().getId());
         List<OrderItemDTO> items = order.getItems().stream().map(item -> {
             OrderItemDTO itemDTO = new OrderItemDTO();

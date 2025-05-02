@@ -7,6 +7,11 @@ export const CurrentDelivery: React.FC = () => {
 
   if (!currentDelivery) return null;
 
+  //<div className="flex justify-between mt-1">
+  //        <span className="text-sm text-gray-600">{currentDelivery.distance}</span>
+  //        <span className="text-base font-semibold">£{currentDelivery.amount.toFixed(2)}</span>
+  //      </div >
+  
   return (
     <div className="bg-white rounded-lg shadow-md p-4 mb-4">
       <h2 className="text-lg font-semibold mb-4">Current Delivery</h2>
@@ -14,10 +19,7 @@ export const CurrentDelivery: React.FC = () => {
       <div className="mb-4">
         <h3 className="text-base font-medium">{currentDelivery.restaurantName}</h3>
         <p className="text-sm text-gray-600">{currentDelivery.address}</p>
-        <div className="flex justify-between mt-1">
-          <span className="text-sm text-gray-600">{currentDelivery.distance}</span>
-          <span className="text-base font-semibold">£{currentDelivery.amount.toFixed(2)}</span>
-        </div>
+        
       </div>
       
       {/* Map visualization */}

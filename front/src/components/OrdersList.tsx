@@ -1,5 +1,5 @@
 import { Order, Courier } from '../types';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 import { AssignCourierModal } from './AssignCourierModal.tsx';
 
@@ -7,6 +7,8 @@ export function OrdersList() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+
+    const lastOrderId = useRef<number>(0);
 
     useEffect(() => {
         fetch("http://localhost:8080/api/orders/restaurant", {
@@ -65,6 +67,8 @@ export function OrdersList() {
                                     onClick={() => {
                                         setSelectedOrder(order);
                                         setIsAssignModalOpen(true);
+                                        lastOrderId.current = order.id;
+                                        console.log( lastOrderId )
                                     }}
                                     className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                                 >
@@ -103,6 +107,7 @@ export function OrdersList() {
                         setSelectedOrder(null);
                     }
                 }}
+                orderId={lastOrderId.current}
             />
         </div>
     );

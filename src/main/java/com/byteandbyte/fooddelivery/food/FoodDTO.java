@@ -17,4 +17,5 @@ public class FoodDTO {
     private Double price;
     private boolean available;
     private String image;
+    private String restaurantEmail;
 }
