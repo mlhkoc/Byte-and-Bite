@@ -11,6 +11,8 @@ import com.byteandbyte.fooddelivery.food.Food;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
+@Setter
 public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

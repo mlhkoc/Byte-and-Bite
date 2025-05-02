@@ -43,7 +43,4 @@ public class Order {
     private String note;
 
 
-    public void setCreatedAt(LocalDateTime now) {
-
-    }
 }

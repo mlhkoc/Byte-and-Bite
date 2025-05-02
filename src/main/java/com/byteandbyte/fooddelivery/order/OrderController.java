@@ -18,34 +18,15 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
-    private final CustomerRepository customerRepository;
     private final RestaurantRepository restaurantRepository;
 
     public OrderController(OrderService orderService,
-                           CustomerRepository customerRepository,
                            RestaurantRepository restaurantRepository) {
         this.orderService = orderService;
-        this.customerRepository = customerRepository;
         this.restaurantRepository = restaurantRepository;
     }
 
-    @PostMapping("/order/{customerEmail}")
-    public ResponseEntity<String> placeOrder(
-            @PathVariable String customerEmail,
-            @RequestBody(required = false) List<CartItemDTO> items // optional, you can also fetch from DB
-    ) {
-        Customer customer = customerRepository.findByEmail(customerEmail).orElse(null);
-        if (customer == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer not found");
-        }
 
-        try {
-            orderService.placeOrder(customer);
-            return ResponseEntity.ok("Order placed successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to place order");
-        }
-    }
 
     @PostMapping("/orders/checkout")
     public ResponseEntity<?> checkout(@RequestBody OrderDTO orderDTO, Principal principal) {
