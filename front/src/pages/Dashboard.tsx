@@ -11,7 +11,7 @@ const Dashboard: React.FC = () => {
   const { isLoggedIn } = useAuth();
   
   if (!isLoggedIn) {
-    return <Navigate to="/signup" />;
+    return <Navigate to="/auth" />;
   }
 
   return (

@@ -31,7 +31,7 @@ public class CourierController {
     }
 
     @GetMapping("/{email}/deliveries")
-    public List<DeliveryDTO> getDeliveries(@PathVariable String email, @RequestBody String type) {
+    public List<DeliveryDTO> getDeliveries(@PathVariable String email, @RequestParam String type) {
         Courier courier = courierService.findByEmail(email);
         if (courier == null) {
             throw  new UsernameNotFoundException("Courier Not Found!");

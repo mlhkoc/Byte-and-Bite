@@ -1,48 +1,26 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Delivery, DailyPerformance } from '../types';
+import { useAuth } from './AuthContext';
 
-// Sample data for demonstration
-const SAMPLE_RECENT_DELIVERIES: Delivery[] = [
-  {
-    id: '1',
-    restaurantName: 'Burger King',
-    address: '123 Main St, Downtown',
-    distance: '1.8 miles',
-    amount: 7.25,
-    status: 'completed',
-    completedAt: '2:30 PM',
-    rating: 5.0
-  },
-  {
-    id: '2',
-    restaurantName: 'Pizza Hut',
-    address: '456 Oak Ave, Midtown',
-    distance: '2.2 miles',
-    amount: 8.50,
-    status: 'completed',
-    completedAt: '1:15 PM',
-    rating: 4.8
-  },
-  {
-    id: '3',
-    restaurantName: 'Subway',
-    address: '789 Pine St, Uptown',
-    distance: '1.5 miles',
-    amount: 6.75,
-    status: 'completed',
-    completedAt: '12:45 PM',
-    rating: 4.9
-  }
-];
+// Define allowed status values for type safety
+type DeliveryStatus = 'pending' | 'accepted' | 'picked_up' | 'delivered' | 'completed';
 
-// Sample new delivery request
-const SAMPLE_NEW_DELIVERY: Delivery = {
-  id: '4',
-  restaurantName: 'Thai Express Restaurant',
-  address: '123 Main St, Downtown',
-  distance: '2.5 miles',
-  amount: 8.50,
-  status: 'pending'
+// Map frontend statuses to backend-friendly versions
+const statusToBackend: Record<DeliveryStatus, string> = {
+  pending: 'Pending',
+  accepted: 'Accepted',
+  picked_up: 'Picked Up',
+  delivered: 'Delivered',
+  completed: 'Completed',
+};
+
+// Optionally: map backend statuses to frontend if needed
+const statusFromBackend: Record<string, DeliveryStatus> = {
+  Pending: 'pending',
+  Accepted: 'accepted',
+  'Picked Up': 'picked_up',
+  Delivered: 'delivered',
+  Completed: 'completed',
 };
 
 interface DeliveryContextType {
@@ -60,32 +38,59 @@ export const DeliveryContext = createContext<DeliveryContextType | undefined>(un
 
 export const DeliveryProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [currentDelivery, setCurrentDelivery] = useState<Delivery | null>(null);
-  const [newDeliveryRequest, setNewDeliveryRequest] = useState<Delivery | null>(SAMPLE_NEW_DELIVERY);
-  const [recentDeliveries, setRecentDeliveries] = useState<Delivery[]>(SAMPLE_RECENT_DELIVERIES);
+  const [newDeliveryRequest, setNewDeliveryRequest] = useState<Delivery | null>(null);
+  const [recentDeliveries, setRecentDeliveries] = useState<Delivery[]>([]);
   const [dailyPerformance, setDailyPerformance] = useState<DailyPerformance>({
-    earnings: 85.50,
-    deliveries: 12,
-    rating: 4.8
+    earnings: 0,
+    deliveries: 0,
+    rating: 0,
   });
 
-  const calculateDailyPerformance = () => {
-    const totalEarnings = recentDeliveries.reduce((sum, delivery) => sum + delivery.amount, 0);
-    const avgRating = recentDeliveries.reduce((sum, delivery) => sum + (delivery.rating || 0), 0) / recentDeliveries.length;
-    
-    setDailyPerformance({
-      earnings: totalEarnings,
-      deliveries: recentDeliveries.length,
-      rating: parseFloat(avgRating.toFixed(1))
-    });
-  };
+  const courierEmail = 'courier@example.com'; // Replace this with dynamic value
 
   useEffect(() => {
+    const fetchDeliveries = async () => {
+      try {
+        const pastRes = await fetch(`http://localhost:8080/api/courier/${courierEmail}/deliveries?type=PAST`, {
+          credentials: 'include',
+        });
+        const pastData = await pastRes.json();
+        setRecentDeliveries(pastData);
+
+        const activeRes = await fetch(`http://localhost:8080/api/courier/${courierEmail}/deliveries?type=ACTIVE`, {
+          credentials: 'include',
+        });
+        const activeData = await activeRes.json();
+        if (activeData.length > 0) {
+          setCurrentDelivery(activeData[0]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch deliveries:', error);
+      }
+    };
+
+    fetchDeliveries();
+  }, [courierEmail]);
+
+  useEffect(() => {
+    const calculateDailyPerformance = () => {
+      const totalEarnings = recentDeliveries.reduce((sum, d) => sum + d.amount, 0);
+      const avgRating =
+        recentDeliveries.reduce((sum, d) => sum + (d.rating || 0), 0) / (recentDeliveries.length || 1);
+
+      setDailyPerformance({
+        earnings: parseFloat(totalEarnings.toFixed(2)),
+        deliveries: recentDeliveries.length,
+        rating: parseFloat(avgRating.toFixed(1)),
+      });
+    };
+
     calculateDailyPerformance();
   }, [recentDeliveries]);
 
   const acceptDelivery = () => {
     if (newDeliveryRequest) {
-      const accepted = { ...newDeliveryRequest, status: 'accepted' as const };
+      const accepted = { ...newDeliveryRequest, status: 'accepted' as DeliveryStatus };
       setCurrentDelivery(accepted);
       setNewDeliveryRequest(null);
     }
@@ -93,27 +98,53 @@ export const DeliveryProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   const rejectDelivery = () => {
     setNewDeliveryRequest(null);
-    // In a real app, could request a new delivery after a short delay
   };
 
-  const markAsPickedUp = () => {
+  const markAsPickedUp = async () => {
     if (currentDelivery) {
-      setCurrentDelivery({ ...currentDelivery, status: 'picked_up' });
+      const updated = { ...currentDelivery, status: 'picked_up' as DeliveryStatus };
+      try {
+        await fetch(`http://localhost:8080/api/courier/${courierEmail}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            ...updated,
+            status: statusToBackend[updated.status],
+          }),
+        });
+        setCurrentDelivery(updated);
+      } catch (err) {
+        console.error('Failed to mark as picked up', err);
+      }
     }
   };
 
-  const markAsDelivered = () => {
+  const markAsDelivered = async () => {
     if (currentDelivery) {
-      const delivered: Delivery = {
+      const completed: Delivery = {
         ...currentDelivery,
-        status: 'completed',
+        status: 'completed' as DeliveryStatus,
         completedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         rating: 5.0,
       };
 
-      // Now update the list
-      setRecentDeliveries(prev => [delivered, ...prev]);
-      setCurrentDelivery(null);
+      try {
+        await fetch(`http://localhost:8080/api/courier/${courierEmail}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            ...completed,
+            status: statusToBackend[completed.status],
+          }),
+        });
+
+        setRecentDeliveries(prev => [completed, ...prev]);
+        setCurrentDelivery(null);
+      } catch (err) {
+        console.error('Failed to mark as delivered', err);
+      }
     }
   };
 
@@ -127,7 +158,7 @@ export const DeliveryProvider: React.FC<{ children: ReactNode }> = ({ children }
         acceptDelivery,
         rejectDelivery,
         markAsPickedUp,
-        markAsDelivered
+        markAsDelivered,
       }}
     >
       {children}
