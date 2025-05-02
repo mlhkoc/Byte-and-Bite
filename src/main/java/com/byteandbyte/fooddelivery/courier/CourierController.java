@@ -4,12 +4,15 @@ import com.byteandbyte.fooddelivery.food.Food;
 import com.byteandbyte.fooddelivery.order.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -30,8 +33,38 @@ public class CourierController {
         this.orderRepository = orderRepository;
     }
 
+
+    @GetMapping("/get")
+    public List<CourierDTO> getAllCouriers() {
+        return courierRepository.findAll()
+                .stream()
+                .filter(Courier::isAvailable)
+                .map(CourierDTO::from)
+                .collect(Collectors.toList());
+    }
+
+    @PostMapping("/{courierId}")
+    public ResponseEntity<?> assignCourier(@PathVariable Long courierId, @RequestBody OrderDTO orderDTO) {
+        Courier courier = courierRepository.findById(courierId).orElse(null);
+        if (courier == null) {
+            return ResponseEntity.notFound().build();
+        }
+        Delivery delivery = new Delivery();
+        delivery.setCourier(courier);
+        delivery.setStatus("Picked Up");
+        Order order = orderRepository.getReferenceById(orderDTO.getId());
+        order.setDelivery(delivery);
+        delivery.setOrder(order);;
+        courier.getDeliveries().add(delivery);
+        courier.setAvailable(false);
+        deliveryRepository.save(delivery);
+        courierRepository.save(courier);
+        orderRepository.save(order);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @GetMapping("/{email}/deliveries")
-    public List<DeliveryDTO> getDeliveries(@PathVariable String email, @RequestBody String type) {
+    public List<DeliveryDTO> getDeliveries(@PathVariable String email, @RequestParam String type) {
         Courier courier = courierService.findByEmail(email);
         if (courier == null) {
             throw  new UsernameNotFoundException("Courier Not Found!");
