@@ -10,6 +10,7 @@ interface MenuItem {
     name: string;
     image: string;
     price: number;
+    restaurantEmail: string;
 }
 
 function MenuViewer() {
@@ -141,7 +142,8 @@ function MenuViewer() {
                                                     id: item.id,
                                                     name: item.name,
                                                     price: item.price,
-                                                    image: item.image
+                                                    image: item.image,
+                                                    restaurantMail: item.restaurantEmail
                                                 });
                                             } else {
                                                 alert('Please sign in!');

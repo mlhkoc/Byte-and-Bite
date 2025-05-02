@@ -5,6 +5,7 @@ export interface MenuItem {
     description: string;
     image: string;
     available: boolean;
+    restaurantEmail: string;
 }
 
 export interface Review {
@@ -22,6 +23,7 @@ export interface OrderItem {
 }
 
 export interface Courier {
+    id: string;
     name: string;
     avatar: string;
 }
@@ -45,9 +47,8 @@ export interface Delivery {
     restaurantName: string;
     address: string;
     distance: string;
-    amount: number;
     status: 'pending' | 'accepted' | 'picked_up' | 'delivered' | 'completed';
-    completedAt?: string;
+    deliveryDate?: string;
     rating?: number;
 }
 
