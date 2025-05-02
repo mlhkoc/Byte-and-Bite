@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import {clearCart, fetchCartItems, removeCartItem, updateCartQuantity} from "../components/CartApi.tsx";
+import { clearCart, fetchCartItems, removeCartItem, updateCartQuantity } from "../components/CartApi.tsx";
 
 interface CartItem {
     id: number;
@@ -12,7 +12,7 @@ interface CartItem {
 
 interface CartContextType {
     items: CartItem[];
-    addToCart: (item: Omit<CartItem, 'quantity'>) => void;
+    addToCart: (item: Omit<CartItem, 'quantity'>) => Promise<void>;
     removeFromCart: (id: number) => void;
     updateQuantity: (id: number, quantity: number) => void;
     clearCartItems: () => void;
@@ -33,8 +33,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         fetchCartItems().then(fetchedItems => setItems(fetchedItems));
     }, []);
 
+    const addToCart = async (item: Omit<CartItem, 'quantity'>) => {
+        if (items.length > 0 && items[0].restaurantMail !== item.restaurantMail) {
+            const confirmed = window.confirm(
+                "Your cart contains items from a different restaurant. Adding this item will remove all existing items from your cart. Would you like to proceed?"
+            );
 
-    const addToCart = (async (item: Omit<CartItem, 'quantity'>) => {
+            if (confirmed) {
+                await clearCart();
+                setItems([]);
+            } else {
+                return;
+            }
+        }
+
         const response = await fetch(`http://localhost:8080/api/cart/${username}`, {
             method: 'POST',
             headers: {
@@ -43,10 +55,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             credentials: 'include',
             body: JSON.stringify(item),
         });
+
         if (!response.ok) throw new Error('Failed to add item to cart');
         const updatedItems = await fetchCartItems();
         setItems(updatedItems);
-    });
+    };
 
     const removeFromCart = async (id: number) => {
         await removeCartItem(id);
@@ -55,14 +68,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     };
 
     const updateQuantity = async (id: number, quantity: number) => {
-        await updateCartQuantity(id, quantity);
+        // Ensure quantity is not less than 1
+        const validQuantity = Math.max(1, quantity);
+        await updateCartQuantity(id, validQuantity);
         const updatedItems = await fetchCartItems();
         setItems(updatedItems);
     };
 
     const clearCartItems = async () => {
         try {
-            await clearCart(); // Await for the API call result
+            await clearCart();
             setItems([]);
         } catch (error) {
             console.error('Error clearing cart:', error);
