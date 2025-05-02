@@ -9,29 +9,33 @@ import { useAuth } from '../context/AuthContext';
 
 const Dashboard: React.FC = () => {
   const { isLoggedIn } = useAuth();
-  
+
   if (!isLoggedIn) {
     return <Navigate to="/auth" />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Header />
-      
-      <main className="container mx-auto max-w-4xl p-4">
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <DeliveryRequest />
-            <CurrentDelivery />
-          </div>
-          
-          <div>
-            <PerformanceSummary />
-            <RecentDeliveries />
-          </div>
+      <div className="min-h-screen bg-gray-100">
+        {/* Header + AvailabilityToggle */}
+        <div className="flex justify-between items-center px-4 pt-4">
+          <Header />
+          {/* AvailabilityToggle butonu Header içinde */}
         </div>
-      </main>
-    </div>
+
+        <main className="container mx-auto max-w-4xl p-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <DeliveryRequest />
+              <CurrentDelivery />
+            </div>
+
+            <div>
+              <PerformanceSummary />
+              <RecentDeliveries />
+            </div>
+          </div>
+        </main>
+      </div>
   );
 };
 
