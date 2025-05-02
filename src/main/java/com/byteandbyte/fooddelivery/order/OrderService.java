@@ -55,13 +55,13 @@ public class OrderService {
 
         Order order = new Order();
         order.setCustomer(customer);
-        order.setCreatedAt(LocalDateTime.now());
+        order.setOrderTime(LocalDateTime.now());
         orderRepository.save(order);
 
         for (CartItem cartItem : cartItems) {
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
-            orderItem.setFoodItem(cartItem.getFoodItem());
+            orderItem.setFood(cartItem.getFoodItem());
             orderItem.setQuantity(cartItem.getQuantity());
             orderItem.setPrice(cartItem.getPrice());
             orderItemRepository.save(orderItem);
@@ -80,15 +80,16 @@ public class OrderService {
         order.setCustomer(customer);
         order.setRestaurant(restaurant);
         order.setStatus("PENDING");
-
+        order.setOrderTime(LocalDateTime.now());
         List<OrderItem> items = dto.getItems().stream().map(i -> {
             OrderItem item = new OrderItem();
             item.setOrder(order);
             item.setFood(foodRepository.findById(i.getFoodId()).orElseThrow());
             item.setQuantity(i.getQuantity());
+            item.setPrice(i.getPrice());
             return item;
         }).collect(Collectors.toList());
-
+        order.setPrice(dto.getTotal());
         order.setItems(items);
         orderRepository.save(order);
     }
