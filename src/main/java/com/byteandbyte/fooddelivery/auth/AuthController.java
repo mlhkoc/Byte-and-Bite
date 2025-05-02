@@ -65,6 +65,7 @@ public class AuthController {
                 courier.setPasswordHash(passwordHash);
                 courier.setPhone(phone);
                 courier.setName(name);
+                courier.setAvailable(true);
                 authService.registerNewCourier(courier);
                 return ResponseEntity.ok("User registered!");
             }

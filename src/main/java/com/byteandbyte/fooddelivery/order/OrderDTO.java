@@ -22,6 +22,7 @@ public class OrderDTO {
     private List<OrderItemDTO> items;
     private double total;
     private LocalDateTime orderDateTime;
+    private String address;
 
 
 

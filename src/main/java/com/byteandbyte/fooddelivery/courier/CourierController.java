@@ -58,7 +58,9 @@ public class CourierController {
         Long orderId = Long.parseLong(payload.get("id").toString());
         Order order = orderRepository.getReferenceById(orderId);
         order.setDelivery(delivery);
+        order.setStatus("Picked Up");
         delivery.setOrder(order);;
+        delivery.setAddress(order.getAddress());
         courier.getDeliveries().add(delivery);
         courier.setAvailable(false);
         deliveryRepository.save(delivery);
@@ -113,6 +115,7 @@ public class CourierController {
             delivery.setDeliveryDate(LocalDateTime.now());
             order.setStatus(newStatus);
             order.setDelivery(delivery);
+            order.setDeliveryTime(LocalDateTime.now());
 
 
         }

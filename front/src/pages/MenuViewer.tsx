@@ -11,6 +11,7 @@ interface MenuItem {
     image: string;
     price: number;
     restaurantEmail: string;
+    description: string;
 }
 
 function MenuViewer() {
@@ -132,7 +133,7 @@ function MenuViewer() {
                             />
                             <div className="p-4">
                                 <h3 className="text-lg font-semibold text-gray-900">{item.name}</h3>
-                                <p className="mt-1 text-gray-600 text-sm">{item.image}</p>
+                                <p className="mt-1 text-gray-600 text-sm">{item.description}</p>
                                 <div className="mt-4 flex items-center justify-between">
                                     <span className="text-gray-900 font-medium">${item.price.toFixed(2)}</span>
                                     <button
