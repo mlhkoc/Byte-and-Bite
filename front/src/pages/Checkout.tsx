@@ -76,7 +76,6 @@ export default function Checkout() {
                     price: item.price
                 })),
                 total
-
             };
 
             // 3. Send order
@@ -312,6 +311,7 @@ export default function Checkout() {
                                     type="submit"
                                     onClick={handleSubmit}
                                     className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors"
+                                    disabled={items.length === 0}
                                 >
                                     Complete Order
                                 </button>
