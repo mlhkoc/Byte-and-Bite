@@ -34,6 +34,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     const addToCart = async (item: Omit<CartItem, 'quantity'>) => {
+        console.log( items[0] );
+        console.log( item );
         if (items.length > 0 && items[0].restaurantMail !== item.restaurantMail) {
             const confirmed = window.confirm(
                 "Your cart contains items from a different restaurant. Adding this item will remove all existing items from your cart. Would you like to proceed?"

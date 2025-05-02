@@ -38,9 +38,11 @@ public class MenuController {
         List<Menu> menus = menuRepository.findByRestaurantId(restaurantId);
         List<FoodDTO> foodDtos = new ArrayList<>();
 
+        Restaurant restaurant = restaurantRepository.findById(restaurantId).orElse(null);
+
         for (Menu menu : menus) {
             for (Food food : foodRepository.findByMenuId(menu.getId())) {
-                foodDtos.add(new FoodDTO(food.getId(),food.getName(), food.getDescription(), food.getPrice(),food.isAvailable(),food.getImage()));
+                foodDtos.add(new FoodDTO(food.getId(),food.getName(), food.getDescription(), food.getPrice(),food.isAvailable(),food.getImage(), restaurant.getEmail()));
             }
         }
 
@@ -54,7 +56,7 @@ public class MenuController {
 
         for (Menu menu : menus) {
             for (Food food : foodRepository.findByMenuId(menu.getId())) {
-                foodDtos.add(new FoodDTO(food.getId(),food.getName(), food.getDescription(), food.getPrice(),food.isAvailable(),food.getImage()));
+                foodDtos.add(new FoodDTO(food.getId(),food.getName(), food.getDescription(), food.getPrice(),food.isAvailable(),food.getImage(),restaurantMail));
             }
         }
 

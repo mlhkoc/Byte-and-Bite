@@ -14,6 +14,7 @@ import Checkout from './pages/Checkout.tsx';
 import Dashboard from './pages/Dashboard.tsx';
 import { UserProvider } from './context/UserContext.tsx';
 import { DeliveryProvider } from './context/DeliveryContext.tsx';
+import CourierWrapper from './CourierWrapper.tsx';
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
@@ -28,13 +29,9 @@ createRoot(document.getElementById('root')!).render(
                     <Route path="/:restaurantId/menu" element={<MenuViewer />} />
                     <Route path="/restaurant/:restaurantMail" element={<Restaurant />} />
                     <Route path="/checkout/:restaurantMail" element={<Checkout />} />
+                            <Route path="/courier/:courierMail" element={<CourierWrapper />} />
 
                 </Routes>
-                <DeliveryProvider>
-                        <Routes>
-                            <Route path="/courier/:courierMail" element={<Dashboard />} />
-                        </Routes>
-                </DeliveryProvider>
                 <CartModal />
             </UserProvider>
             </BrowserRouter>

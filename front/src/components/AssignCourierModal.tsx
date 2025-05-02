@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { Courier } from '../types';
 
@@ -5,39 +6,61 @@ interface AssignCourierModalProps {
     isOpen: boolean;
     onClose: () => void;
     onAssign: (courier: Courier) => void;
+    orderId: number; // Order ID prop'u
 }
 
 export function AssignCourierModal({
-                                       isOpen,
-                                       onClose,
-                                       onAssign,
-                                   }: AssignCourierModalProps) {
-    const availableCouriers: Courier[] = [
-        {
-            id: '1',
-            name: 'Mike',
-            available: true,
-            avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e',
-        },
-        {
-            id: '2',
-            name: 'Sarah',
-            available: true,
-            avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
-        },
-        {
-            id: '3',
-            name: 'John',
-            available: true,
-            avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e',
-        },
-    ];
+    isOpen,
+    onClose,
+    onAssign,
+    orderId,
+}: AssignCourierModalProps) {
+    const [availableCouriers, setAvailableCouriers] = useState<Courier[]>([]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const fetchCouriers = async () => {
+            try {
+                const res = await fetch('http://localhost:8080/api/courier/get');
+                const data = await res.json();
+                setAvailableCouriers(data);
+            } catch (error) {
+                console.error("Failed to fetch couriers:", error);
+            }
+        };
+
+        fetchCouriers();
+    }, [isOpen]);
+
+    const handleAssignCourier = async (courier: Courier) => {
+        try {
+            console.log( JSON.stringify(orderId) )
+            const res = await fetch(`http://localhost:8080/api/courier/id/${courier.id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include', // Eğer oturum için cookie gerekiyorsa
+                body: JSON.stringify({ id: orderId }),
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed to assign courier');
+            }
+
+            onAssign(courier); // Gerekirse parent state güncelle
+            onClose(); // Modalı kapat
+        } catch (error) {
+            console.error("Courier assignment failed:", error);
+        }
+    };
 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold">Assign Courier</h2>
                     <button onClick={onClose}>
@@ -45,21 +68,25 @@ export function AssignCourierModal({
                     </button>
                 </div>
 
-                <div className="space-y-4">
-                    {availableCouriers.map((courier) => (
-                        <button
-                            key={courier.id}
-                            onClick={() => onAssign(courier)}
-                            className="w-full flex items-center p-3 border rounded-lg hover:bg-gray-50"
-                        >
-                            <img
-                                src={courier.avatar}
-                                alt={courier.name}
-                                className="w-10 h-10 rounded-full"
-                            />
-                            <span className="ml-3">{courier.name}</span>
-                        </button>
-                    ))}
+                <div className="space-y-4 max-h-60 overflow-y-auto">
+                    {availableCouriers.length === 0 ? (
+                        <p className="text-sm text-gray-600">No couriers available.</p>
+                    ) : (
+                        availableCouriers.map((courier) => (
+                            <button
+                                key={courier.id}
+                                onClick={() => handleAssignCourier(courier)}
+                                className="w-full flex items-center p-3 border rounded-lg hover:bg-gray-50 transition"
+                            >
+                                <img
+                                    src={courier.avatar || '/default-avatar.png'}
+                                    alt={courier.name}
+                                    className="w-10 h-10 rounded-full"
+                                />
+                                <span className="ml-3">{courier.name}</span>
+                            </button>
+                        ))
+                    )}
                 </div>
             </div>
         </div>
