@@ -15,6 +15,7 @@ import Dashboard from './pages/Dashboard.tsx';
 import { UserProvider } from './context/UserContext.tsx';
 import { DeliveryProvider } from './context/DeliveryContext.tsx';
 import CourierWrapper from './CourierWrapper.tsx';
+import PrivateRoute from './components/PrivateRoute.tsx';
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
@@ -27,9 +28,9 @@ createRoot(document.getElementById('root')!).render(
                     <Route path="/" element={<Home />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/:restaurantId/menu" element={<MenuViewer />} />
-                    <Route path="/restaurant/:restaurantMail" element={<Restaurant />} />
-                    <Route path="/checkout/:restaurantMail" element={<Checkout />} />
-                            <Route path="/courier/:courierMail" element={<CourierWrapper />} />
+                    <Route path="/restaurant/:restaurantMail" element={<PrivateRoute><Restaurant /></PrivateRoute>} />
+                    <Route path="/checkout/:restaurantMail" element={<PrivateRoute><Checkout /></PrivateRoute>} />
+                    <Route path="/courier/:courierMail" element={<PrivateRoute><CourierWrapper /></PrivateRoute>} />
 
                 </Routes>
                 <CartModal />
