@@ -3,7 +3,7 @@ import {Edit2, Plus, Search, Trash2} from 'lucide-react';
 import {MenuItem} from '../types';
 import {MenuItemModal} from './MenuItemModal';
 import {useParams} from "react-router-dom";
-import {fetchCartItems} from "./CartApi.tsx";
+import {fetchCartItems} from "../services/CartApi.tsx";
 
 export function MenuManagement() {
     const [items, setItems] = useState<MenuItem[]>([]);

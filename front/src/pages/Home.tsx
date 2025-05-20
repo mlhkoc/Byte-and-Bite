@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.jpg';
-import {fetchCartItems} from "../components/CartApi.tsx";
+import {fetchCartItems} from "../services/CartApi.tsx";
+import { DropdownMenu } from '../components/DropdownMenu.tsx';
 
 interface Restaurant {
     id: number;
@@ -22,6 +23,8 @@ function Home() {
     const navigate = useNavigate();
     const { items, setIsCartOpen, setItems} = useCart();
     const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+    const { setIsLoggedIn } = useAuth();
+    
 
     useEffect(() => {
         fetchCartItems().then(fetchedItems => setItems(fetchedItems));
@@ -105,9 +108,30 @@ function Home() {
                                     </span>
                                 )}
                             </button>
-                            <button className="p-2 hover:bg-gray-100 rounded-full">
-                                <User className="w-6 h-6" />
-                            </button>
+                            <DropdownMenu
+                                items={[
+                                    {
+                                        label: 'Orders',
+                                        onClick: () => navigate('/orders'),
+                                    },
+                                    {
+                                        label: 'Profile',
+                                        onClick: () => navigate('/profile'),
+                                    },
+                                    {
+                                        label: 'Logout',
+                                        onClick: () => {
+                                            // TODO: Might need improvements
+                                            setIsLoggedIn( false );
+                                            navigate('/');
+                                        },
+                                    },
+                                ]}
+                            >
+                                <button className="p-2 hover:bg-gray-100 rounded-full">
+                                    <User className="w-6 h-6" />
+                                </button>
+                            </DropdownMenu>
                         </>
                     ) : (
                         <>

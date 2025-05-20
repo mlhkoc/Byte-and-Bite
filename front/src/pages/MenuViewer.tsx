@@ -3,7 +3,7 @@ import { ShoppingCart, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
     import {useParams} from "react-router-dom";
-    import {fetchCartItems} from "../components/CartApi.tsx";
+    import {fetchCartItems} from "../services/CartApi.tsx";
 
 interface MenuItem {
     id: number;

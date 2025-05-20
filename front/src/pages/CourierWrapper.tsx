@@ -1,7 +1,7 @@
 // src/CourierWrapper.tsx
 import { useParams } from "react-router-dom";
-import { DeliveryProvider } from "./context/DeliveryContext";
-import Dashboard from "./pages/Dashboard";
+import { DeliveryProvider } from "../context/DeliveryContext";
+import Dashboard from "./Dashboard";
 
 export default function CourierWrapper() {
     const { courierMail } = useParams();

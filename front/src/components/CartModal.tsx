@@ -2,7 +2,7 @@ import { X, Plus, Minus, Trash2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from "react";
-import { fetchCartItems } from "./CartApi.tsx";
+import { fetchCartItems } from "../services/CartApi.tsx";
 
 export function CartModal() {
     const username = localStorage.getItem("user");

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { clearCart, fetchCartItems, removeCartItem, updateCartQuantity } from "../components/CartApi.tsx";
+import { clearCart, fetchCartItems, removeCartItem, updateCartQuantity } from "../services/CartApi.tsx";
 
 interface CartItem {
     id: number;

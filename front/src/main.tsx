@@ -7,14 +7,14 @@ import Home from './pages/Home.tsx';
 import MenuViewer from './pages/MenuViewer.tsx';    
 import './index.css';
 import { AuthProvider } from './context/AuthContext.tsx';
-import Restaurant from './Restaurant.tsx';
+import Restaurant from './pages/Restaurant.tsx';
 import { CartProvider } from './context/CartContext';
 import { CartModal } from './components/CartModal';
 import Checkout from './pages/Checkout.tsx';
 import Dashboard from './pages/Dashboard.tsx';
 import { UserProvider } from './context/UserContext.tsx';
 import { DeliveryProvider } from './context/DeliveryContext.tsx';
-import CourierWrapper from './CourierWrapper.tsx';
+import CourierWrapper from './pages/CourierWrapper.tsx';
 import PrivateRoute from './components/PrivateRoute.tsx';
 
 createRoot(document.getElementById('root')!).render(
