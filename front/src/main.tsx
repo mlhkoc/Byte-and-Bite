@@ -11,11 +11,11 @@ import Restaurant from './pages/Restaurant.tsx';
 import { CartProvider } from './context/CartContext';
 import { CartModal } from './components/CartModal';
 import Checkout from './pages/Checkout.tsx';
-import Dashboard from './pages/Dashboard.tsx';
 import { UserProvider } from './context/UserContext.tsx';
-import { DeliveryProvider } from './context/DeliveryContext.tsx';
 import CourierWrapper from './pages/CourierWrapper.tsx';
 import PrivateRoute from './components/PrivateRoute.tsx';
+import ProfilePage from './pages/Profile.tsx';
+import { LogoutPage } from './pages/LogoutPage.tsx';
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
@@ -31,7 +31,8 @@ createRoot(document.getElementById('root')!).render(
                     <Route path="/restaurant/:restaurantMail" element={<PrivateRoute><Restaurant /></PrivateRoute>} />
                     <Route path="/checkout/:restaurantMail" element={<PrivateRoute><Checkout /></PrivateRoute>} />
                     <Route path="/courier/:courierMail" element={<PrivateRoute><CourierWrapper /></PrivateRoute>} />
-
+                    <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+                    <Route path="/logout" element={<PrivateRoute><LogoutPage /></PrivateRoute>} />
                 </Routes>
                 <CartModal />
             </UserProvider>

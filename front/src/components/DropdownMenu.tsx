@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useState, useRef } from 'react';
 
 export function DropdownMenu({
     children,
@@ -7,22 +7,40 @@ export function DropdownMenu({
     children: React.ReactNode;
     items: { label: string; onClick: () => void }[];
 }) {
-    const menuRef = useRef<HTMLDivElement>(null);
+    const [isOpen, setIsOpen] = useState(false);
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handleMouseEnter = () => {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        setIsOpen(true);
+    };
+
+    const handleMouseLeave = () => {
+        timeoutRef.current = setTimeout(() => {
+            setIsOpen(false);
+        }, 250); // 250ms delay before hiding
+    };
 
     return (
-        <div className="relative group" ref={menuRef}>
+        <div
+            className="relative"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+        >
             {children}
-            <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-50 pointer-events-none">
-                {items.map((item, index) => (
-                    <button
-                        key={index}
-                        onClick={item.onClick}
-                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                    >
-                        {item.label}
-                    </button>
-                ))}
-            </div>
+            {isOpen && (
+                <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                    {items.map((item, index) => (
+                        <button
+                            key={index}
+                            onClick={item.onClick}
+                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                        >
+                            {item.label}
+                        </button>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

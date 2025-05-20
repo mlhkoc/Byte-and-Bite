@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.jpg';
 import {fetchCartItems} from "../services/CartApi.tsx";
 import { DropdownMenu } from '../components/DropdownMenu.tsx';
+import { CustomerHeader } from '../components/Header.tsx';
 
 interface Restaurant {
     id: number;
@@ -23,7 +24,6 @@ function Home() {
     const navigate = useNavigate();
     const { items, setIsCartOpen, setItems} = useCart();
     const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
-    const { setIsLoggedIn } = useAuth();
     
 
     useEffect(() => {
@@ -92,60 +92,7 @@ function Home() {
     return (
         <div className="max-w-7xl mx-auto px-4 py-6">
             {/* Header */}
-            <div className="flex justify-between items-center mb-8">
-                <img src={logo} alt="Logo" className="h-10 w-auto" />
-                <div className="flex gap-4">
-                    {isLoggedIn ? (
-                        <>
-                            <button
-                                onClick={() => setIsCartOpen(true)}
-                                className="p-2 hover:bg-gray-100 rounded-full relative"
-                            >
-                                <ShoppingCart className="w-6 h-6" />
-                                {cartCount > 0 && (
-                                    <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                                        {cartCount}
-                                    </span>
-                                )}
-                            </button>
-                            <DropdownMenu
-                                items={[
-                                    {
-                                        label: 'Orders',
-                                        onClick: () => navigate('/orders'),
-                                    },
-                                    {
-                                        label: 'Profile',
-                                        onClick: () => navigate('/profile'),
-                                    },
-                                    {
-                                        label: 'Logout',
-                                        onClick: () => {
-                                            // TODO: Might need improvements
-                                            setIsLoggedIn( false );
-                                            navigate('/');
-                                        },
-                                    },
-                                ]}
-                            >
-                                <button className="p-2 hover:bg-gray-100 rounded-full">
-                                    <User className="w-6 h-6" />
-                                </button>
-                            </DropdownMenu>
-                        </>
-                    ) : (
-                        <>
-                            <Link to="/auth?mode=login">
-                                <button className="p-2 px-4 hover:bg-gray-100 rounded-full font-semibold">Login</button>
-                            </Link>
-                            <Link to="/auth?mode=signup">
-                                <button className="p-2 px-4 hover:bg-gray-100 rounded-full font-semibold">Signup</button>
-                            </Link>
-                        </>
-                    )}
-                </div>
-            </div>
-
+            <CustomerHeader />
             {/* Search Bar */}
             <div className="flex gap-2 mb-8">
                 <div className="flex-1 relative">
