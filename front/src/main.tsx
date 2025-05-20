@@ -16,6 +16,7 @@ import CourierWrapper from './pages/CourierWrapper.tsx';
 import PrivateRoute from './components/PrivateRoute.tsx';
 import ProfilePage from './pages/Profile.tsx';
 import { LogoutPage } from './pages/LogoutPage.tsx';
+import OrderHistory from './pages/OrderHistory.tsx';
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
@@ -33,6 +34,7 @@ createRoot(document.getElementById('root')!).render(
                     <Route path="/courier/:courierMail" element={<PrivateRoute><CourierWrapper /></PrivateRoute>} />
                     <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
                     <Route path="/logout" element={<PrivateRoute><LogoutPage /></PrivateRoute>} />
+                    <Route path="/orders" element={<PrivateRoute><OrderHistory /></PrivateRoute>} />
                 </Routes>
                 <CartModal />
             </UserProvider>
