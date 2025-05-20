@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import backgroundImage from '../assets/bnb.jpg';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ErrorPopup from "../components/ErrorPopup";
 
 interface FormData {
     fullName: string;
@@ -39,7 +40,15 @@ function Auth() {
     const [emailError, setEmailError] = useState<string>('');
     const [phoneNumberError, setPhoneNumberError] = useState<string>('');
 
+    const [popupTitle, setPopupTitle] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+    const [showError, setShowError] = useState(false);
 
+    function showErrorPopup(title: string, msg: string) {
+        setPopupTitle(title);
+        setErrorMessage(msg);
+        setShowError(true);
+    }
 
     const formatPhoneNumber = (value: string) => {
         const cleaned = value.replace(/\D/g, '');
@@ -93,7 +102,7 @@ function Auth() {
                 navigate('/auth');
             } else {
                 const errorData = await response.json();
-                alert(errorData.message || 'Signup failed.');
+                showErrorPopup('Error', errorData.message || 'Signup failed.');
             }
 
         }
@@ -138,7 +147,7 @@ function Auth() {
 
             }catch (error){
                 console.error("Unexpected login error:", error);
-                alert("An unexpected error occurred.");
+                showErrorPopup("Error", "An unexpected error occurred.");
             }
         }
 
@@ -200,6 +209,7 @@ function Auth() {
     };
 
     return (
+        <>
         <div className="min-h-screen flex items-center justify-center" style={{
             backgroundImage: `url(${backgroundImage})`,
             backgroundSize: 'cover',
@@ -437,6 +447,14 @@ function Auth() {
                 </div>
             </div>
         </div>
+        {showError && (
+            <ErrorPopup
+                title={popupTitle}
+                message={errorMessage}
+                onClose={() => setShowError(false)}
+            />
+        )}
+        </>
     );
 }
 
