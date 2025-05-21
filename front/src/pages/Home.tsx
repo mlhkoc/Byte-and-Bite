@@ -170,21 +170,25 @@ function Home() {
                 </div>
             </div>
 
-            {/* Sign Up Buttons */}
-            <div className="fixed bottom-4 left-4 flex gap-4">
-                <button
-                    onClick={() => navigate('/auth')}
-                    className="px-3 py-1.5 bg-orange-300 text-white text-xs rounded-lg hover:bg-orange-400"
-                >
-                    Join as Restaurant
-                </button>
-                <button className="px-3 py-1.5 bg-orange-700 text-white text-xs rounded-lg hover:bg-orange-800">
-                    Join as Courier
-                </button>
-            </div>
+            
         </div>
     );
 }
+
+
+// TODO: Eğer ayrı sign-up sayfaları yapılacaksa bunları geri ekle
+//{/* Sign Up Buttons */ }
+//<div className="fixed bottom-4 left-4 flex gap-4">
+//    <button
+//        onClick={() => navigate('/auth')}
+//        className="px-3 py-1.5 bg-orange-300 text-white text-xs rounded-lg hover:bg-orange-400"
+//    >
+//        Join as Restaurant
+//    </button>
+//    <button className="px-3 py-1.5 bg-orange-700 text-white text-xs rounded-lg hover:bg-orange-800">
+//        Join as Courier
+//    </button>
+//</div>
 
 interface RestaurantCardProps {
     restaurant: Restaurant;
