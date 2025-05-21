@@ -1,15 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Pencil, LogOut, Lock, MapPin, CreditCard, HelpCircle, RotateCcw } from 'lucide-react';
 import { CustomerHeader } from '../components/Header';
+import { fetchCustomerByEmail, updateCustomer } from '../services/CustomerApi';
+import { Customer } from '../types';
+import { useAuth } from '../context/AuthContext';
 
 function ProfilePage() {
-    const [user, setUser] = useState({
-        fullName: 'Sarah Johnson',
-        email: 'sarah.j@example.com',
-        phone: '+1 (555) 123-4567',
-        address: '123 Main St, New York, NY 10001',
-    });
+    const [user, setUser] = useState<Customer | null>(null);
+    const [editMode, setEditMode] = useState(false);
+
+    const {userEmail} = useAuth();
 
     const orders = [
         {
@@ -28,6 +29,27 @@ function ProfilePage() {
         },
     ];
 
+
+
+    useEffect(() => {
+        if (!userEmail) return;
+
+        fetchCustomerByEmail(userEmail)
+            .then(setUser)
+            .catch(console.error);
+    }, []);
+
+    const handleSave = async () => {
+        if (!userEmail || !user) return;
+
+        try {
+            await updateCustomer(userEmail, user);
+            setEditMode(false);
+        } catch (err) {
+            console.error("Update failed:", err);
+        }
+    };
+
     return (
         <div className="p-4 md:p-8">
             <CustomerHeader />
@@ -35,32 +57,100 @@ function ProfilePage() {
                 <div className="md:col-span-2 space-y-6">
                     <div className="bg-white rounded-2xl shadow p-6">
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-semibold">Sarah Johnson</h2>
-                            <button className="border px-3 py-1 rounded hover:bg-gray-100">Edit Profile</button>
+                            <h2 className="text-xl font-semibold">{user?.fullName}</h2>
+                            <button
+                                className="border px-3 py-1 rounded hover:bg-gray-100"
+                                onClick={editMode ? handleSave : () => setEditMode(true)}
+                            >
+                                {editMode ? "Save" : "Edit Profile"}
+                            </button>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="text-sm text-gray-500">Full Name</label>
                                 <div className="border p-2 rounded flex justify-between items-center">
-                                    {user.fullName} <Pencil size={16} />
+                                    {editMode ? (
+                                        <input
+                                            type="text"
+                                            value={user?.fullName || ''}
+                                            onChange={(e) => setUser(prev => prev ? { ...prev, fullName: e.target.value } : null)}
+                                            onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+                                            className="w-full outline-none"
+                                        />
+                                    ) : (
+                                        <>
+                                            {user?.fullName}
+                                            <button onClick={() => setEditMode(true)}>
+                                                <Pencil size={16} />
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
+
                             <div>
                                 <label className="text-sm text-gray-500">Email Address</label>
                                 <div className="border p-2 rounded flex justify-between items-center">
-                                    {user.email} <Pencil size={16} />
+                                    {editMode ? (
+                                        <input
+                                            type="email"
+                                            value={user?.email || ''}
+                                            onChange={(e) => setUser(prev => prev ? { ...prev, email: e.target.value } : null)}
+                                            onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+                                            className="w-full outline-none"
+                                        />
+                                    ) : (
+                                        <>
+                                            {user?.email}
+                                            <button onClick={() => setEditMode(true)}>
+                                                <Pencil size={16} />
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
+
                             <div>
                                 <label className="text-sm text-gray-500">Phone Number</label>
                                 <div className="border p-2 rounded flex justify-between items-center">
-                                    {user.phone} <Pencil size={16} />
+                                    {editMode ? (
+                                        <input
+                                            type="tel"
+                                            value={user?.phone || ''}
+                                            onChange={(e) => setUser(prev => prev ? { ...prev, phone: e.target.value } : null)}
+                                            onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+                                            className="w-full outline-none"
+                                        />
+                                    ) : (
+                                        <>
+                                            {user?.phone}
+                                            <button onClick={() => setEditMode(true)}>
+                                                <Pencil size={16} />
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
+
                             <div>
                                 <label className="text-sm text-gray-500">Default Address</label>
                                 <div className="border p-2 rounded flex justify-between items-center">
-                                    {user.address} <Pencil size={16} />
+                                    {editMode ? (
+                                        <input
+                                            type="text"
+                                            value={user?.address || ''}
+                                            onChange={(e) => setUser(prev => prev ? { ...prev, address: e.target.value } : null)}
+                                            onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+                                            className="w-full outline-none"
+                                        />
+                                    ) : (
+                                        <>
+                                            {user?.address}
+                                            <button onClick={() => setEditMode(true)}>
+                                                <Pencil size={16} />
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>

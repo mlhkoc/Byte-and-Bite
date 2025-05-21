@@ -72,3 +72,10 @@ export interface Restaurant {
     minOrder: number;
     image: string;
 }
+
+export interface Customer {
+    fullName: string;
+    email: string;
+    phone: string;
+    address: string;
+}
