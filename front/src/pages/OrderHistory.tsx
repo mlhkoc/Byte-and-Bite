@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { CustomerHeader } from "../components/Header";
-import { Order } from "../types";
+import { Order, Restaurant } from "../types";
 import { fetchRestaurantById } from "../services/RestaurantApi";
-import RestaurantDashboard from "./Restaurant";
+
 
 
 export default function OrderHistory() {
@@ -25,7 +25,7 @@ export default function OrderHistory() {
                 const uniqueIds = [...new Set(orderData.map(o => o.restaurantId))];
 
                 // Fetch restaurant info in parallel
-                const restaurantMap: { [key: number]: RestaurantDashboard } = {};
+                const restaurantMap: { [key: number]: Restaurant } = {};
                 await Promise.all(
                     uniqueIds.map(async (id) => {
                         try {
