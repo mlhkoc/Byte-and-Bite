@@ -23,7 +23,7 @@ function Auth() {
     const [showLogin, setShowLogin] = useState(true);
     const [animationClass, setAnimationClass] = useState('fade-in');
     const [searchParams] = useSearchParams();
-    const { setIsLoggedIn } = useAuth();
+    const { login } = useAuth();
 
     const [formData, setFormData] = useState<FormData>({
         fullName: '',
@@ -125,20 +125,18 @@ function Auth() {
                     return response.json();
                 })
                     .then((data) => {
-                        setIsLoggedIn(true);
+                        login( data.username, data.role );
 
                         const role = data.role;
 
                         if (role === "CUSTOMER") {
-                            const username = data.username;
-                            localStorage.setItem('user', username);
                             navigate('/');
                         } else if (role === "RESTAURANT") {
 
-                            navigate(`/restaurant/${data.username}`);
+                            navigate(`/restaurant`);
                         }
                         else if (role == "COURIER"){
-                            navigate(`/courier/${data.username}`);
+                            navigate(`/courier`);
                         }
                     })
                     .catch((error) => {

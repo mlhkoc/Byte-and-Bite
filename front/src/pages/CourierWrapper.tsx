@@ -1,14 +1,14 @@
 // src/CourierWrapper.tsx
-import { useParams } from "react-router-dom";
 import { DeliveryProvider } from "../context/DeliveryContext";
 import Dashboard from "./Dashboard";
+import { useAuth } from "../context/AuthContext";
 
 export default function CourierWrapper() {
-    const { courierMail } = useParams();
-    if (!courierMail) return <div>Error: Missing courierMail in route</div>;
+    const { userEmail } = useAuth();
+    if (!userEmail) return <div>Error: Missing userEmail in route</div>;
 
     return (
-        <DeliveryProvider courierEmail={courierMail}>
+        <DeliveryProvider courierEmail={userEmail}>
             <Dashboard />
         </DeliveryProvider>
     );

@@ -29,9 +29,9 @@ createRoot(document.getElementById('root')!).render(
                     <Route path="/" element={<Home />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/:restaurantId/menu" element={<MenuViewer />} />
-                    <Route path="/restaurant/:restaurantMail" element={<PrivateRoute><Restaurant /></PrivateRoute>} />
+                    <Route path="/restaurant" element={<PrivateRoute><Restaurant /></PrivateRoute>} />
                     <Route path="/checkout/:restaurantMail" element={<PrivateRoute><Checkout /></PrivateRoute>} />
-                    <Route path="/courier/:courierMail" element={<PrivateRoute><CourierWrapper /></PrivateRoute>} />
+                    <Route path="/courier" element={<PrivateRoute><CourierWrapper /></PrivateRoute>} />
                     <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
                     <Route path="/logout" element={<PrivateRoute><LogoutPage /></PrivateRoute>} />
                     <Route path="/orders" element={<PrivateRoute><OrderHistory /></PrivateRoute>} />

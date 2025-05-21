@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export function LogoutPage() {
-    const { setIsLoggedIn } = useAuth();
+    const { logout } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
-        setIsLoggedIn(false);
+        logout();
         navigate("/");
     }, []);
 
