@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import backgroundImage from '../assets/bnb.jpg';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import ErrorPopup from "../components/ErrorPopup";
 
 interface FormData {
     fullName: string;
@@ -23,7 +22,7 @@ function Auth() {
     const [showLogin, setShowLogin] = useState(true);
     const [animationClass, setAnimationClass] = useState('fade-in');
     const [searchParams] = useSearchParams();
-    const { login } = useAuth();
+    const { setIsLoggedIn } = useAuth();
 
     const [formData, setFormData] = useState<FormData>({
         fullName: '',
@@ -39,16 +38,6 @@ function Auth() {
     const [passwordError, setPasswordError] = useState<string>('');
     const [emailError, setEmailError] = useState<string>('');
     const [phoneNumberError, setPhoneNumberError] = useState<string>('');
-
-    const [popupTitle, setPopupTitle] = useState("");
-    const [errorMessage, setErrorMessage] = useState("");
-    const [showError, setShowError] = useState(false);
-
-    function showErrorPopup(title: string, msg: string) {
-        setPopupTitle(title);
-        setErrorMessage(msg);
-        setShowError(true);
-    }
 
     const formatPhoneNumber = (value: string) => {
         const cleaned = value.replace(/\D/g, '');
@@ -72,6 +61,14 @@ function Auth() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Check if it's admin login
+        if (showLogin && formData.email === 'admin' && formData.password === 'admin') {
+            localStorage.setItem('adminUsername', 'admin');
+            navigate('/admin');
+            return;
+        }
+
         if (!showLogin) {
             const passwordRegex = /^(?=.*[A-Z])(?=.*\W).{8,}$/;
             if (!passwordRegex.test(formData.password)) {
@@ -102,9 +99,8 @@ function Auth() {
                 navigate('/auth');
             } else {
                 const errorData = await response.json();
-                showErrorPopup('Error', errorData.message || 'Signup failed.');
+                alert(errorData.message || 'Signup failed.');
             }
-
         }
 
         if (showLogin) {
@@ -125,18 +121,19 @@ function Auth() {
                     return response.json();
                 })
                     .then((data) => {
-                        login( data.username, data.role );
+                        setIsLoggedIn(true);
 
                         const role = data.role;
 
                         if (role === "CUSTOMER") {
+                            const username = data.username;
+                            localStorage.setItem('user', username);
                             navigate('/');
                         } else if (role === "RESTAURANT") {
-
-                            navigate(`/restaurant`);
+                            navigate(`/restaurant/${data.username}`);
                         }
                         else if (role == "COURIER"){
-                            navigate(`/courier`);
+                            navigate(`/courier/${data.username}`);
                         }
                     })
                     .catch((error) => {
@@ -145,11 +142,10 @@ function Auth() {
 
             }catch (error){
                 console.error("Unexpected login error:", error);
-                showErrorPopup("Error", "An unexpected error occurred.");
+                alert("An unexpected error occurred.");
             }
         }
-
-        };
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const target = e.target as HTMLInputElement;
@@ -163,7 +159,6 @@ function Auth() {
                     ? formatPhoneNumber(value)
                     : value,
         }));
-
 
         if (name === 'password' && !showLogin) {
             const passwordRegex = /^(?=.*[A-Z])(?=.*\W).{8,}$/;
@@ -207,7 +202,6 @@ function Auth() {
     };
 
     return (
-        <>
         <div className="min-h-screen flex items-center justify-center" style={{
             backgroundImage: `url(${backgroundImage})`,
             backgroundSize: 'cover',
@@ -224,12 +218,12 @@ function Auth() {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                                     <input
-                                        type="email"
+                                        type="text" // Changed to text to support "admin" login
                                         name="email"
                                         value={formData.email}
                                         onChange={handleChange}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                                        placeholder="Enter your email"
+                                        placeholder="Enter your email or username"
                                         required
                                     />
                                 </div>
@@ -280,6 +274,16 @@ function Auth() {
                                 <button onClick={toggleView} className="text-orange-600 hover:text-orange-500 font-medium">
                                     Create Account
                                 </button>
+                                <div className="mt-2 text-gray-600">
+                                    <span>For admin login use:</span><br />
+                                    <span>Email: <strong>admin</strong></span><br />
+                                    <span>Password: <strong>admin</strong></span>
+                                </div>
+                                <div className="mt-2 text-gray-600">
+                                    <span>For customer login use:</span><br />
+                                    <span>Email: <strong>test@example.com</strong></span><br />
+                                    <span>Password: <strong>Test@123</strong></span>
+                                </div>
                             </div>
                         </div>
                     ) : (
@@ -440,14 +444,6 @@ function Auth() {
                 </div>
             </div>
         </div>
-        {showError && (
-            <ErrorPopup
-                title={popupTitle}
-                message={errorMessage}
-                onClose={() => setShowError(false)}
-            />
-        )}
-        </>
     );
 }
 

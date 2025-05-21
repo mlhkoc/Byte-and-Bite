@@ -17,6 +17,8 @@ import PrivateRoute from './components/PrivateRoute.tsx';
 import ProfilePage from './pages/Profile.tsx';
 import { LogoutPage } from './pages/LogoutPage.tsx';
 import OrderHistory from './pages/OrderHistory.tsx';
+import Admin from './pages/Admin.tsx';
+
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
@@ -35,6 +37,8 @@ createRoot(document.getElementById('root')!).render(
                     <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
                     <Route path="/logout" element={<PrivateRoute><LogoutPage /></PrivateRoute>} />
                     <Route path="/orders" element={<PrivateRoute><OrderHistory /></PrivateRoute>} />
+                    <Route path="/admin" element={<Admin />} />
+
                 </Routes>
                 <CartModal />
             </UserProvider>
