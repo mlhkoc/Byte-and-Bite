@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    // Check local storage to see if logged in before (so we keep logged on after refreshing)
+    // Check local storage to see if logged in before (so we keep logged in after refreshing)
     useEffect(() => {
         setAuthInitialized(false);
         

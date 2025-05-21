@@ -45,9 +45,9 @@ public class OrderController {
         return orderService.getOrdersByRestaurant(restaurant.getId());
     }
 
-    @GetMapping("/orders/customer")
-    public List<OrderDTO> getOrdersForCustomer(Principal principal) {
-        Customer customer = customerRepository.findByEmail(principal.getName())
+    @GetMapping("/orders/customer/{email}")
+    public List<OrderDTO> getOrdersForCustomer(@PathVariable String email) {
+        Customer customer = customerRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("Customer not found"));
 
         return orderService.getOrdersByCustomer(customer.getId());

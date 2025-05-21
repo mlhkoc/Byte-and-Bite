@@ -24,6 +24,7 @@ public class CustomerService {
             return null;
 
         customer.setName(dto.getFullName());
+        customer.setEmail(dto.getEmail());
         customer.setPhone(dto.getPhone());
         customer.setAddress(dto.getAddress());
 

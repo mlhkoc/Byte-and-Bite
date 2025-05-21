@@ -9,11 +9,13 @@ import { fetchRestaurantById } from "../services/RestaurantApi";
 
 export default function OrderHistory() {
     const [orders, setOrders] = useState<Order[]>([]);
+    const {userEmail} = useAuth();
 
     useEffect(() => {
-        const fetchOrdersWithRestaurants = async () => {
+        const fetchOrdersWithRestaurants = async (email: string | null) => {
+            if (!email) return;
             try {
-                const res = await fetch("http://localhost:8080/api/orders/customer", {
+                const res = await fetch(`http://localhost:8080/api/orders/customer/${email}`, {
                     method: "GET",
                     credentials: "include",
                 });
@@ -49,7 +51,7 @@ export default function OrderHistory() {
             }
         };
 
-        fetchOrdersWithRestaurants();
+        fetchOrdersWithRestaurants(userEmail);
     }, []);
 
     return (

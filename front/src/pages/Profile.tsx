@@ -10,7 +10,7 @@ function ProfilePage() {
     const [user, setUser] = useState<Customer | null>(null);
     const [editMode, setEditMode] = useState(false);
 
-    const {userEmail} = useAuth();
+    const {userEmail, setUserEmail} = useAuth();
 
     const orders = [
         {
@@ -40,10 +40,13 @@ function ProfilePage() {
     }, []);
 
     const handleSave = async () => {
-        if (!userEmail || !user) return;
+        if (userEmail == null || user == null) return;
 
         try {
             await updateCustomer(userEmail, user);
+            console.log( user );
+            setUserEmail( user.email );
+            localStorage.setItem( "userEmail", user.email );
             setEditMode(false);
         } catch (err) {
             console.error("Update failed:", err);
