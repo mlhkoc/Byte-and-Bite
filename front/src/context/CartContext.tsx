@@ -27,7 +27,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
     const [items, setItems] = useState<CartItem[]>([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
-    const username = localStorage.getItem("user");
+    const username = localStorage.getItem("userEmail");
 
     useEffect(() => {
         fetchCartItems().then(fetchedItems => setItems(fetchedItems));

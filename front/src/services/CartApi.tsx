@@ -1,5 +1,5 @@
 
-const username = localStorage.getItem("user");
+const username = localStorage.getItem("userEmail");
 
 export const fetchCartItems = async () => {
     const response = await fetch(`http://localhost:8080/api/cart/${username}`, {
