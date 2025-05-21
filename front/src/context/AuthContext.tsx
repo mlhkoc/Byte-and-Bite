@@ -11,6 +11,7 @@ type AuthContextType = {
     setRole: (role: string | null) => void;
     login: (email: string, role: string) => void;
     logout: () => void;
+    authInitialized: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,6 +21,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isAvailable, setIsAvailable] = useState(false);
     const [userEmail, setUserEmail] = useState<string | null>(null);
     const [role, setRole] = useState<string | null>(null);
+    const [authInitialized, setAuthInitialized] = useState(false);
 
     const toggleAvailability = async () => {
         try {
@@ -49,6 +51,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Check local storage to see if logged in before (so we keep logged on after refreshing)
     useEffect(() => {
+        setAuthInitialized(false);
+        
         let stored = localStorage.getItem("isLoggedIn");
         if (stored === "true") {
             setIsLoggedIn(true);
@@ -56,7 +60,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setRole( localStorage.getItem( "role" ) );
         } 
 
-    });
+        setAuthInitialized(true);
+    }, []);
 
     const login = (email: string, role: string) => {
         
@@ -91,7 +96,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 role,
                 setRole,
                 login,
-                logout
+                logout,
+                authInitialized
             }}
         >
             {children}

@@ -20,12 +20,13 @@ interface Restaurant {
 function Restaurant() {
     const [activeSection, setActiveSection] = useState('dashboard');
     const [showReviews, setShowReviews] = useState(false);
-    const {userEmail, role} = useAuth();
+    const {userEmail, role, authInitialized} = useAuth();
     const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
     const navigate = useNavigate()
 
     useEffect(() => {
-        if (role != "RESTAURANT") {
+
+        if (authInitialized && role != "RESTAURANT") {
             navigate( "/" );
         }
         const fetchRestaurant = async () => {

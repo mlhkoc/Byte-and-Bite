@@ -6,8 +6,10 @@ import {
     Settings,
     MapPin,
     Clock,
-    Store
+    Store,
+    LogOut
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface SidebarProps {
     activeSection: string;
@@ -25,6 +27,8 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
         { id: 'hours', label: 'Business Hours', icon: Clock },
         { id: 'profile', label: 'Restaurant Profile', icon: Store },
     ];
+
+    const navigate = useNavigate();
 
     return (
         <aside className="w-64 bg-white border-r border-gray-200 p-4">
@@ -47,6 +51,14 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
                     );
                 })}
             </nav>
+
+            <button
+                onClick={() => navigate("/logout")}
+                className="mt-4 w-full flex items-center space-x-3 px-4 py-3 text-sm rounded-lg text-red-600 hover:bg-red-50"
+            >
+                <LogOut size={20} />
+                <span>Logout</span>
+            </button>
         </aside>
     );
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Package, Search, SlidersHorizontal, ShoppingCart, User } from 'lucide-react';
+import { Package, Search, SlidersHorizontal, ShoppingCart, User, LogOut } from 'lucide-react';
 import { useUser } from '../context/UserContext';
 import AvailabilityToggle from './AvailabilityToggle';
 import { Link, useNavigate } from 'react-router-dom';
@@ -10,6 +10,7 @@ import { DropdownMenu } from './DropdownMenu';
 
 const Header: React.FC = () => {
   const { user } = useUser();
+  const navigate = useNavigate();
 
   return (
       <header className="bg-white shadow-sm py-4 px-6">
@@ -20,6 +21,16 @@ const Header: React.FC = () => {
             </div>
             <h1 className="text-lg font-semibold">Welcome, {user?.name || 'Courier'}</h1>
           </div>
+
+          {/* Logout Button */}
+          <button
+            onClick={() => {navigate("/logout")}}
+            className="flex items-center space-x-2 text-red-600 hover:text-red-800"
+          >
+            <LogOut size={18} />
+            <span>Logout</span>
+          </button>
+
         </div>
 
         {/* AvailabilityToggle butonuna margin-top ekledik */}
