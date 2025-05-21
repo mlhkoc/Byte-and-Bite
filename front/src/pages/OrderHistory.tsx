@@ -2,52 +2,54 @@ import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { CustomerHeader } from "../components/Header";
+import { Order } from "../types";
+import { fetchRestaurantById } from "../services/RestaurantApi";
+import RestaurantDashboard from "./Restaurant";
 
-interface Order {
-    id: number;
-    restaurant: string;
-    date: string;
-    status: "Completed" | "On the Way" | "Preparing";
-    items: string[];
-    total: number;
-    deliveryInfo?: string;
-}
-
-const dummyOrders: Order[] = [
-    {
-        id: 12345,
-        restaurant: "The Garden Kitchen",
-        date: "March 15, 2024",
-        status: "Completed",
-        items: ["1x Grilled Salmon Bowl", "2x Fresh Garden Salad", "1x Lemon Cheesecake"],
-        total: 45.9,
-    },
-    {
-        id: 12346,
-        restaurant: "Sushi Master",
-        date: "March 14, 2024",
-        status: "On the Way",
-        items: ["1x Dragon Roll", "1x California Roll", "1x Miso Soup"],
-        total: 32.5,
-        deliveryInfo: "John D. will deliver your order in 15-20 minutes",
-    },
-    {
-        id: 12347,
-        restaurant: "Pizza Paradise",
-        date: "March 14, 2024",
-        status: "Preparing",
-        items: ["1x Margherita Pizza", "1x Garlic Bread", "2x Coca Cola"],
-        total: 28.75,
-    },
-];
 
 export default function OrderHistory() {
-    const { isLoggedIn } = useAuth();
     const [orders, setOrders] = useState<Order[]>([]);
 
     useEffect(() => {
-        // Replace with API call when backend ready
-        setOrders(dummyOrders);
+        const fetchOrdersWithRestaurants = async () => {
+            try {
+                const res = await fetch("http://localhost:8080/api/orders/customer", {
+                    method: "GET",
+                    credentials: "include",
+                });
+                const orderData: Order[] = await res.json();
+
+                console.log( orderData );
+
+                // Fetch all unique restaurant IDs
+                const uniqueIds = [...new Set(orderData.map(o => o.restaurantId))];
+
+                // Fetch restaurant info in parallel
+                const restaurantMap: { [key: number]: RestaurantDashboard } = {};
+                await Promise.all(
+                    uniqueIds.map(async (id) => {
+                        try {
+                            const restaurant = await fetchRestaurantById(id);
+                            restaurantMap[id] = restaurant;
+                        } catch (err) {
+                            console.error(`Failed to fetch restaurant ${id}`);
+                        }
+                    })
+                );
+
+                // Inject restaurants into orders
+                const enrichedOrders = orderData.map(order => ({
+                    ...order,
+                    restaurant: restaurantMap[order.restaurantId],
+                }));
+
+                setOrders(enrichedOrders);
+            } catch (err) {
+                console.error("Failed to fetch orders or restaurants", err);
+            }
+        };
+
+        fetchOrdersWithRestaurants();
     }, []);
 
     return (
@@ -70,25 +72,27 @@ export default function OrderHistory() {
                     <div key={order.id} className="bg-white shadow p-4 rounded-lg mb-6">
                         <div className="flex justify-between items-center">
                             <div>
-                                <h3 className="font-semibold">{order.restaurant}</h3>
-                                <p className="text-sm text-gray-500">Order #{order.id} • {order.date}</p>
+                                <h3 className="font-semibold">{order.restaurant?.name}</h3>
+                                <p className="text-sm text-gray-500">Order #{order.id} ● Date</p>
                             </div>
                             <span className={`px-3 py-1 rounded-full text-sm font-medium
-                  ${order.status === "Completed" ? "bg-green-100 text-green-700"
-                                    : order.status === "On the Way" ? "bg-blue-100 text-blue-700"
-                                        : "bg-orange-100 text-orange-700"}`}>
-                                {order.status}
+                                ${order.status === "Completed" ? "bg-green-100 text-green-700"
+                                    : order.status === "preparing" ? "bg-blue-100 text-blue-700"
+                                        : order.status === "PENDING" ? "bg-yellow-100 text-yellow-700"
+                                            : order.status === "ready" ? "bg-orange-100 text-orange-700"
+                                                : "bg-gray-100 text-gray-700"}`}>
+                                {order.status.toUpperCase()}
                             </span>
                             <p className="font-semibold">${order.total.toFixed(2)}</p>
                         </div>
 
                         <ul className="mt-2 text-gray-700 list-disc ml-5">
                             {order.items.map((item, idx) => (
-                                <li key={idx}>{item}</li>
+                                <li key={idx}>{item.quantity}x {item.foodName}</li>
                             ))}
                         </ul>
 
-                        {order.status === "Completed" && (
+                        {order.status === "ready" && (
                             <>
                                 <div className="mt-4">
                                     <label className="block mb-1 font-medium">Rate your experience</label>
@@ -109,14 +113,14 @@ export default function OrderHistory() {
                             </>
                         )}
 
-                        {order.status === "On the Way" && (
+                        {order.status === "ready" && (
                             <div className="mt-3 bg-blue-50 text-blue-700 p-3 rounded text-sm">
                                 🚚 Your order is on the way<br />
-                                {order.deliveryInfo}
+                                
                             </div>
                         )}
 
-                        {order.status === "Preparing" && (
+                        {order.status === "preparing" && (
                             <div className="mt-3 bg-orange-50 text-orange-700 p-3 rounded text-sm">
                                 🍽 Your order is being prepared by the restaurant
                             </div>

@@ -6,22 +6,13 @@ import { Stats } from '../components/Stats';
 import { Reviews } from '../components/Reviews';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { Restaurant } from '../types';
 
-interface Restaurant {
-    id: number;
-    name: string;
-    cuisine: string;
-    rating: number;
-    deliveryTime: string;
-    minOrder: number;
-    image: string;
-}
-
-function Restaurant() {
+function RestaurantDashboard() {
     const [activeSection, setActiveSection] = useState('dashboard');
     const [showReviews, setShowReviews] = useState(false);
     const {userEmail, role, authInitialized} = useAuth();
-    const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+    const [restaurant, setRestaurant] = useState< Restaurant | null>(null);
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -82,4 +73,4 @@ function Restaurant() {
     );
 }
 
-export default Restaurant;
+export default RestaurantDashboard;

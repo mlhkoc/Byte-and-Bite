@@ -7,7 +7,7 @@ import Home from './pages/Home.tsx';
 import MenuViewer from './pages/MenuViewer.tsx';    
 import './index.css';
 import { AuthProvider } from './context/AuthContext.tsx';
-import Restaurant from './pages/Restaurant.tsx';
+import RestaurantDashboard from './pages/RestaurantDashboard.tsx';
 import { CartProvider } from './context/CartContext';
 import { CartModal } from './components/CartModal';
 import Checkout from './pages/Checkout.tsx';
@@ -29,7 +29,7 @@ createRoot(document.getElementById('root')!).render(
                     <Route path="/" element={<Home />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/:restaurantId/menu" element={<MenuViewer />} />
-                    <Route path="/restaurant" element={<PrivateRoute><Restaurant /></PrivateRoute>} />
+                    <Route path="/restaurant" element={<PrivateRoute><RestaurantDashboard /></PrivateRoute>} />
                     <Route path="/checkout/:restaurantMail" element={<PrivateRoute><Checkout /></PrivateRoute>} />
                     <Route path="/courier" element={<PrivateRoute><CourierWrapper /></PrivateRoute>} />
                     <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />

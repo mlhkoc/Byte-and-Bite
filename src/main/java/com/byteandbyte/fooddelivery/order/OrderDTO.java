@@ -23,7 +23,7 @@ public class OrderDTO {
     private double total;
     private LocalDateTime orderDateTime;
     private String address;
-
+    private String status;
 
 
 
@@ -31,15 +31,18 @@ public class OrderDTO {
         OrderDTO dto = new OrderDTO();
         dto.setId(order.getId());
         dto.setRestaurantId(order.getRestaurant().getId());
+        dto.total = 0;
         List<OrderItemDTO> items = order.getItems().stream().map(item -> {
             OrderItemDTO itemDTO = new OrderItemDTO();
             itemDTO.setFoodId(item.getFood().getId());
             itemDTO.setFoodName(item.getFood().getName());
             itemDTO.setQuantity(item.getQuantity());
             itemDTO.setPrice(item.getPrice());
+            dto.total += item.getPrice();
             return itemDTO;
         }).collect(Collectors.toList());
         dto.setItems(items);
+        dto.setStatus(order.getStatus());
         return dto;
     }
 }

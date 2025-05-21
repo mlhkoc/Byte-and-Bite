@@ -99,4 +99,13 @@ public class OrderService {
 
         return orders.stream().filter(order -> order.getStatus().equals("PENDING")).map(OrderDTO::fromEntity).collect(Collectors.toList());
     }
+
+    public List<OrderDTO> getOrdersByCustomer(Long customerId) {
+        List<Order> orders = orderRepository.findByCustomerId(customerId);
+
+        return orders.stream()
+                .filter(order -> order.getRestaurant() != null) // skip malformed orders
+                .map(OrderDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
 }
