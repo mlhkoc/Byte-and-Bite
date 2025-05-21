@@ -65,6 +65,18 @@ function Restaurant() {
                         {showReviews && <Reviews onClose={() => setShowReviews(false)} />}
                     </>
                 )}
+
+                {activeSection === 'menu' && (
+                    <>
+                        <MenuManagement />
+                    </>
+                )}
+
+                {activeSection === 'orders' && (
+                    <>
+                        <OrdersList />
+                    </>
+                )}
             </main>
         </div>
     );
