@@ -15,13 +15,15 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
+import com.byteandbyte.fooddelivery.auth.JwtRequestFilter;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
 
@@ -33,24 +35,23 @@ public class SecurityConfig {
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
+    @Autowired
+    private JwtRequestFilter jwtRequestFilter;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors()
                 .and()
                 .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/api/restaurant","/api/orders/restaurant","/api/menuManagement").hasRole("RESTAURANT")
+                        .requestMatchers("/api/login", "/api/signup", "/api/restaurants","/api/menu/*","/api/restaurants/id/*").permitAll()
                         .anyRequest().authenticated()
-                )
-                .formLogin(form -> form
-                        .loginProcessingUrl("/login").successHandler(new CustomAuthenticationSuccessHandler())
-                        .failureHandler(new CustomAuthenticationFailureHandler()) // React should POST here
-                        .permitAll()
-                )
+                ).addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .permitAll()
@@ -72,37 +73,9 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
-        @Override
-        public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-            // Send an appropriate HTTP status code (401 Unauthorized)
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Invalid username or password");
-        }
-    }
-
-    public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
-        @Override
-        public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-                                            Authentication authentication) throws IOException, ServletException {
-            // Redirect to a specific URL after login
-            response.setStatus(HttpServletResponse.SC_OK);  // 200 OK
-            response.setContentType("application/json");
 
 
-            String role = authentication.getAuthorities().stream()
-                    .findFirst()
-                    .map(auth -> auth.getAuthority().replace("ROLE_", "")) // optional cleanup
-                    .orElse("UNKNOWN");
-
-            String username = authentication.getName();
 
 
-            // Send a simple JSON response
-            String json = String.format("{\"username\": \"%s\", \"role\": \"%s\"}", username, role);
-            response.getWriter().write(json);
-        }
-
-        }
 
 }

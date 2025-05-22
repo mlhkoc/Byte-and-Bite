@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.*;
 
 @RestController
@@ -33,7 +34,7 @@ public class MenuController {
 
     }
 
-    @GetMapping("/{restaurantId}/menu")
+    @GetMapping("/menu/{restaurantId}")
     public List<FoodDTO> getMenuByRestaurant(@PathVariable Long restaurantId) {
         List<Menu> menus = menuRepository.findByRestaurantId(restaurantId);
         List<FoodDTO> foodDtos = new ArrayList<>();
@@ -49,29 +50,29 @@ public class MenuController {
         return foodDtos;
     }
 
-    @GetMapping("/{restaurantMail}")
-    public List<FoodDTO> getMenuIdByMail(@PathVariable String restaurantMail) {
-        List<Menu> menus = menuRepository.findByRestaurantEmail(restaurantMail);
+    @GetMapping("/menuManagement")
+    public List<FoodDTO> getMenuIdByMail(Principal principal) {
+        List<Menu> menus = menuRepository.findByRestaurantEmail(principal.getName());
         List<FoodDTO> foodDtos = new ArrayList<>();
 
         for (Menu menu : menus) {
             for (Food food : foodRepository.findByMenuId(menu.getId())) {
-                foodDtos.add(new FoodDTO(food.getId(),food.getName(), food.getDescription(), food.getPrice(),food.isAvailable(),food.getImage(),restaurantMail));
+                foodDtos.add(new FoodDTO(food.getId(),food.getName(), food.getDescription(), food.getPrice(),food.isAvailable(),food.getImage(),principal.getName()));
             }
         }
 
         return foodDtos;
     }
 
-    @PostMapping("/{restaurantMail}")
-    public ResponseEntity<Food> addFood(@RequestBody Map<String, Object> payload, @PathVariable String restaurantMail) {
+    @PostMapping("/menuManagement")
+    public ResponseEntity<Food> addFood(@RequestBody Map<String, Object> payload, Principal principal) {
         String image = (String) payload.get("image");
         String description = (String) payload.get("description");
         Number priceNumber = (Number) payload.get("price");
         double price = priceNumber.doubleValue();
         String name = (String) payload.get("name");
         boolean available = Boolean.parseBoolean(payload.get("available").toString());
-        System.out.println(restaurantMail);
+
 
         Food food = new Food();
         food.setName(name);
@@ -80,7 +81,7 @@ public class MenuController {
         food.setAvailable(available);
         food.setPrice(price);
 
-        Optional<Restaurant> optionalRestaurant = restaurantRepository.findByEmail(restaurantMail);
+        Optional<Restaurant> optionalRestaurant = restaurantRepository.findByEmail(principal.getName());
         if (optionalRestaurant.isEmpty()) {
             return ResponseEntity.badRequest().build(); // or throw an exception
         }
@@ -88,7 +89,7 @@ public class MenuController {
         Restaurant restaurant = optionalRestaurant.get();
         System.out.println(restaurant.getName());
 
-        List<Menu> menus = menuRepository.findByRestaurantEmail(restaurantMail);
+        List<Menu> menus = menuRepository.findByRestaurantEmail(principal.getName());
         Menu menu;
         if (menus.isEmpty()) {
             menu = new Menu();
@@ -105,9 +106,8 @@ public class MenuController {
 
     }
 
-    @PutMapping("/{restaurantMail}/{id}")
-    public ResponseEntity<Food> updateFood(@RequestBody Map<String, Object> payload,
-                                           @PathVariable String restaurantMail,@PathVariable long id) {
+    @PutMapping("/menuManagement/{id}")
+        public ResponseEntity<Food> updateFood(@RequestBody Map<String, Object> payload,@PathVariable long id) {
 
 
         String image = (String) payload.get("image");
@@ -132,7 +132,7 @@ public class MenuController {
     }
 
 
-    @DeleteMapping("/{restaurantMail}/{id}")
+    @DeleteMapping("/menuManagement/{id}")
     public ResponseEntity<Void> deleteFood(@PathVariable Long id) {
         foodRepository.deleteById(id);
         return ResponseEntity.noContent().build();

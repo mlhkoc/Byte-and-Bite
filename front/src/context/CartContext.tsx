@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { clearCart, fetchCartItems, removeCartItem, updateCartQuantity } from "../components/CartApi.tsx";
+import { useAuth } from '../context/AuthContext';
 
 interface CartItem {
     id: number;
@@ -28,14 +29,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const [items, setItems] = useState<CartItem[]>([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const username = localStorage.getItem("user");
+    const token = localStorage.getItem("token")
+    // const { isLoggedIn } = useAuth();
 
-    useEffect(() => {
-        fetchCartItems().then(fetchedItems => setItems(fetchedItems));
-    }, []);
+    // useEffect(() => {
+    //     if (!isLoggedIn) return;
+    //
+    //     fetchCartItems().then(fetchedItems => setItems(fetchedItems));
+    // }, [isLoggedIn]);
 
     const addToCart = async (item: Omit<CartItem, 'quantity'>) => {
-        console.log( items[0] );
-        console.log( item );
         if (items.length > 0 && items[0].restaurantMail !== item.restaurantMail) {
             const confirmed = window.confirm(
                 "Your cart contains items from a different restaurant. Adding this item will remove all existing items from your cart. Would you like to proceed?"
@@ -53,8 +56,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+
             },
-            credentials: 'include',
             body: JSON.stringify(item),
         });
 

@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import { Search, SlidersHorizontal, ShoppingCart, User, Pizza, Merge as Burger, Fish, Drumstick, IceCream, Heart, Clock, DollarSign } from 'lucide-react';
+import { Search, SlidersHorizontal, ShoppingCart, User, Pizza,LogOut, Menu, Fish, Drumstick, IceCream, Heart, Clock, DollarSign } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -23,28 +23,18 @@ function Home() {
     const { items, setIsCartOpen, setItems} = useCart();
     const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
-    useEffect(() => {
-        fetchCartItems().then(fetchedItems => setItems(fetchedItems));
-    }, []);
+
+
 
 
     const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-    useEffect(() => {
-        fetch('http://localhost:8080/api/restaurants', {
-            method: 'GET',
-            credentials: 'include',
-        })
-            .then((res) => res.json())
-            .then((data) => setRestaurants(data))
-            .catch((err) => console.error("Failed to fetch restaurants", err));
-    }, []);
 
 
 
 
     const categories = [
         { name: "Pizza", icon: <Pizza className="w-6 h-6" />, cuisine: "Italian" },
-        { name: "Burgers", icon: <Burger className="w-6 h-6" />, cuisine: "American" },
+        { name: "Burgers", icon: <Menu className="w-6 h-6" />, cuisine: "American" },
         { name: "Sushi", icon: <Fish className="w-6 h-6" />, cuisine: "Japanese" },
         { name: "Chicken", icon: <Drumstick className="w-6 h-6" />, cuisine: "Chicken" },
         { name: "Desserts", icon: <IceCream className="w-6 h-6" />, cuisine: "Desserts" },
@@ -53,7 +43,7 @@ function Home() {
         { name: "Thai", icon: <Fish className="w-6 h-6" />, cuisine: "Thai" }
     ];
 
-    const { isLoggedIn } = useAuth();
+    const { isLoggedIn , logout} = useAuth();
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
@@ -66,13 +56,13 @@ function Home() {
     };
     useEffect(() => {
         if (isLoggedIn) {
-            fetchCartItems();
+            fetchCartItems().then(fetchedItems => setItems(fetchedItems));
         }
     }, [isLoggedIn]);
     useEffect(() => {
+        console.log(localStorage.getItem("user"))
         fetch('http://localhost:8080/api/restaurants', {
             method: 'GET',
-            credentials: 'include',
         })
             .then((res) => res.json())
             .then((data) => setRestaurants(data))
@@ -93,7 +83,16 @@ function Home() {
                 <img src={logo} alt="Logo" className="h-10 w-auto" />
                 <div className="flex gap-4">
                     {isLoggedIn ? (
+
                         <>
+                            <button
+                                onClick={logout}
+                                className="p-2 hover:bg-gray-100 rounded-full relative"
+                            >
+                                <LogOut className="w-6 h-6"/>
+
+
+                            </button>
                             <button
                                 onClick={() => setIsCartOpen(true)}
                                 className="p-2 hover:bg-gray-100 rounded-full relative"

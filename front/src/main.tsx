@@ -11,10 +11,11 @@ import Restaurant from './Restaurant.tsx';
 import { CartProvider } from './context/CartContext';
 import { CartModal } from './components/CartModal';
 import Checkout from './pages/Checkout.tsx';
-import Dashboard from './pages/Dashboard.tsx';
 import { UserProvider } from './context/UserContext.tsx';
 import { DeliveryProvider } from './context/DeliveryContext.tsx';
 import CourierWrapper from './CourierWrapper.tsx';
+import ForbiddenPage from "./pages/403Forbidden.tsx";
+import NotFoundPage from "./pages/404NotFound.tsx";
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
@@ -27,10 +28,11 @@ createRoot(document.getElementById('root')!).render(
                     <Route path="/" element={<Home />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/:restaurantId/menu" element={<MenuViewer />} />
-                    <Route path="/restaurant/:restaurantMail" element={<Restaurant />} />
+                    <Route path="/restaurant" element={<Restaurant />} />
                     <Route path="/checkout/:restaurantMail" element={<Checkout />} />
-                            <Route path="/courier/:courierMail" element={<CourierWrapper />} />
-
+                    <Route path="/courier/:courierMail" element={<CourierWrapper />} />
+                    <Route path="/not-authorized" element={<ForbiddenPage />}/>
+                    <Route path="*" element={<NotFoundPage />}/>
                 </Routes>
                 <CartModal />
             </UserProvider>
