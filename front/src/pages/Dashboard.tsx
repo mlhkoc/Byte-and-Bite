@@ -4,23 +4,15 @@ import DeliveryRequest from '../components/DeliveryRequest';
 import CurrentDelivery from '../components/CurrentDelivery';
 import PerformanceSummary from '../components/PerformanceSummary';
 import RecentDeliveries from '../components/RecentDeliveries';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 
 const Dashboard: React.FC = () => {
-  const { isLoggedIn } = useAuth();
-
-  if (!isLoggedIn) {
-    return <Navigate to="/auth" />;
-  }
 
   return (
+
       <div className="min-h-screen bg-gray-100">
         {/* Header + AvailabilityToggle */}
-        <div className="flex justify-between items-center px-4 pt-4">
           <Header />
           {/* AvailabilityToggle butonu Header içinde */}
-        </div>
 
         <main className="container mx-auto max-w-4xl p-4">
           <div className="grid md:grid-cols-2 gap-4">

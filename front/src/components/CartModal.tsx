@@ -3,8 +3,7 @@ import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from "react";
 import { useAuth } from '../context/AuthContext';
-
-import { fetchCartItems } from "./CartApi.tsx";
+import { fetchCartItems } from "../services/CartApi.tsx";
 
 export function CartModal() {
 

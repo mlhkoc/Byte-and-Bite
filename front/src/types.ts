@@ -1,3 +1,4 @@
+
 export interface MenuItem {
     id: string;
     name: string;
@@ -28,10 +29,14 @@ export interface Courier {
     avatar: string;
 }
 
+// TODO: Will need to fix the statuses
 export interface Order {
     id: number;
     items: OrderItem[];
-    status: 'preparing' | 'ready';
+    status: 'preparing' | 'ready' | 'Completed' | 'PENDING';
+    restaurantId: number;
+    total: number;
+    restaurant?: Restaurant;
     courier?: Courier;
 }
 
@@ -56,4 +61,21 @@ export interface DailyPerformance {
     earnings: number;
     deliveries: number;
     rating: number;
+}
+
+export interface Restaurant {
+    id: number;
+    name: string;
+    cuisine: string;
+    rating: number;
+    deliveryTime: string;
+    minOrder: number;
+    image: string;
+}
+
+export interface Customer {
+    fullName: string;
+    email: string;
+    phone: string;
+    address: string;
 }

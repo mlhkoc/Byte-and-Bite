@@ -19,11 +19,14 @@ public class OrderController {
 
     private final OrderService orderService;
     private final RestaurantRepository restaurantRepository;
+    private final CustomerRepository customerRepository;
 
     public OrderController(OrderService orderService,
-                           RestaurantRepository restaurantRepository) {
+                           RestaurantRepository restaurantRepository,
+                           CustomerRepository customerRepository) {
         this.orderService = orderService;
         this.restaurantRepository = restaurantRepository;
+        this.customerRepository = customerRepository;
     }
 
 
@@ -40,5 +43,13 @@ public class OrderController {
                 .orElseThrow(() -> new RuntimeException("Restaurant not found"));
 
         return orderService.getOrdersByRestaurant(restaurant.getId());
+    }
+
+    @GetMapping("/orders/customer/{email}")
+    public List<OrderDTO> getOrdersForCustomer(@PathVariable String email) {
+        Customer customer = customerRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        return orderService.getOrdersByCustomer(customer.getId());
     }
 }

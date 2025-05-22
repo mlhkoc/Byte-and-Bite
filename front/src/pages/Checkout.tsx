@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useParams } from "react-router-dom";
+import ErrorPopup from "../components/ErrorPopup";
 
 interface DeliveryForm {
     streetAddress: string;
@@ -55,7 +56,7 @@ export default function Checkout() {
         e.preventDefault();
         try {
             if (!restaurantMail) {
-                alert("Missing restaurant information.");
+                showErrorPopup("Error", "Missing restaurant information.");
                 return;
             }
 
@@ -92,21 +93,34 @@ export default function Checkout() {
             });
 
             if (response.ok) {
-                alert('Order placed successfully!');
+                showErrorPopup('Success', 'Order placed successfully!');
                 clearCartItems();
-                navigate('/');
+                setTimeout(() => {
+                    navigate('/');
+                }, 1000);
             } else {
                 const errorText = await response.text();
-                alert("Failed to place order.");
+                showErrorPopup('Error', "Failed to place order.");
                 console.error(errorText);
             }
         } catch (err) {
             console.error("Network error:", err);
-            alert("Something went wrong.");
+            showErrorPopup("Error", "Something went wrong.");
         }
     };
 
+    const [popupTitle, setPopupTitle] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+    const [showError, setShowError] = useState(false);
+
+    function showErrorPopup(title: string, msg: string) {
+        setPopupTitle(title);
+        setErrorMessage(msg);
+        setShowError(true);
+    }
+
     return (
+        <>
         <div className="min-h-screen bg-gray-50 py-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col md:flex-row gap-8">
@@ -324,5 +338,15 @@ export default function Checkout() {
                 </div>
             </div>
         </div>
+        
+        {showError && (
+            <ErrorPopup
+                title={popupTitle}
+                message={errorMessage}
+                onClose={() => setShowError(false)}
+            />
+        )}
+
+        </>
     );
 }

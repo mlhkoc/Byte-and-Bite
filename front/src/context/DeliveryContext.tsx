@@ -1,7 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Delivery, DailyPerformance } from '../types';
-import { useAuth } from './AuthContext';
-import { useParams } from "react-router-dom";
 
 // Define allowed status values for type safety
 type DeliveryStatus = 'pending' | 'accepted' | 'picked_up' | 'delivered' | 'completed';

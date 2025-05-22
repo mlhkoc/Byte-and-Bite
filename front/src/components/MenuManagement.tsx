@@ -54,7 +54,7 @@ export function MenuManagement() {
     };
 
     const handleEditItem = async (newFood: MenuItem) => {
-        const response = await fetch(`http://localhost:8080/api/menuManagement/${newFood.id}`, {
+        const response = await fetch(`http://localhost:8080/api/${restaurantMail}/${newFood.id}`, {
             method: 'PUT',
             credentials: 'include',
             headers: {
@@ -64,7 +64,7 @@ export function MenuManagement() {
             },
             body: JSON.stringify(newFood),
         });
-        console.log(restaurantMail)
+        console.log(userEmail)
         if (response.ok) {
             const updatedItems = await fetchMenuItems();
             setItems(updatedItems);
