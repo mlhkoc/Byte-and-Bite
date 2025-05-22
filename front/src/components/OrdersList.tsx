@@ -7,14 +7,18 @@ export function OrdersList() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
-
     const lastOrderId = useRef<number>(0);
-
+    const token = localStorage.getItem("token")
     useEffect(() => {
         fetch("http://localhost:8080/api/orders/restaurant", {
             method: "GET",
-            credentials: "include",
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+
+            },
         })
+
             .then((res) => res.json())
             .then((data) => setOrders(data))
             .catch((err) => console.error("Failed to fetch orders", err));

@@ -6,12 +6,18 @@ import com.byteandbyte.fooddelivery.restaurant.Restaurant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+
+import org.springframework.security.authentication.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import com.byteandbyte.fooddelivery.courier.Courier;
 import org.springframework.web.bind.annotation.*;
 import com.byteandbyte.fooddelivery.customer.Customer;
-import com.byteandbyte.fooddelivery.auth.AuthService;
+import com.byteandbyte.fooddelivery.security.CustomUserDetailsService;
 
 import java.util.Map;
 
@@ -20,13 +26,42 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
-    private final CourierService courierService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
+    private final CustomUserDetailsService customUserDetailsService;
+
+
 
     @Autowired
-    public AuthController(AuthService authService, CourierService courierService) {
+    public AuthController(AuthService authService, JwtUtil jwtUtil, CustomUserDetailsService customUserDetailsService, AuthenticationManager authenticationManager) {
         this.authService = authService;
-        this.courierService = courierService;
+        this.jwtUtil = jwtUtil;
+        this.customUserDetailsService = customUserDetailsService;
+        this.authenticationManager = authenticationManager;
     }
+
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
+
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(request.getUsername());
+        String role = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .map(auth -> auth.replace("ROLE_", ""))
+                .findFirst()
+                .orElse("UNKNOWN");
+
+        String token = jwtUtil.generateToken(userDetails.getUsername(), role); // updated
+
+        return ResponseEntity.ok(new AuthResponse(token, userDetails.getUsername(), role));
+
+    }
+
 
 
     @PostMapping("/signup")

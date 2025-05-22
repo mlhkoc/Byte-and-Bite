@@ -100,48 +100,44 @@ function Auth() {
 
         if (showLogin) {
             try {
-                const params = new URLSearchParams();
-                params.append('username', formData.email);
-                params.append('password', formData.password);
-
-                fetch('http://localhost:8080/login', {
+                const response = await fetch('http://localhost:8080/api/login', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Content-Type': 'application/json',
                     },
-                    body: params.toString(),
-                    credentials: 'include', // crucial for session cookie to be sent
-                }).then((response) => {
-                    if (!response.ok) throw new Error("Login failed");
-                    return response.json();
-                })
-                    .then((data) => {
-                        setIsLoggedIn(true);
+                    body: JSON.stringify({
+                        username: formData.email,
+                        password: formData.password
+                    }),
+                });
 
-                        const role = data.role;
+                if (!response.ok) {
+                    throw new Error('Login failed');
+                }
 
-                        if (role === "CUSTOMER") {
-                            const username = data.username;
-                            localStorage.setItem('user', username);
-                            navigate('/');
-                        } else if (role === "RESTAURANT") {
+                const data = await response.json();
 
-                            navigate(`/restaurant/${data.username}`);
-                        }
-                        else if (role == "COURIER"){
-                            navigate(`/courier/${data.username}`);
-                        }
-                    })
-                    .catch((error) => {
-                        console.error("Login error:", error);
-                    });
+                // Store JWT token securely (sessionStorage preferred)
+                localStorage.setItem('token', data.token);
 
-            }catch (error){
-                console.error("Unexpected login error:", error);
-                alert("An unexpected error occurred.");
+                setIsLoggedIn(true);
+
+                const role = data.role;
+                const username = data.username;
+                localStorage.setItem('role' ,role);
+                if (role === "CUSTOMER") {
+                    localStorage.setItem('user', username);
+                    navigate('/');
+                } else if (role === "RESTAURANT") {
+                    navigate(`/restaurant`);
+                } else if (role === "COURIER") {
+                    navigate(`/courier/${username}`);
+                }
+            } catch (error) {
+                console.error("Login error:", error);
+                alert("Login failed. Please check your credentials.");
             }
         }
-
         };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {

@@ -76,7 +76,6 @@ public class CourierController {
     public List<DeliveryDTO> getDeliveries(@PathVariable String email, @RequestParam String type) {
         Courier courier = courierService.findByEmail(email);
         if (courier == null) {
-            System.out.println("COURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIERCOURIER");
             throw  new UsernameNotFoundException("Courier Not Found!");
         }
 
