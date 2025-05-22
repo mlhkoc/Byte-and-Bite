@@ -7,10 +7,12 @@ const AvailabilityToggle: React.FC = () => {
   // Fetch the current availability status when the component mounts
   useEffect(() => {
     const fetchAvailability = async () => {
+      const token = localStorage.getItem("token");
       try {
         const response = await fetch('http://localhost:8080/api/courier/me/availability', {
           method: 'GET',
           credentials: 'include',  // Include cookies for session-based auth
+          headers: { Authorization: `Bearer ${token}` }
         });
 
         if (response.ok) {
@@ -32,6 +34,7 @@ const AvailabilityToggle: React.FC = () => {
 
   // Handle availability toggle (POST request to update status)
   const toggleAvailability = async () => {
+    const token = localStorage.getItem("token");
     try {
       const newAvailability = !isAvailable;
       setIsAvailable(newAvailability);  // Optimistic update
@@ -40,6 +43,7 @@ const AvailabilityToggle: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
         },
         credentials: 'include',  // Include cookies for session-based auth
         body: JSON.stringify({ isAvailable: newAvailability }),  // Payload to update availability
@@ -55,14 +59,15 @@ const AvailabilityToggle: React.FC = () => {
   };
 
   return (
-    <div>
-      <div>
-        <span>{isAvailable ? "Available" : "Unavailable"}</span>
-      </div>
-      <button onClick={toggleAvailability}>
-        Toggle Availability
-      </button>
-    </div>
+    <button
+      onClick={toggleAvailability}
+      className="flex items-center space-x-2 bg-white border border-gray-300 rounded-full px-4 py-1 shadow-sm hover:bg-gray-50 transition"
+    >
+      <div className={`w-3 h-3 rounded-full ${isAvailable ? 'bg-black' : 'bg-gray-400'}`} />
+      <span className="text-sm font-medium">
+        {isAvailable ? 'Available' : 'Unavailable'}
+      </span>
+    </button>
   );
 };
 
