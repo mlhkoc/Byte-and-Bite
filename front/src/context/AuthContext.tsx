@@ -1,11 +1,15 @@
 // AuthContext.tsx
-import { createContext, useContext, useState, ReactNode } from 'react';
+import {createContext, useContext, useState, ReactNode, useEffect} from 'react';
 
 type AuthContextType = {
     isLoggedIn: boolean;
     setIsLoggedIn: (value: boolean) => void;
     isAvailable: boolean;
     toggleAvailability: () => void;
+    token: string | null;
+    setToken: (value: string | null) => void;
+    logout: () => void; // ✅ new
+
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -13,6 +17,23 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isAvailable, setIsAvailable] = useState(false);
+    const [token, setToken] = useState<string | null>(null);
+
+    useEffect(() => {
+        const storedToken = localStorage.getItem('token');
+        if (storedToken) {
+            setToken(storedToken);
+            setIsLoggedIn(true);
+        }
+    }, []);
+
+    const logout = () => {
+        setToken(null);
+        setIsLoggedIn(false);
+        localStorage.clear()
+    };
+
+
 
     const toggleAvailability = async () => {
         try {
@@ -23,9 +44,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
-                    // Authorization: 'Bearer <token>' // eğer token gerekiyorsa
+                    Authorization: `Bearer ${token}`
                 },
-                credentials: "include",
                 body: JSON.stringify({ isAvailable: newAvailability }),
             });
 
@@ -43,8 +63,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+
     return (
-        <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, isAvailable, toggleAvailability }}>
+        <AuthContext.Provider
+            value={{ isLoggedIn, setIsLoggedIn, isAvailable, toggleAvailability, token, setToken,logout }}
+        >
             {children}
         </AuthContext.Provider>
     );

@@ -37,19 +37,19 @@ public class CustomUserDetailsService implements UserDetailsService {
             return new org.springframework.security.core.userdetails.User(
                     customer.getEmail(),
                     customer.getPasswordHash(), // this must be the encoded password!
-                    Collections.singletonList(new SimpleGrantedAuthority("CUSTOMER")));
+                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_CUSTOMER")));
         }
         if (courier != null){
             return new org.springframework.security.core.userdetails.User(
                     courier.getEmail(),
                     courier.getPasswordHash(), // this must be the encoded password!
-                    Collections.singletonList(new SimpleGrantedAuthority("COURIER")));
+                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_COURIER")));
         }
         if (restaurant != null){
             return new org.springframework.security.core.userdetails.User(
                     restaurant.getEmail(),
                     restaurant.getPasswordHash(), // this must be the encoded password!
-                    Collections.singletonList(new SimpleGrantedAuthority("RESTAURANT")));
+                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_RESTAURANT")));
         }
         throw new UsernameNotFoundException(email);
 
