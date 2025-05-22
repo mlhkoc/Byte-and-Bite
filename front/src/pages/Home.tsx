@@ -4,7 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.jpg';
-import {fetchCartItems} from "../components/CartApi.tsx";
+import {fetchCartItems} from "../services/CartApi.tsx";
+import { DropdownMenu } from '../components/DropdownMenu.tsx';
+import { CustomerHeader } from '../components/Header.tsx';
 
 interface Restaurant {
     id: number;
@@ -27,7 +29,17 @@ function Home() {
 
 
 
+
     const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+    useEffect(() => {
+        fetch('http://localhost:8080/api/restaurants', {
+            method: 'GET',
+            credentials: 'include',
+        })
+            .then((res) => res.json())
+            .then((data) => setRestaurants(data))
+            .catch((err) => console.error("Failed to fetch restaurants", err));
+    }, []);
 
 
 
@@ -121,6 +133,7 @@ function Home() {
                 </div>
             </div>
 
+            <CustomerHeader />
             {/* Search Bar */}
             <div className="flex gap-2 mb-8">
                 <div className="flex-1 relative">
@@ -198,18 +211,7 @@ function Home() {
                 </div>
             </div>
 
-            {/* Sign Up Buttons */}
-            <div className="fixed bottom-4 left-4 flex gap-4">
-                <button
-                    onClick={() => navigate('/auth')}
-                    className="px-3 py-1.5 bg-orange-300 text-white text-xs rounded-lg hover:bg-orange-400"
-                >
-                    Join as Restaurant
-                </button>
-                <button className="px-3 py-1.5 bg-orange-700 text-white text-xs rounded-lg hover:bg-orange-800">
-                    Join as Courier
-                </button>
-            </div>
+
         </div>
     );
 }

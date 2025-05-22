@@ -9,6 +9,7 @@ import {
     Store,
     LogOut
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface SidebarProps {
     activeSection: string;
@@ -31,6 +32,8 @@ export function Sidebar({ activeSection, onSectionChange ,logout}: SidebarProps)
 
     ];
 
+
+    const navigate = useNavigate();
 
     return (
         <aside className="w-64 bg-white border-r border-gray-200 p-4">

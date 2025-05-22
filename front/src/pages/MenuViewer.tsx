@@ -2,8 +2,9 @@ import {useEffect, useState} from 'react';
 import { ShoppingCart, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-    import {useParams} from "react-router-dom";
-    import {fetchCartItems} from "../components/CartApi.tsx";
+import {useParams} from "react-router-dom";
+import {fetchCartItems} from "../services/CartApi.tsx";
+import ErrorPopup from "../components/ErrorPopup";
 
 interface MenuItem {
     id: number;
@@ -76,11 +77,22 @@ function MenuViewer() {
         item.image.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    const [popupTitle, setPopupTitle] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+    const [showError, setShowError] = useState(false);
+
+    function showErrorPopup(title: string, msg: string) {
+        setPopupTitle(title);
+        setErrorMessage(msg);
+        setShowError(true);
+    }
+
 
     // If we hold rating counts in the database in the future
     // <span className="text-gray-500 text-sm ml-1">(342 reviews)</span>
     // after the rating
     return (
+        <>
         <div className="min-h-screen bg-gray-50">
             {/* Header */}
             <header className="bg-white shadow-sm">
@@ -152,7 +164,7 @@ function MenuViewer() {
                                                     restaurantMail: item.restaurantEmail
                                                 });
                                             } else {
-                                                alert('Please sign in!');
+                                                showErrorPopup( 'Error', 'Please sign in!' );
                                             }
                                         }}
                                         className="bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
@@ -179,6 +191,14 @@ function MenuViewer() {
                 </button>
             </div>
         </div>
+        {showError && (
+            <ErrorPopup
+                title={popupTitle}
+                message={errorMessage}
+                onClose={() => setShowError(false)}
+            />
+        )}
+        </>
     );
 }
 
