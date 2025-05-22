@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, EyeOff, Utensils } from 'lucide-react';
+import { Eye, EyeOff, Utensils, User } from 'lucide-react'; // Added User icon
 import { useNavigate } from 'react-router-dom';
 import backgroundImage from '../assets/bnb.jpg';
 import { useSearchParams } from 'react-router-dom';
@@ -43,7 +43,7 @@ function Auth() {
         const cleaned = value.replace(/\D/g, '');
         const limited = cleaned.slice(0, 10);
         const match = limited.match(/^(\d{3})(\d{3})(\d{2})(\d{2})$/);
-        if (!match) return value;
+        if (!match) return value; // Return original value if it doesn't match the full pattern yet, to allow typing
 
         let formatted = '';
         if (match[1]) formatted += match[1];
@@ -61,15 +61,14 @@ function Auth() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setPasswordError('');
+        setEmailError('');
+        setPhoneNumberError('');
 
         // Check if it's admin login
-        if (showLogin && formData.email === 'admin' && formData.password === 'admin') {
-            localStorage.setItem('adminUsername', 'admin');
-            navigate('/admin');
-            return;
-        }
 
-        if (!showLogin) {
+
+        if (!showLogin) { // Signup
             const passwordRegex = /^(?=.*[A-Z])(?=.*\W).{8,}$/;
             if (!passwordRegex.test(formData.password)) {
                 setPasswordError('Password must be at least 8 characters long, contain at least one uppercase letter and one special character.');
@@ -83,27 +82,44 @@ function Auth() {
             }
 
             const phoneRegex = /^\d{3} \d{3} \d{2} \d{2}$/;
-            if (!phoneRegex.test(formData.phoneNumber)) {
+            if (formData.phoneNumber && !phoneRegex.test(formData.phoneNumber)) { // phoneNumber might be optional
                 setPhoneNumberError('Please enter a valid phone number (e.g., 555 123 45 67).');
                 return;
             }
-            const response = await fetch('http://localhost:8080/api/signup', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-                credentials: 'include'
-            });
-            if (response.ok) {
-                navigate('/auth');
-            } else {
-                const errorData = await response.json();
-                alert(errorData.message || 'Signup failed.');
-            }
-        }
+            try {
+                const response = await fetch('http://localhost:8080/api/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
 
-        if (showLogin) {
+                if (response.ok) {
+                    const resultData = await response.json();
+                    alert(resultData.message || 'Registration request submitted. Waiting for admin approval.');
+                    setShowLogin(true); // Switch to login view
+                    setAnimationClass('fade-in');
+                    // Clear form data for signup specific fields, keep email for convenience
+                    setFormData(prev => ({
+                        ...prev,
+                        fullName: '',
+                        password: '',
+                        phoneNumber: '',
+                        agreeToTerms: false,
+                        role: 'customer',
+                        restaurantName: '',
+                        // email: prev.email // Keep email
+                    }));
+                } else {
+                    const errorData = await response.json();
+                    alert(errorData.message || 'Signup failed.');
+                }
+            } catch (error) {
+                console.error("Signup error:", error);
+                alert('An error occurred during signup. Please try again.');
+            }
+        } else { // Login
             try {
                 const response = await fetch('http://localhost:8080/api/login', {
                     method: 'POST',
@@ -111,43 +127,54 @@ function Auth() {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        username: formData.email,
+                        username: formData.email, // API expects 'username'
                         password: formData.password
                     }),
                 });
 
                 if (!response.ok) {
-                    throw new Error('Login failed');
+                    const errorText = await response.text(); // Backend sends plain text error messages
+                    throw new Error(errorText || 'Login failed');
                 }
 
                 const data = await response.json();
 
-                // Store JWT token securely (sessionStorage preferred)
                 localStorage.setItem('token', data.token);
-
                 setIsLoggedIn(true);
 
-                const role = data.role;
-                const username = data.username;
+                const role = data.role; // Should be "CUSTOMER", "RESTAURANT", "COURIER"
+                const username = data.username; // This is the email
                 localStorage.setItem('role' ,role);
+                localStorage.setItem('user', username); // Storing email as user identifier
+
                 if (role === "CUSTOMER") {
-                    localStorage.setItem('user', username);
                     navigate('/');
                 } else if (role === "RESTAURANT") {
                     navigate(`/restaurant`);
-                } else if (role === "COURIER") {
-                    navigate(`/courier`);
+                } else if(role == "ADMIN") {
+                    localStorage.setItem('user', username);
+                    localStorage.setItem('role', role);
+                    navigate('/admin');
                 }
-            } catch (error) {
+
+                else if (role === "COURIER") {
+                    navigate(`/courier`);
+                } else {
+                    // Fallback or error if role is unexpected
+                    alert("Login successful, but role is unrecognized. Redirecting to home.");
+                    navigate('/');
+                }
+            } catch (error: any) {
                 console.error("Login error:", error);
-                alert("Login failed. Please check your credentials.");
+                alert(error.message || "Login failed. Please check your credentials.");
             }
         }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const target = e.target as HTMLInputElement;
-        const { name, value, type, checked } = target;
+        const target = e.target as HTMLInputElement; // Type assertion
+        const { name, value, type } = target;
+        const checked = target.checked; // Explicitly get checked for checkboxes
 
         setFormData(prev => ({
             ...prev,
@@ -158,19 +185,23 @@ function Auth() {
                     : value,
         }));
 
+        // Real-time validation (optional, can be kept or removed if submit validation is preferred)
         if (name === 'password' && !showLogin) {
             const passwordRegex = /^(?=.*[A-Z])(?=.*\W).{8,}$/;
-            setPasswordError(passwordRegex.test(value) ? '' : 'Password must be at least 8 characters long, contain at least one uppercase letter and one special character.');
+            setPasswordError(passwordRegex.test(value) ? '' : 'Password: 8+ chars, 1 uppercase, 1 special.');
         }
-
         if (name === 'email' && !showLogin) {
             const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-            setEmailError(emailRegex.test(value) ? '' : 'Please enter a valid email address.');
+            setEmailError(emailRegex.test(value) ? '' : 'Invalid email format.');
         }
-
-        if (name === 'phoneNumber') {
+        if (name === 'phoneNumber' && !showLogin) { // only validate on signup
             const phoneRegex = /^\d{3} \d{3} \d{2} \d{2}$/;
-            setPhoneNumberError(phoneRegex.test(value) ? '' : 'Please enter a valid phone number (e.g., 555 123 45 67).');
+            // Only show error if user has typed something and it's not yet valid
+            if (value && !phoneRegex.test(formatPhoneNumber(value))) {
+                setPhoneNumberError('Phone format: XXX XXX XX XX');
+            } else {
+                setPhoneNumberError('');
+            }
         }
     };
 
@@ -184,18 +215,34 @@ function Auth() {
         const phoneRegex = /^\d{3} \d{3} \d{2} \d{2}$/;
 
         return (
+            formData.fullName &&
             passwordRegex.test(formData.password) &&
             emailRegex.test(formData.email) &&
-            phoneRegex.test(formData.phoneNumber) &&
-            formData.agreeToTerms
+            phoneRegex.test(formData.phoneNumber) && // Ensure phone number is also valid
+            formData.agreeToTerms &&
+            (formData.role === 'restaurant' ? !!formData.restaurantName : true) // restaurant name required if role is restaurant
         );
     };
 
     const toggleView = () => {
         setAnimationClass('fade-out');
+        setPasswordError(''); // Clear errors on view toggle
+        setEmailError('');
+        setPhoneNumberError('');
         setTimeout(() => {
             setShowLogin(!showLogin);
             setAnimationClass('fade-in');
+            // Clear form data when switching views
+            setFormData({
+                fullName: '',
+                email: '',
+                password: '',
+                phoneNumber: '',
+                agreeToTerms: false,
+                rememberMe: false,
+                role: 'customer',
+                restaurantName: ''
+            });
         }, 300);
     };
 
@@ -214,9 +261,9 @@ function Auth() {
 
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Email or Username</label>
                                     <input
-                                        type="text" // Changed to text to support "admin" login
+                                        type="text"
                                         name="email"
                                         value={formData.email}
                                         onChange={handleChange}
@@ -277,11 +324,6 @@ function Auth() {
                                     <span>Email: <strong>admin</strong></span><br />
                                     <span>Password: <strong>admin</strong></span>
                                 </div>
-                                <div className="mt-2 text-gray-600">
-                                    <span>For customer login use:</span><br />
-                                    <span>Email: <strong>test@example.com</strong></span><br />
-                                    <span>Password: <strong>Test@123</strong></span>
-                                </div>
                             </div>
                         </div>
                     ) : (
@@ -324,7 +366,7 @@ function Auth() {
                                             onChange={handleChange}
                                             className={`mt-1 block w-full px-3 py-2 border ${emailError ? 'border-red-500' : 'border-gray-300'} rounded-md`}
                                         />
-                                        {emailError && <p className="text-red-500 text-sm">{emailError}</p>}
+                                        {emailError && <p className="text-red-500 text-xs mt-1">{emailError}</p>}
                                     </div>
 
                                     <div>
@@ -349,7 +391,7 @@ function Auth() {
                                                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                             </button>
                                         </div>
-                                        {passwordError && <p className="text-red-500 text-sm">{passwordError}</p>}
+                                        {passwordError && <p className="text-red-500 text-xs mt-1">{passwordError}</p>}
                                     </div>
 
                                     <div>
@@ -360,15 +402,15 @@ function Auth() {
                                             id="phoneNumber"
                                             name="phoneNumber"
                                             type="text"
+                                            placeholder="e.g., 555 123 45 67"
                                             required
                                             value={formData.phoneNumber}
                                             onChange={handleChange}
                                             className={`mt-1 block w-full px-3 py-2 border ${phoneNumberError ? 'border-red-500' : 'border-gray-300'} rounded-md`}
                                         />
-                                        {phoneNumberError && <p className="text-red-500 text-sm">{phoneNumberError}</p>}
+                                        {phoneNumberError && <p className="text-red-500 text-xs mt-1">{phoneNumberError}</p>}
                                     </div>
 
-                                    {/* ROLE SELECTION START */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700">
                                             What is your role?
@@ -382,7 +424,6 @@ function Auth() {
                                             <option value="customer">Customer</option>
                                             <option value="restaurant">Restaurant</option>
                                             <option value="courier">Courier</option>
-
                                         </select>
                                     </div>
 
@@ -395,14 +436,13 @@ function Auth() {
                                                 id="restaurantName"
                                                 name="restaurantName"
                                                 type="text"
-                                                required
+                                                required={formData.role === 'restaurant'}
                                                 value={formData.restaurantName}
                                                 onChange={handleChange}
                                                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
                                             />
                                         </div>
                                     )}
-                                    {/* ROLE SELECTION END */}
 
                                     <div>
                                         <label className="inline-flex items-center">
@@ -412,6 +452,7 @@ function Auth() {
                                                 checked={formData.agreeToTerms}
                                                 onChange={handleChange}
                                                 className="form-checkbox h-5 w-5 text-orange-500"
+                                                required
                                             />
                                             <span className="ml-2 text-sm text-gray-600">I agree to the terms and conditions</span>
                                         </label>
