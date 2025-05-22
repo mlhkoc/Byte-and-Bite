@@ -48,6 +48,7 @@ public class SecurityConfig {
                 .and()
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // Admin yollarını ROLE_ADMIN ile koru
                         .requestMatchers("/api/restaurant","/api/orders/restaurant","/api/menuManagement").hasRole("RESTAURANT")
                         .requestMatchers("/api/login", "/api/signup", "/api/restaurants","/api/menu/*","/api/restaurants/id/*").permitAll()
                         .anyRequest().authenticated()

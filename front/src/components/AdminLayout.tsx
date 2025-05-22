@@ -6,12 +6,11 @@ import {
     Truck,
     BarChart,
     Settings,
-    LogOut,
-    HelpCircle
+    LogOut
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-type AdminSection = 'dashboard' | 'users' | 'restaurants' | 'couriers' | 'tickets' | 'reports' | 'settings';
+type AdminSection = 'dashboard' | 'users' | 'restaurants' | 'couriers' | 'reports' | 'settings';
 
 interface AdminLayoutProps {
     children: React.ReactNode;
@@ -31,12 +30,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
         { id: 'users', label: 'User Management', icon: <Users size={20} /> },
         { id: 'restaurants', label: 'Restaurants', icon: <Utensils size={20} /> },
         { id: 'couriers', label: 'Couriers', icon: <Truck size={20} /> },
-        { id: 'tickets', label: 'Tickets', icon: <HelpCircle size={20} /> },
         { id: 'reports', label: 'Reports', icon: <BarChart size={20} /> },
         { id: 'settings', label: 'Settings', icon: <Settings size={20} /> },
     ];
 
     const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('user');
         localStorage.removeItem('adminUsername');
         navigate('/auth');
     };
