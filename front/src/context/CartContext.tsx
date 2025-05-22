@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { clearCart, fetchCartItems, removeCartItem, updateCartQuantity } from "../components/CartApi.tsx";
-import { useAuth } from '../context/AuthContext';
+import { clearCart, fetchCartItems, removeCartItem, updateCartQuantity } from "../services/CartApi.tsx";
+import { useAuth} from '../context/AuthContext';
 
 interface CartItem {
     id: number;

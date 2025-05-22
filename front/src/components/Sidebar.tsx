@@ -9,15 +9,18 @@ import {
     Store,
     LogOut
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from "react-router-dom";
+
 
 interface SidebarProps {
     activeSection: string;
     onSectionChange: (section: string) => void;
-    logout: () => void; // Add this prop
 
 }
 
-export function Sidebar({ activeSection, onSectionChange ,logout}: SidebarProps) {
+
+export function Sidebar({ activeSection, onSectionChange}: SidebarProps) {
     const menuItems = [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { id: 'menu', label: 'Menu Management', icon: Menu },
@@ -30,6 +33,8 @@ export function Sidebar({ activeSection, onSectionChange ,logout}: SidebarProps)
         { id: 'logout', label: 'Logout', icon: LogOut },
 
     ];
+    const navigate = useNavigate();
+
 
 
     return (
@@ -44,7 +49,7 @@ export function Sidebar({ activeSection, onSectionChange ,logout}: SidebarProps)
                             key={item.id}
                             onClick={() =>
                                 item.id === 'logout'
-                                    ? logout()
+                                    ? navigate('/logout')
                                     : onSectionChange(item.id)
                             }
                             className={`w-full flex items-center space-x-3 px-4 py-3 text-sm rounded-lg ${

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import backgroundImage from '../assets/bnb.jpg';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ErrorPopup from "../components/ErrorPopup";
 
 interface FormData {
     fullName: string;
@@ -39,7 +40,15 @@ function Auth() {
     const [emailError, setEmailError] = useState<string>('');
     const [phoneNumberError, setPhoneNumberError] = useState<string>('');
 
+    const [popupTitle, setPopupTitle] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+    const [showError, setShowError] = useState(false);
 
+    function showErrorPopup(title: string, msg: string) {
+        setPopupTitle(title);
+        setErrorMessage(msg);
+        setShowError(true);
+    }
 
     const formatPhoneNumber = (value: string) => {
         const cleaned = value.replace(/\D/g, '');
@@ -93,7 +102,7 @@ function Auth() {
                 navigate('/auth');
             } else {
                 const errorData = await response.json();
-                alert(errorData.message || 'Signup failed.');
+                showErrorPopup('Error', errorData.message || 'Signup failed.');
             }
 
         }
@@ -138,6 +147,7 @@ function Auth() {
                 alert("Login failed. Please check your credentials.");
             }
         }
+
         };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -196,6 +206,7 @@ function Auth() {
     };
 
     return (
+        <>
         <div className="min-h-screen flex items-center justify-center" style={{
             backgroundImage: `url(${backgroundImage})`,
             backgroundSize: 'cover',
@@ -268,11 +279,6 @@ function Auth() {
                                 <button onClick={toggleView} className="text-orange-600 hover:text-orange-500 font-medium">
                                     Create Account
                                 </button>
-                                <div className="mt-2 text-gray-600"> {/* alt satır için margin ekledim bura sonrası silinecek.*/}
-                                    <span>Sadece aşağıdaki test credentialleri ile giriş yapılabilir şu an!</span><br />
-                                    <span>Email: <strong>test@example.com</strong></span><br />
-                                    <span>Password: <strong>Test@123</strong></span>
-                                </div>
                             </div>
                         </div>
                     ) : (
@@ -433,6 +439,14 @@ function Auth() {
                 </div>
             </div>
         </div>
+        {showError && (
+            <ErrorPopup
+                title={popupTitle}
+                message={errorMessage}
+                onClose={() => setShowError(false)}
+            />
+        )}
+        </>
     );
 }
 

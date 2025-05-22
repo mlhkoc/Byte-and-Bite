@@ -18,5 +18,17 @@ public class CustomerService {
 
     }
 
+    public Customer updateCustomer(String email, CustomerDTO dto) {
+        Customer customer = customerRepository.findByEmail(email).orElse(null);
+        if (customer == null)
+            return null;
 
+        customer.setName(dto.getFullName());
+        customer.setEmail(dto.getEmail());
+        customer.setPhone(dto.getPhone());
+        customer.setAddress(dto.getAddress());
+
+        return customerRepository.save(customer);
+    }
+    
 }

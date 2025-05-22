@@ -3,8 +3,10 @@ import { Search, SlidersHorizontal, ShoppingCart, User, Pizza,LogOut, Menu, Fish
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
-import logo from '../assets/logo.jpg';
-import {fetchCartItems} from "../components/CartApi.tsx";
+// import logo from '../assets/logo.jpg';
+import {fetchCartItems} from "../services/CartApi.tsx";
+// import { DropdownMenu } from '../components/DropdownMenu.tsx';
+import { CustomerHeader } from '../components/Header.tsx';
 
 interface Restaurant {
     id: number;
@@ -19,15 +21,25 @@ interface Restaurant {
 }
 
 function Home() {
-    const navigate = useNavigate();
-    const { items, setIsCartOpen, setItems} = useCart();
-    const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+    // const navigate = useNavigate();
+    const { items, setItems} = useCart();
+    // const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
 
 
 
 
 
     const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+    useEffect(() => {
+        fetch('http://localhost:8080/api/restaurants', {
+            method: 'GET',
+            credentials: 'include',
+        })
+            .then((res) => res.json())
+            .then((data) => setRestaurants(data))
+            .catch((err) => console.error("Failed to fetch restaurants", err));
+    }, []);
 
 
 
@@ -43,7 +55,7 @@ function Home() {
         { name: "Thai", icon: <Fish className="w-6 h-6" />, cuisine: "Thai" }
     ];
 
-    const { isLoggedIn , logout} = useAuth();
+    const { isLoggedIn } = useAuth();
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
@@ -79,52 +91,19 @@ function Home() {
     return (
         <div className="max-w-7xl mx-auto px-4 py-6">
             {/* Header */}
-            <div className="flex justify-between items-center mb-8">
-                <img src={logo} alt="Logo" className="h-10 w-auto" />
-                <div className="flex gap-4">
-                    {isLoggedIn ? (
-
-                        <>
-                            <button
-                                onClick={logout}
-                                className="p-2 hover:bg-gray-100 rounded-full relative"
-                            >
-                                <LogOut className="w-6 h-6"/>
+            {/*<button*/}
+            {/*    onClick={logout}*/}
+            {/*    className="p-2 hover:bg-gray-100 rounded-full relative"*/}
+            {/*>*/}
+            {/*    <LogOut className="w-6 h-6"/>*/}
 
 
-                            </button>
-                            <button
-                                onClick={() => setIsCartOpen(true)}
-                                className="p-2 hover:bg-gray-100 rounded-full relative"
-                            >
-                                <ShoppingCart className="w-6 h-6" />
-                                {cartCount > 0 && (
-                                    <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                                        {cartCount}
-                                    </span>
-                                )}
-                            </button>
-                            <button className="p-2 hover:bg-gray-100 rounded-full">
-                                <User className="w-6 h-6" />
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <Link to="/auth?mode=login">
-                                <button className="p-2 px-4 hover:bg-gray-100 rounded-full font-semibold">Login</button>
-                            </Link>
-                            <Link to="/auth?mode=signup">
-                                <button className="p-2 px-4 hover:bg-gray-100 rounded-full font-semibold">Signup</button>
-                            </Link>
-                        </>
-                    )}
-                </div>
-            </div>
-
+            {/*</button>*/}
+            <CustomerHeader/>
             {/* Search Bar */}
             <div className="flex gap-2 mb-8">
                 <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"/>
                     <input
                         type="text"
                         placeholder="Search for restaurants or dishes"
@@ -134,7 +113,7 @@ function Home() {
                     />
                 </div>
                 <button className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">
-                    <SlidersHorizontal className="w-5 h-5" />
+                    <SlidersHorizontal className="w-5 h-5"/>
                 </button>
             </div>
 
@@ -198,18 +177,7 @@ function Home() {
                 </div>
             </div>
 
-            {/* Sign Up Buttons */}
-            <div className="fixed bottom-4 left-4 flex gap-4">
-                <button
-                    onClick={() => navigate('/auth')}
-                    className="px-3 py-1.5 bg-orange-300 text-white text-xs rounded-lg hover:bg-orange-400"
-                >
-                    Join as Restaurant
-                </button>
-                <button className="px-3 py-1.5 bg-orange-700 text-white text-xs rounded-lg hover:bg-orange-800">
-                    Join as Courier
-                </button>
-            </div>
+
         </div>
     );
 }
@@ -219,7 +187,7 @@ interface RestaurantCardProps {
     onFavoriteToggle: (id: number) => void;
 }
 
-function RestaurantCard({ restaurant, onFavoriteToggle }: RestaurantCardProps) {
+function RestaurantCard({restaurant, onFavoriteToggle}: RestaurantCardProps) {
     const navigate = useNavigate();
 
     return (
