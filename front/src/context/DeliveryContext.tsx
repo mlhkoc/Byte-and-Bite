@@ -152,7 +152,9 @@ export const DeliveryProvider: React.FC<DeliveryProviderProps> = ({ children }) 
       try {
         await fetch(`http://localhost:8080/api/courier/me`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+           },
           credentials: 'include',
           body: JSON.stringify({
             ...completed,
