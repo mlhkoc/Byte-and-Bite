@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import AdminLayout from '../components/adminDosyaları/AdminLayout.tsx';
-import AdminDashboard from '../components/adminDosyaları/AdminDashboard.tsx';
-import UserManagement from '../components/adminDosyaları/UserManagement.tsx';
-import RestaurantManagement from '../components/adminDosyaları/RestaurantManagement.tsx';
-import CourierManagement from '../components/adminDosyaları/CourierManagement.tsx';
-import ReportsView from '../components/adminDosyaları/ReportsView.tsx';
-import SettingsView from '../components/adminDosyaları/SettingsView.tsx';
+import AdminLayout from '../components/AdminLayout.tsx';
+import AdminDashboard from '../components/AdminDashboard.tsx';
+import UserManagement from '../components/UserManagement.tsx';
+import RestaurantManagement from '../components/RestaurantManagement.tsx';
+import CourierManagement from '../components/CourierManagement.tsx';
+import ReportsView from '../components/ReportsView.tsx';
+import SettingsView from '../components/SettingsView.tsx';
 
 type AdminSection = 'dashboard' | 'users' | 'restaurants' | 'couriers' | 'reports' | 'settings';
 
