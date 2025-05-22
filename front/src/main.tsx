@@ -36,7 +36,7 @@ createRoot(document.getElementById('root')!).render(
                     <Route path="/:restaurantId/menu" element={<MenuViewer />} />
                     <Route path="/restaurant" element={<Restaurant />} />
                     <Route path="/checkout/:restaurantMail" element={<Checkout />} />
-                    <Route path="/courier/:courierMail" element={<CourierWrapper />} />
+                    <Route path="/courier" element={<CourierWrapper />} />
                     <Route path="/not-authorized" element={<ForbiddenPage />}/>
                     {/*<Route path="/restaurant" element={<PrivateRoute><RestaurantDashboard /></PrivateRoute>} />*/}
                     <Route path="/checkout/:restaurantMail" element={<Checkout />} />
