@@ -20,6 +20,8 @@ import CourierWrapper from './pages/CourierWrapper.tsx';
 import ProfilePage from './pages/Profile.tsx';
 import { LogoutPage } from './pages/LogoutPage.tsx';
 import OrderHistory from './pages/OrderHistory.tsx';
+import Admin from './pages/Admin.tsx';
+
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
