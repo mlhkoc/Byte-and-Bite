@@ -7,18 +7,16 @@ import Home from './pages/Home.tsx';
 import MenuViewer from './pages/MenuViewer.tsx';    
 import './index.css';
 import { AuthProvider } from './context/AuthContext.tsx';
-import Restaurant from './Restaurant.tsx';
+import Restaurant from './pages/RestaurantDashboard.tsx';
 import { CartProvider } from './context/CartContext';
 import { CartModal } from './components/CartModal';
 import Checkout from './pages/Checkout.tsx';
-import Dashboard from './pages/Dashboard.tsx';
+// import Dashboard from './pages/Dashboard.tsx';
 import { UserProvider } from './context/UserContext.tsx';
 import { DeliveryProvider } from './context/DeliveryContext.tsx';
-import CourierWrapper from './CourierWrapper.tsx';
 import ForbiddenPage from "./pages/403Forbidden.tsx";
 import NotFoundPage from "./pages/404NotFound.tsx";
 import CourierWrapper from './pages/CourierWrapper.tsx';
-import PrivateRoute from './components/PrivateRoute.tsx';
 import ProfilePage from './pages/Profile.tsx';
 import { LogoutPage } from './pages/LogoutPage.tsx';
 import OrderHistory from './pages/OrderHistory.tsx';
@@ -38,13 +36,14 @@ createRoot(document.getElementById('root')!).render(
                     <Route path="/checkout/:restaurantMail" element={<Checkout />} />
                     <Route path="/courier/:courierMail" element={<CourierWrapper />} />
                     <Route path="/not-authorized" element={<ForbiddenPage />}/>
+                    {/*<Route path="/restaurant" element={<PrivateRoute><RestaurantDashboard /></PrivateRoute>} />*/}
+                    <Route path="/checkout/:restaurantMail" element={<Checkout />} />
+                    <Route path="/courier" element={<CourierWrapper />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/logout" element={<LogoutPage />} />
+                    <Route path="/orders" element={<OrderHistory />}/>
                     <Route path="*" element={<NotFoundPage />}/>
-                    <Route path="/restaurant" element={<PrivateRoute><RestaurantDashboard /></PrivateRoute>} />
-                    <Route path="/checkout/:restaurantMail" element={<PrivateRoute><Checkout /></PrivateRoute>} />
-                    <Route path="/courier" element={<PrivateRoute><CourierWrapper /></PrivateRoute>} />
-                    <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
-                    <Route path="/logout" element={<PrivateRoute><LogoutPage /></PrivateRoute>} />
-                    <Route path="/orders" element={<PrivateRoute><OrderHistory /></PrivateRoute>} />
+
                 </Routes>
                 <CartModal />
             </UserProvider>

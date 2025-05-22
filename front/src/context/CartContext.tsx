@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { clearCart, fetchCartItems, removeCartItem, updateCartQuantity } from "../services/CartApi.tsx";
+import { useAuth} from '../context/AuthContext';
 
 interface CartItem {
     id: number;
@@ -58,7 +59,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 Authorization: `Bearer ${token}`
 
             },
-            credentials: 'include',
             body: JSON.stringify(item),
         });
 

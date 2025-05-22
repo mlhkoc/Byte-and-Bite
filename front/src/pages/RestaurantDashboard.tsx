@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { MenuManagement } from './components/MenuManagement';
-import { OrdersList } from './components/OrdersList';
-import { Sidebar } from './components/Sidebar';
-import { Stats } from './components/Stats';
-import { Reviews } from './components/Reviews';
-import { useParams } from "react-router-dom";
+import { MenuManagement } from '../components/MenuManagement';
+import { OrdersList } from '../components/OrdersList';
+import { Sidebar } from '../components/Sidebar';
+import { Stats } from '../components/Stats';
+import { Reviews } from '../components/Reviews';
+import {useNavigate} from "react-router-dom";
 
 interface Restaurant {
     id: number;
@@ -19,15 +19,21 @@ interface Restaurant {
 function Restaurant() {
     const [activeSection, setActiveSection] = useState('dashboard');
     const [showReviews, setShowReviews] = useState(false);
-    const { restaurantMail } = useParams();
     const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+    const token = localStorage.getItem("token");
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchRestaurant = async () => {
             try {
-                const res = await fetch(`http://localhost:8080/api/restaurants/mail/${restaurantMail}`, {
+                const res = await fetch(`http://localhost:8080/api/restaurant`, {
                     credentials: 'include',
+                    headers:{
+                        Authorization: `Bearer ${token}`
+
+                    }
                 });
+                if (res.status == 403) navigate("/not-authorized")
                 const data = await res.json();
                 setRestaurant(data);
             } catch (err) {
@@ -35,10 +41,10 @@ function Restaurant() {
             }
         };
 
-        if (restaurantMail) {
-            fetchRestaurant();
-        }
-    }, [restaurantMail]);
+
+        fetchRestaurant();
+
+    }, []);
 
     return (
         <div className="flex min-h-screen bg-gray-50">
