@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { CustomerHeader } from "../components/Header";
 import { Order, Restaurant } from "../types";
 import { fetchRestaurantById } from "../services/RestaurantApi";
+import { submitReview, fetchReview } from "../services/ReviewApi";
 
 export default function OrderHistory() {
     const [orders, setOrders] = useState<Order[]>([]);
@@ -16,6 +17,7 @@ export default function OrderHistory() {
 
     useEffect(() => {
         const token = localStorage.getItem("token");
+
         const fetchOrdersWithRestaurants = async (email: string | null) => {
             if (!email) return;
             try {
@@ -25,11 +27,12 @@ export default function OrderHistory() {
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`
-
                     },
                 });
+
                 const orderData: Order[] = await res.json();
 
+                // Fetch restaurant data
                 const uniqueIds = [...new Set(orderData.map(o => o.restaurantId))];
                 const restaurantMap: { [key: number]: Restaurant } = {};
                 await Promise.all(
@@ -43,12 +46,38 @@ export default function OrderHistory() {
                     })
                 );
 
+                // Inject restaurant data
                 const enrichedOrders = orderData.map(order => ({
                     ...order,
                     restaurant: restaurantMap[order.restaurantId],
                 }));
 
+                // 🆕 Fetch reviews
+                const initialSubmitted: { [key: number]: boolean } = {};
+                const initialReviews: { [key: number]: { rating: number; text: string } } = {};
+
+                await Promise.all(enrichedOrders.map(async (order) => {
+                    try {
+                        const review = await fetchReview(order.id);
+                        if (review) {
+                            initialSubmitted[order.id] = true;
+                            initialReviews[order.id] = {
+                                rating: review.rating,
+                                text: review.text,
+                            };
+                        }
+                    } catch (err) {
+                        console.error("Failed to fetch review for order", order.id);
+                    }
+                }));
+
                 setOrders(enrichedOrders);
+                setSubmitted(initialSubmitted);
+                setReviews(initialReviews);
+
+                console.log("Submitted reviews:", initialSubmitted);
+                console.log("Review data:", initialReviews);
+
             } catch (err) {
                 console.error("Failed to fetch orders or restaurants", err);
             }
@@ -56,6 +85,7 @@ export default function OrderHistory() {
 
         fetchOrdersWithRestaurants(localStorage.getItem("user"));
     }, []);
+    
 
     const toggleReviewBox = (orderId: number) => {
         setShowReviewBox(prev => ({ ...prev, [orderId]: !prev[orderId] }));
@@ -82,33 +112,14 @@ export default function OrderHistory() {
     };
 
     const handleSubmitReview = async (orderId: number) => {
-        const token = localStorage.getItem("token");
-
         const review = reviews[orderId];
-        if (!review || !review.rating || !review.text) return;
+        const order = orders.find(o => o.id === orderId);
+        if (!review || !review.rating || !review.text || !order) return;
 
         try {
-            const res = await fetch("http://localhost:8080/api/reviews", {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
-
-                },
-                credentials: "include",
-                body: JSON.stringify({
-                    orderId,
-                    rating: review.rating,
-                    comment: review.text
-                })
-            });
-
-            if (res.ok) {
-                setSubmitted(prev => ({ ...prev, [orderId]: true }));
-                setShowReviewBox(prev => ({ ...prev, [orderId]: false }));
-            } else {
-                throw new Error("Failed to submit review");
-            }
+            await submitReview(orderId, order.restaurantId, review.rating, review.text);
+            setSubmitted(prev => ({ ...prev, [orderId]: true }));
+            setShowReviewBox(prev => ({ ...prev, [orderId]: false }));
         } catch (err) {
             console.error("Error submitting review:", err);
         }
@@ -270,8 +281,12 @@ export default function OrderHistory() {
                             <p className="text-sm text-red-600 mt-2">🎫 Your support ticket has been submitted.</p>
                         )}
 
-                        {submitted[order.id] && (
-                            <p className="text-sm text-green-600 mt-2">✅ Review submitted. Thank you!</p>
+                        {submitted[order.id] && reviews[order.id] && (
+                            <div className="mt-3 bg-green-50 text-green-800 p-3 rounded text-sm">
+                                <p className="font-semibold">✅ Review submitted</p>
+                                <p className="mt-1">⭐ Rating: {reviews[order.id].rating} / 5</p>
+                                <p className="italic mt-1">"{reviews[order.id].text}"</p>
+                            </div>
                         )}
 
                         {order.status === "ready" && (

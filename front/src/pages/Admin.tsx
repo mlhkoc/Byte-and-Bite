@@ -7,8 +7,9 @@ import RestaurantManagement from '../components/RestaurantManagement.tsx';
 import CourierManagement from '../components/CourierManagement.tsx';
 import ReportsView from '../components/ReportsView.tsx';
 import SettingsView from '../components/SettingsView.tsx';
+import TicketManagement from '../components/TicketManagement.tsx';
 
-type AdminSection = 'dashboard' | 'users' | 'restaurants' | 'couriers' | 'reports' | 'settings';
+type AdminSection = 'dashboard' | 'users' | 'restaurants' | 'couriers' | 'tickets'| 'reports' | 'settings' ;
 
 const Admin: React.FC = () => {
     const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
@@ -55,6 +56,8 @@ const Admin: React.FC = () => {
                 return <ReportsView />;
             case 'settings':
                 return <SettingsView />;
+            case 'tickets':
+                return <TicketManagement />;
             default:
                 return <AdminDashboard />;
         }

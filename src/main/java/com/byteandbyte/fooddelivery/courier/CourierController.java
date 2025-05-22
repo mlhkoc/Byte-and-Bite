@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
@@ -72,59 +73,67 @@ public class CourierController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("/{email}/deliveries")
-    public List<DeliveryDTO> getDeliveries(@PathVariable String email, @RequestParam String type) {
+    @GetMapping("/me/deliveries")
+    public List<DeliveryDTO> getDeliveries(@RequestParam String type, Principal principal) {
+        String email = principal.getName(); // Extract email from authenticated user
         Courier courier = courierService.findByEmail(email);
+
         if (courier == null) {
-            throw  new UsernameNotFoundException("Courier Not Found!");
+            throw new UsernameNotFoundException("Courier Not Found!");
         }
 
-        List<DeliveryDTO> deliveries =  courier.getDeliveries().stream().map(DeliveryDTO::toDTO).toList();
-        if(type.equals("ACTIVE")){
-            return deliveries.stream().filter(deliveryDTObj -> deliveryDTObj.getStatus().equals("Picked Up")).collect(Collectors.toList());
-        }
-        else if (type.equals("PAST")){
-            return deliveries.stream().filter(deliveryDTObj -> deliveryDTObj.getStatus().equals("Completed")).collect(Collectors.toList());
-        }
-        else {
-            return null;
-        }
+        List<DeliveryDTO> deliveries = courier.getDeliveries().stream()
+                .map(DeliveryDTO::toDTO)
+                .toList();
+
+        return switch (type) {
+            case "ACTIVE" -> deliveries.stream()
+                    .filter(d -> "Picked Up".equals(d.getStatus()))
+                    .collect(Collectors.toList());
+            case "PAST" -> deliveries.stream()
+                    .filter(d -> "Completed".equals(d.getStatus()))
+                    .collect(Collectors.toList());
+            default -> Collections.emptyList();
+        };
     }
 
-    @PostMapping("/{email}")
-    public ResponseEntity<?> createDelivery(@PathVariable String email, @RequestBody DeliveryDTO deliveryDTO) {
-        long id = deliveryDTO.getId();
-        String newStatus = deliveryDTO.getStatus();
+    @PostMapping("/me")
+    public ResponseEntity<?> createOrUpdateDelivery(@RequestBody DeliveryDTO deliveryDTO, Principal principal) {
+        String email = principal.getName(); // Get authenticated courier email
         Courier courier = courierService.findByEmail(email);
         if (courier == null) {
-            throw  new UsernameNotFoundException("Courier Not Found!");
+            throw new UsernameNotFoundException("Courier Not Found!");
         }
+
+        long id = deliveryDTO.getId();
+        String newStatus = deliveryDTO.getStatus();
+
         Delivery delivery = deliveryRepository.findById(id).orElse(null);
         if (delivery == null) {
-            throw  new UsernameNotFoundException("Delivery Not Found!");
+            throw new UsernameNotFoundException("Delivery Not Found!");
         }
+
         Order order = delivery.getOrder();
-        if(newStatus.equals("Picked Up")){
+
+        if ("Picked Up".equals(newStatus)) {
             order.setStatus(newStatus);
             delivery.setStatus(newStatus);
             order.setDelivery(delivery);
             courier.setAvailable(false);
-
-        }
-        else if (newStatus.equals("Completed")){
+        } else if ("Completed".equals(newStatus)) {
             courier.setAvailable(true);
             delivery.setStatus(newStatus);
             delivery.setDeliveryDate(LocalDateTime.now());
             order.setStatus(newStatus);
             order.setDelivery(delivery);
             order.setDeliveryTime(LocalDateTime.now());
-
-
         }
+
         deliveryRepository.save(delivery);
         orderRepository.save(order);
         courierRepository.save(courier);
-        return null;
+
+        return ResponseEntity.ok().build(); // Return 200 OK with no body
     }
 
     @GetMapping("/me/availability")

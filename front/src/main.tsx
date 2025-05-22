@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Auth from './pages/Auth.tsx';
 import Home from './pages/Home.tsx';
-import MenuViewer from './pages/MenuViewer.tsx';    
+import MenuViewer from './pages/MenuViewer.tsx';
 import './index.css';
 import { AuthProvider } from './context/AuthContext.tsx';
 import Restaurant from './pages/RestaurantDashboard.tsx';
@@ -28,28 +28,29 @@ createRoot(document.getElementById('root')!).render(
         <AuthProvider>
 
             <CartProvider>
-            <BrowserRouter>
-            <UserProvider>
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/auth" element={<Auth />} />
-                    <Route path="/:restaurantId/menu" element={<MenuViewer />} />
-                    <Route path="/restaurant" element={<Restaurant />} />
-                    <Route path="/checkout/:restaurantMail" element={<Checkout />} />
-                    <Route path="/courier/:courierMail" element={<CourierWrapper />} />
-                    <Route path="/not-authorized" element={<ForbiddenPage />}/>
-                    {/*<Route path="/restaurant" element={<PrivateRoute><RestaurantDashboard /></PrivateRoute>} />*/}
-                    <Route path="/checkout/:restaurantMail" element={<Checkout />} />
-                    <Route path="/courier" element={<CourierWrapper />} />
-                    <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="/logout" element={<LogoutPage />} />
-                    <Route path="/orders" element={<OrderHistory />}/>
-                    <Route path="*" element={<NotFoundPage />}/>
+                <BrowserRouter>
+                    <UserProvider>
+                        <Routes>
+                            <Route path="/" element={<Home />} />
+                            <Route path="/auth" element={<Auth />} />
+                            <Route path="/:restaurantId/menu" element={<MenuViewer />} />
+                            <Route path="/restaurant" element={<Restaurant />} />
+                            <Route path="/checkout/:restaurantMail" element={<Checkout />} />
+                            <Route path="/courier" element={<CourierWrapper />} />
+                            <Route path="/not-authorized" element={<ForbiddenPage />}/>
+                            {/*<Route path="/restaurant" element={<PrivateRoute><RestaurantDashboard /></PrivateRoute>} />*/}
+                            <Route path="/checkout/:restaurantMail" element={<Checkout />} />
+                            <Route path="/courier" element={<CourierWrapper />} />
+                            <Route path="/profile" element={<ProfilePage />} />
+                            <Route path="/logout" element={<LogoutPage />} />
+                            <Route path="/orders" element={<OrderHistory />}/>
+                            <Route path="*" element={<NotFoundPage />}/>
+                            <Route path="/admin" element={<Admin />} />
 
-                </Routes>
-                <CartModal />
-            </UserProvider>
-            </BrowserRouter>
+                        </Routes>
+                        <CartModal />
+                    </UserProvider>
+                </BrowserRouter>
             </CartProvider>
         </AuthProvider>
     </StrictMode>

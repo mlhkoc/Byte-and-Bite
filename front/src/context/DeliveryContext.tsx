@@ -35,13 +35,12 @@ interface DeliveryContextType {
 
 interface DeliveryProviderProps {
   children: ReactNode;
-  courierEmail: string;
 }
 
 
 export const DeliveryContext = createContext<DeliveryContextType | undefined>(undefined);
 
-export const DeliveryProvider: React.FC<DeliveryProviderProps> = ({ children, courierEmail }) => {
+export const DeliveryProvider: React.FC<DeliveryProviderProps> = ({ children }) => {
   const [currentDelivery, setCurrentDelivery] = useState<Delivery | null>(null);
   const [newDeliveryRequest, setNewDeliveryRequest] = useState<Delivery | null>(null);
   const [recentDeliveries, setRecentDeliveries] = useState<Delivery[]>([]);
@@ -50,21 +49,29 @@ export const DeliveryProvider: React.FC<DeliveryProviderProps> = ({ children, co
     deliveries: 0,
     rating: 0,
   });
+  const token = localStorage.getItem('token');
 
   const fetchDeliveries = async (
-    courierEmail: string,
     setRecentDeliveries: (data: any) => void,
     setCurrentDelivery: (data: any) => void
   ) => {
     try {
-      const pastRes = await fetch(`http://localhost:8080/api/courier/${courierEmail}/deliveries?type=PAST`, {
+      const pastRes = await fetch(`http://localhost:8080/api/courier/me/deliveries?type=PAST`, {
         credentials: 'include',
+        headers: {
+          Authorization: `Bearer ${token}`
+
+        }
       });
       const pastData = await pastRes.json();
       setRecentDeliveries(pastData);
 
-      const activeRes = await fetch(`http://localhost:8080/api/courier/${courierEmail}/deliveries?type=ACTIVE`, {
+      const activeRes = await fetch(`http://localhost:8080/api/courier/me/deliveries?type=ACTIVE`, {
         credentials: 'include',
+        headers: {
+          Authorization: `Bearer ${token}`
+
+        }
       });
       const activeData = await activeRes.json();
       console.log(activeData);
@@ -77,10 +84,10 @@ export const DeliveryProvider: React.FC<DeliveryProviderProps> = ({ children, co
   };
 
   useEffect(() => {
-    if (courierEmail) {
-      fetchDeliveries(courierEmail, setRecentDeliveries, setCurrentDelivery);
+    if (token) {
+      fetchDeliveries(setRecentDeliveries, setCurrentDelivery);
     }
-  }, [courierEmail]);
+  }, [token]);
 
   useEffect(() => {
     const calculateDailyPerformance = () => {
@@ -114,9 +121,12 @@ export const DeliveryProvider: React.FC<DeliveryProviderProps> = ({ children, co
     if (currentDelivery) {
       const updated = { ...currentDelivery, status: 'picked_up' as DeliveryStatus };
       try {
-        await fetch(`http://localhost:8080/api/courier/${courierEmail}`, {
+        await fetch(`http://localhost:8080/api/courier/me`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+           },
           credentials: 'include',
           body: JSON.stringify({
             ...updated,
@@ -135,14 +145,16 @@ export const DeliveryProvider: React.FC<DeliveryProviderProps> = ({ children, co
       const completed: Delivery = {
         ...currentDelivery,
         status: 'completed' as DeliveryStatus,
-        completedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        deliveryDate: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         rating: 5.0,
       };
 
       try {
-        await fetch(`http://localhost:8080/api/courier/${courierEmail}`, {
+        await fetch(`http://localhost:8080/api/courier/me`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+           },
           credentials: 'include',
           body: JSON.stringify({
             ...completed,

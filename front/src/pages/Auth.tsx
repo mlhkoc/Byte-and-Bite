@@ -136,7 +136,7 @@ function Auth() {
                 } else if (role === "RESTAURANT") {
                     navigate(`/restaurant`);
                 } else if (role === "COURIER") {
-                    navigate(`/courier/${username}`);
+                    navigate(`/courier`);
                 }
             } catch (error) {
                 console.error("Login error:", error);

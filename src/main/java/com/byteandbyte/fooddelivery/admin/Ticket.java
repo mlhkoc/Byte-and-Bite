@@ -7,6 +7,8 @@ import com.byteandbyte.fooddelivery.restaurant.Restaurant;
 import jakarta.persistence.*;
 import lombok.*;
 import com.byteandbyte.fooddelivery.order.Order;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -24,6 +26,11 @@ public class Ticket {
 
     private String description;
 
+    private LocalDateTime createdAt;
+
+    private Long orderId;
+
+    private String status;
 
     @ManyToOne
     @JoinColumn(name = "customer_id")
