@@ -1,7 +1,7 @@
 package com.byteandbyte.fooddelivery.restaurant;
 
+import java.util.Date; // Import Date
 import java.util.List;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 import com.byteandbyte.fooddelivery.menu.Menu;
@@ -28,13 +28,24 @@ public class Restaurant {
     private String image;
     private double rating;
 
+    @Column(nullable = false)
+    private boolean approved = false; // For admin approval of registration
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(nullable = false)
+    private Date submissionDate;
+
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     private List<Menu> menus;
 
     @OneToMany(mappedBy = "restaurant")
     private List<Order> orders;
 
-
-
-
+    @PrePersist
+    protected void onCreate() {
+        if (this.submissionDate == null) {
+            this.submissionDate = new Date();
+        }
+        // 'approved' is already false by default
+    }
 }

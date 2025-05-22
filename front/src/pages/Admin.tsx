@@ -2,43 +2,42 @@ import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout.tsx';
 import AdminDashboard from '../components/AdminDashboard.tsx';
-import UserManagement from '../components/UserManagement.tsx';
-import RestaurantManagement from '../components/RestaurantManagement.tsx';
-import CourierManagement from '../components/CourierManagement.tsx';
-import ReportsView from '../components/ReportsView.tsx';
-import SettingsView from '../components/SettingsView.tsx';
-import TicketManagement from '../components/TicketManagement.tsx';
+import UserManagement from '../components/UserManagement.tsx'; // Assuming this exists
+import RestaurantManagement from '../components/RestaurantManagement.tsx'; // Assuming this exists
+import CourierManagement from '../components/CourierManagement.tsx'; // Assuming this exists
+import ReportsView from '../components/ReportsView.tsx'; // Assuming this exists
+import SettingsView from '../components/SettingsView.tsx'; // Assuming this exists
+// import { useAuth } from '../context/AuthContext'; // Not used here for admin status
 
-type AdminSection = 'dashboard' | 'users' | 'restaurants' | 'couriers' | 'tickets'| 'reports' | 'settings' ;
+type AdminSection = 'dashboard' | 'users' | 'restaurants' | 'couriers' | 'reports' | 'settings';
 
 const Admin: React.FC = () => {
     const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
     const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
+    // const { token, role } = useAuth(); // If admin logged in via main login and had a token/role
 
     useEffect(() => {
         // Check if user is admin
-        const checkAdminStatus = async () => {
-            try {
-                // In a real app, you would verify with the backend
-                // Here we're just checking local storage for a simple implementation
-                const username = localStorage.getItem('adminUsername');
-                setIsAdmin(username === 'admin');
-            } catch (error) {
-                console.error('Error checking admin status:', error);
-                setIsAdmin(false);
-            }
+        const checkAdminStatus = () => {
+            // Current simple check for "admin" hardcoded login
+            const token = localStorage.getItem('token');
+            const role = localStorage.getItem('role');
+            setIsAdmin(!!token && role === 'ADMIN');
+
+            // Example of a more robust check if admin logged in via JWT:
+            // const storedToken = localStorage.getItem('token');
+            // const storedRole = localStorage.getItem('role');
+            // setIsAdmin(!!storedToken && storedRole === 'ADMIN');
         };
 
         checkAdminStatus();
     }, []);
 
     if (isAdmin === null) {
-        // Still loading
-        return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+        return <div className="flex items-center justify-center min-h-screen">Loading admin status...</div>;
     }
 
     if (isAdmin === false) {
-        // Not admin, redirect to auth
         return <Navigate to="/auth" replace />;
     }
 
@@ -56,8 +55,6 @@ const Admin: React.FC = () => {
                 return <ReportsView />;
             case 'settings':
                 return <SettingsView />;
-            case 'tickets':
-                return <TicketManagement />;
             default:
                 return <AdminDashboard />;
         }
