@@ -54,6 +54,8 @@ export default function Checkout() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        const token = localStorage.getItem("token");
         try {
             if (!restaurantMail) {
                 showErrorPopup("Error", "Missing restaurant information.");
@@ -62,7 +64,11 @@ export default function Checkout() {
 
             // 1. Get restaurantId using restaurantMail (you must create this backend endpoint)
             const restaurantId = await fetch(`http://localhost:8080/api/restaurant-id/${restaurantMail}`, {
-                credentials: "include"
+                credentials: "include",
+                headers: {
+                    Authorization: `Bearer ${token}`
+
+                },
             }).then(res => {
                 if (!res.ok) throw new Error("Restaurant lookup failed");
                 return res.json();
@@ -87,6 +93,7 @@ export default function Checkout() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
                 },
                 credentials: 'include',
                 body: JSON.stringify(payload),

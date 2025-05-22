@@ -19,10 +19,14 @@ export function AssignCourierModal({
 
     useEffect(() => {
         if (!isOpen) return;
+        const token = localStorage.getItem("token");
 
         const fetchCouriers = async () => {
             try {
-                const res = await fetch('http://localhost:8080/api/courier/get');
+                const res = await fetch('http://localhost:8080/api/courier/get', {
+                    headers: {
+                        Authorization: `Bearer ${token}`}
+                });
                 const data = await res.json();
                 setAvailableCouriers(data);
             } catch (error) {
@@ -34,12 +38,14 @@ export function AssignCourierModal({
     }, [isOpen]);
 
     const handleAssignCourier = async (courier: Courier) => {
+        const token = localStorage.getItem("token");
         try {
             console.log( JSON.stringify(orderId) )
             const res = await fetch(`http://localhost:8080/api/courier/id/${courier.id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
                 },
                 credentials: 'include', // Eğer oturum için cookie gerekiyorsa
                 body: JSON.stringify({ id: orderId }),

@@ -1,6 +1,8 @@
 package com.byteandbyte.fooddelivery.order;
 
 import com.byteandbyte.fooddelivery.restaurant.Restaurant;
+import com.byteandbyte.fooddelivery.review.Review;
+
 import jakarta.persistence.*;
 import lombok.*;
 import com.byteandbyte.fooddelivery.customer.Customer;
@@ -43,6 +45,9 @@ public class Order {
     private LocalDateTime deliveryTime;
     private double price;
     private String note;
+
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    private Review review;
 
 
 }

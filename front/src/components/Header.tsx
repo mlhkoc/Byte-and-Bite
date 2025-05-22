@@ -14,32 +14,29 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-      <header className="bg-white shadow-sm py-4 px-6">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white mr-3">
-              <Package size={20} />
-            </div>
-            <h1 className="text-lg font-semibold">Welcome, {user?.name || 'Courier'}</h1>
+    <header className="bg-white shadow-sm py-4 px-6">
+      <div className="flex justify-between items-center">
+        {/* Left side: logo and welcome */}
+        <div className="flex items-center">
+          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white mr-3">
+            <img src={logo} />
           </div>
+          <h1 className="text-lg font-semibold">Welcome, {user?.name || 'Courier'}</h1>
+        </div>
 
-          {/* Logout Button */}
+        {/* Right side: Availability + Logout */}
+        <div className="flex items-center gap-4">
+          <AvailabilityToggle />
           <button
-            onClick={() => {navigate("/logout")}}
+            onClick={() => navigate("/logout")}
             className="flex items-center space-x-2 text-red-600 hover:text-red-800"
           >
             <LogOut size={18} />
             <span>Logout</span>
           </button>
-
         </div>
-
-        {/* AvailabilityToggle butonuna margin-top ekledik */}
-        <div className="mt-4">
-          <AvailabilityToggle />
-        </div>
-
-      </header>
+      </div>
+    </header>
   );
 };
 

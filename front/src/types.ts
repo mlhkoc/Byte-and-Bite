@@ -79,3 +79,11 @@ export interface Customer {
     phone: string;
     address: string;
 }
+
+export interface Ticket {
+    id: number;
+    orderId: number;
+    customerEmail: string;
+    message: string;
+    status: 'OPEN' | 'CLOSED' | 'IN_PROGRESS';
+}
