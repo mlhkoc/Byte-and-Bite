@@ -4,27 +4,36 @@ import { OrdersList } from '../components/OrdersList';
 import { Sidebar } from '../components/Sidebar';
 import { Stats } from '../components/Stats';
 import { Reviews } from '../components/Reviews';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { Restaurant } from '../types';
+import {useNavigate} from "react-router-dom";
 
-function RestaurantDashboard() {
+interface Restaurant {
+    id: number;
+    name: string;
+    cuisine: string;
+    rating: number;
+    deliveryTime: string;
+    minOrder: number;
+    image: string;
+}
+
+function Restaurant() {
     const [activeSection, setActiveSection] = useState('dashboard');
     const [showReviews, setShowReviews] = useState(false);
-    const {userEmail, role, authInitialized} = useAuth();
-    const [restaurant, setRestaurant] = useState< Restaurant | null>(null);
-    const navigate = useNavigate()
+    const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+    const token = localStorage.getItem("token");
+    const navigate = useNavigate();
 
     useEffect(() => {
-
-        if (authInitialized && role != "RESTAURANT") {
-            navigate( "/" );
-        }
         const fetchRestaurant = async () => {
             try {
-                const res = await fetch(`http://localhost:8080/api/restaurants/mail/${userEmail}`, {
+                const res = await fetch(`http://localhost:8080/api/restaurant`, {
                     credentials: 'include',
+                    headers:{
+                        Authorization: `Bearer ${token}`
+
+                    }
                 });
+                if (res.status == 403) navigate("/not-authorized")
                 const data = await res.json();
                 setRestaurant(data);
             } catch (err) {
@@ -32,10 +41,10 @@ function RestaurantDashboard() {
             }
         };
 
-        if (userEmail) {
-            fetchRestaurant();
-        }
-    }, [userEmail]);
+
+        fetchRestaurant();
+
+    }, []);
 
     return (
         <div className="flex min-h-screen bg-gray-50">
@@ -56,21 +65,9 @@ function RestaurantDashboard() {
                         {showReviews && <Reviews onClose={() => setShowReviews(false)} />}
                     </>
                 )}
-
-                {activeSection === 'menu' && (
-                    <>
-                        <MenuManagement />
-                    </>
-                )}
-
-                {activeSection === 'orders' && (
-                    <>
-                        <OrdersList />
-                    </>
-                )}
             </main>
         </div>
     );
 }
 
-export default RestaurantDashboard;
+export default Restaurant;

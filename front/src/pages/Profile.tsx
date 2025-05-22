@@ -4,13 +4,15 @@ import { Pencil, LogOut, Lock, MapPin, CreditCard, HelpCircle, RotateCcw } from 
 import { CustomerHeader } from '../components/Header';
 import { fetchCustomerByEmail, updateCustomer } from '../services/CustomerApi';
 import { Customer } from '../types';
-import { useAuth } from '../context/AuthContext';
 
 function ProfilePage() {
     const [user, setUser] = useState<Customer | null>(null);
     const [editMode, setEditMode] = useState(false);
 
-    const {userEmail, setUserEmail} = useAuth();
+    const token = localStorage.getItem("token");
+    const userEmail = localStorage.getItem("user");
+
+
 
     const orders = [
         {
@@ -34,7 +36,7 @@ function ProfilePage() {
     useEffect(() => {
         if (!userEmail) return;
 
-        fetchCustomerByEmail(userEmail)
+        fetchCustomerByEmail(userEmail,token)
             .then(setUser)
             .catch(console.error);
     }, []);
@@ -43,10 +45,8 @@ function ProfilePage() {
         if (userEmail == null || user == null) return;
 
         try {
-            await updateCustomer(userEmail, user);
-            console.log( user );
-            setUserEmail( user.email );
-            localStorage.setItem( "userEmail", user.email );
+            await updateCustomer(userEmail, user,token);
+            localStorage.setItem( "user", user.email );
             setEditMode(false);
         } catch (err) {
             console.error("Update failed:", err);

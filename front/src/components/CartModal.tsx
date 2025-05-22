@@ -2,17 +2,21 @@ import { X, Plus, Minus, Trash2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from "react";
+import { useAuth } from '../context/AuthContext';
 import { fetchCartItems } from "../services/CartApi.tsx";
 
 export function CartModal() {
-    const username = localStorage.getItem("user");
 
     const { items, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, total, setItems } = useCart();
     const navigate = useNavigate();
+    const { isLoggedIn } = useAuth();
 
-    useEffect(() => {
-        fetchCartItems().then(fetchedItems => setItems(fetchedItems));
-    }, []);
+    //
+    // useEffect(() => {
+    //     if (!isLoggedIn) return;
+    //
+    //     fetchCartItems().then(fetchedItems => setItems(fetchedItems));
+    // }, [isLoggedIn]);
 
     if (!isCartOpen) return null;
 

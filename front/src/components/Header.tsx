@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { Package, Search, SlidersHorizontal, ShoppingCart, User, LogOut } from 'lucide-react';
 import { useUser } from '../context/UserContext';
 import AvailabilityToggle from './AvailabilityToggle';
@@ -7,6 +7,7 @@ import logo from '../assets/logo.jpg';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { DropdownMenu } from './DropdownMenu';
+import {fetchCartItems} from "../services/CartApi.tsx";
 
 const Header: React.FC = () => {
   const { user } = useUser();
@@ -46,11 +47,23 @@ export default Header;
 
 export function CustomerHeader() {
   const navigate = useNavigate();
-  const { items, setIsCartOpen } = useCart();
+  const { setIsCartOpen } = useCart();
   const { isLoggedIn } = useAuth();
-  const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
-  const { setIsLoggedIn } = useAuth();
+  const [cartCount, setCartCount] = useState(0);
+    const { items, setItems} = useCart();
 
+    const { logout } = useAuth();
+
+  useEffect(() => {
+        // Recalculate cart count whenever items change
+        const count = items.reduce((sum, item) => sum + item.quantity, 0);
+        setCartCount(count);
+    }, [items]);
+    useEffect(() => {
+        if (isLoggedIn) {
+            fetchCartItems().then(fetchedItems => setItems(fetchedItems));
+        }
+    }, [isLoggedIn]);
 
   return (
     <div className="flex justify-between items-center mb-8">
@@ -84,6 +97,7 @@ export function CustomerHeader() {
                           {
                               label: 'Logout',
                               onClick: () => {
+                                  logout();
                                   navigate('/logout');
                               },
                           },

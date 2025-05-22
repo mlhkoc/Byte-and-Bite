@@ -20,6 +20,8 @@ function MenuViewer() {
     const { restaurantId } = useParams();
     const [foods, setFoods] = useState<MenuItem[]>([]);
 
+
+    const token = localStorage.getItem("token")
     interface Restaurant {
         id: number;
         name: string;
@@ -47,9 +49,9 @@ function MenuViewer() {
     useEffect(() => {
         if (!restaurantId) return;
 
-        fetch(`http://localhost:8080/api/${restaurantId}/menu`, {
+        fetch(`http://localhost:8080/api/menu/${restaurantId}`, {
             method: 'GET',
-            credentials: 'include',
+
         })
             .then((res) => res.json())
             .then((data) => setFoods(data))
@@ -61,8 +63,11 @@ function MenuViewer() {
     const { items, addToCart, setIsCartOpen , setItems} = useCart();
 
     useEffect(() => {
+        if (!isLoggedIn) return;
+
         fetchCartItems().then(fetchedItems => setItems(fetchedItems));
-    }, []);
+    }, [isLoggedIn]);
+
 
 
     const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);

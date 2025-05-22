@@ -1,17 +1,15 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+// AuthContext.tsx
+import {createContext, useContext, useState, ReactNode, useEffect} from 'react';
 
 type AuthContextType = {
     isLoggedIn: boolean;
     setIsLoggedIn: (value: boolean) => void;
     isAvailable: boolean;
     toggleAvailability: () => void;
-    userEmail: string | null;
-    setUserEmail: (email: string | null) => void;
-    role: string | null;
-    setRole: (role: string | null) => void;
-    login: (email: string, role: string) => void;
-    logout: () => void;
-    authInitialized: boolean;
+    token: string | null;
+    setToken: (value: string | null) => void;
+    logout: () => void; // ✅ new
+
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,9 +17,23 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isAvailable, setIsAvailable] = useState(false);
-    const [userEmail, setUserEmail] = useState<string | null>(null);
-    const [role, setRole] = useState<string | null>(null);
-    const [authInitialized, setAuthInitialized] = useState(false);
+    const [token, setToken] = useState<string | null>(null);
+
+    useEffect(() => {
+        const storedToken = localStorage.getItem('token');
+        if (storedToken) {
+            setToken(storedToken);
+            setIsLoggedIn(true);
+        }
+    }, []);
+
+    const logout = () => {
+        setToken(null);
+        setIsLoggedIn(false);
+        localStorage.clear()
+    };
+
+
 
     const toggleAvailability = async () => {
         try {
@@ -32,8 +44,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
                 },
-                credentials: "include",
                 body: JSON.stringify({ isAvailable: newAvailability }),
             });
 
@@ -41,64 +53,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 throw new Error('Failed to update availability');
             }
 
+            // optionally confirm from response
             const data = await response.json();
             setIsAvailable(data.isAvailable); // sync with backend
         } catch (error) {
             console.error('Availability update failed:', error);
-            setIsAvailable(prev => !prev); // revert
+            // revert change if request failed
+            setIsAvailable(prev => !prev);
         }
     };
 
-    // Check local storage to see if logged in before (so we keep logged in after refreshing)
-    useEffect(() => {
-        setAuthInitialized(false);
-        
-        let stored = localStorage.getItem("isLoggedIn");
-        if (stored === "true") {
-            setIsLoggedIn(true);
-            setUserEmail( localStorage.getItem( "userEmail" ) );
-            setRole( localStorage.getItem( "role" ) );
-        } 
-
-        setAuthInitialized(true);
-    }, []);
-
-    const login = (email: string, role: string) => {
-        
-        setIsLoggedIn(true);
-        setUserEmail(email);
-        setRole(role);
-
-        localStorage.setItem( "isLoggedIn", "true" );
-        localStorage.setItem( "userEmail", email );
-        localStorage.setItem( "role", role );
-    }
-
-    const logout = () => {
-        setIsLoggedIn(false);
-        setUserEmail(null);
-        setRole(null);
-
-        localStorage.removeItem('isLoggedIn');
-        localStorage.removeItem('userEmail');
-        localStorage.removeItem('role');
-    };
 
     return (
         <AuthContext.Provider
-            value={{
-                isLoggedIn,
-                setIsLoggedIn,
-                isAvailable,
-                toggleAvailability,
-                userEmail,
-                setUserEmail,
-                role,
-                setRole,
-                login,
-                logout,
-                authInitialized
-            }}
+            value={{ isLoggedIn, setIsLoggedIn, isAvailable, toggleAvailability, token, setToken,logout }}
         >
             {children}
         </AuthContext.Provider>

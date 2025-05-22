@@ -1,11 +1,11 @@
 import {useEffect, useState} from 'react';
-import { Search, SlidersHorizontal, ShoppingCart, User, Pizza, Merge as Burger, Fish, Drumstick, IceCream, Heart, Clock, DollarSign } from 'lucide-react';
+import { Search, SlidersHorizontal, ShoppingCart, User, Pizza,LogOut, Menu, Fish, Drumstick, IceCream, Heart, Clock, DollarSign } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
-import logo from '../assets/logo.jpg';
+// import logo from '../assets/logo.jpg';
 import {fetchCartItems} from "../services/CartApi.tsx";
-import { DropdownMenu } from '../components/DropdownMenu.tsx';
+// import { DropdownMenu } from '../components/DropdownMenu.tsx';
 import { CustomerHeader } from '../components/Header.tsx';
 
 interface Restaurant {
@@ -21,14 +21,13 @@ interface Restaurant {
 }
 
 function Home() {
-    const navigate = useNavigate();
-    const { items, setIsCartOpen, setItems} = useCart();
-    const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
-    
+    // const navigate = useNavigate();
+    const { items, setItems} = useCart();
+    // const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
-    useEffect(() => {
-        fetchCartItems().then(fetchedItems => setItems(fetchedItems));
-    }, []);
+
+
+
 
 
     const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -47,7 +46,7 @@ function Home() {
 
     const categories = [
         { name: "Pizza", icon: <Pizza className="w-6 h-6" />, cuisine: "Italian" },
-        { name: "Burgers", icon: <Burger className="w-6 h-6" />, cuisine: "American" },
+        { name: "Burgers", icon: <Menu className="w-6 h-6" />, cuisine: "American" },
         { name: "Sushi", icon: <Fish className="w-6 h-6" />, cuisine: "Japanese" },
         { name: "Chicken", icon: <Drumstick className="w-6 h-6" />, cuisine: "Chicken" },
         { name: "Desserts", icon: <IceCream className="w-6 h-6" />, cuisine: "Desserts" },
@@ -69,13 +68,13 @@ function Home() {
     };
     useEffect(() => {
         if (isLoggedIn) {
-            fetchCartItems();
+            fetchCartItems().then(fetchedItems => setItems(fetchedItems));
         }
     }, [isLoggedIn]);
     useEffect(() => {
+        console.log(localStorage.getItem("user"))
         fetch('http://localhost:8080/api/restaurants', {
             method: 'GET',
-            credentials: 'include',
         })
             .then((res) => res.json())
             .then((data) => setRestaurants(data))
@@ -92,11 +91,19 @@ function Home() {
     return (
         <div className="max-w-7xl mx-auto px-4 py-6">
             {/* Header */}
-            <CustomerHeader />
+            {/*<button*/}
+            {/*    onClick={logout}*/}
+            {/*    className="p-2 hover:bg-gray-100 rounded-full relative"*/}
+            {/*>*/}
+            {/*    <LogOut className="w-6 h-6"/>*/}
+
+
+            {/*</button>*/}
+            <CustomerHeader/>
             {/* Search Bar */}
             <div className="flex gap-2 mb-8">
                 <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"/>
                     <input
                         type="text"
                         placeholder="Search for restaurants or dishes"
@@ -106,7 +113,7 @@ function Home() {
                     />
                 </div>
                 <button className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">
-                    <SlidersHorizontal className="w-5 h-5" />
+                    <SlidersHorizontal className="w-5 h-5"/>
                 </button>
             </div>
 
@@ -170,32 +177,17 @@ function Home() {
                 </div>
             </div>
 
-            
+
         </div>
     );
 }
-
-
-// TODO: Eğer ayrı sign-up sayfaları yapılacaksa bunları geri ekle
-//{/* Sign Up Buttons */ }
-//<div className="fixed bottom-4 left-4 flex gap-4">
-//    <button
-//        onClick={() => navigate('/auth')}
-//        className="px-3 py-1.5 bg-orange-300 text-white text-xs rounded-lg hover:bg-orange-400"
-//    >
-//        Join as Restaurant
-//    </button>
-//    <button className="px-3 py-1.5 bg-orange-700 text-white text-xs rounded-lg hover:bg-orange-800">
-//        Join as Courier
-//    </button>
-//</div>
 
 interface RestaurantCardProps {
     restaurant: Restaurant;
     onFavoriteToggle: (id: number) => void;
 }
 
-function RestaurantCard({ restaurant, onFavoriteToggle }: RestaurantCardProps) {
+function RestaurantCard({restaurant, onFavoriteToggle}: RestaurantCardProps) {
     const navigate = useNavigate();
 
     return (

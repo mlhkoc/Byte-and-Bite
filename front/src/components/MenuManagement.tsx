@@ -2,21 +2,22 @@ import {useEffect, useState} from 'react';
 import {Edit2, Plus, Search, Trash2} from 'lucide-react';
 import {MenuItem} from '../types';
 import {MenuItemModal} from './MenuItemModal';
-import {fetchCartItems} from "../services/CartApi.tsx";
-import { useAuth } from '../context/AuthContext.tsx';
+import {useParams} from "react-router-dom";
 
 export function MenuManagement() {
     const [items, setItems] = useState<MenuItem[]>([]);
-    const {userEmail} = useAuth()
+    const token = localStorage.getItem("token")
 
     const fetchMenuItems = async () => {
-        if (!userEmail) return;
         try {
-            const res = await fetch(`http://localhost:8080/api/${userEmail}`, {
+            const res = await fetch(`http://localhost:8080/api/menuManagement`, {
                 method: 'GET',
-                credentials: 'include',
-            });
-            return await res.json();
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+
+                },            });
+            if(res.ok) return await res.json();
         } catch (err) {
             console.error("Failed to fetch menu:", err);
         }
@@ -24,22 +25,24 @@ export function MenuManagement() {
 
     useEffect(() => {
         fetchMenuItems().then(fetchedMenuItems => setItems(fetchedMenuItems))
-    }, [userEmail]);
+    }, []);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleAddItem =  async (newFood: MenuItem) => {
-        const response = await fetch(`http://localhost:8080/api/${userEmail}`, {
+        const response = await fetch(`http://localhost:8080/api/menuManagement}`, {
             method: 'POST',
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+
             },
             body: JSON.stringify(newFood),
         });
-        console.log(userEmail)
+        console.log(localStorage.getItem("user"))
         if (response.ok) {
             console.log(response)
             console.log('Food added:', newFood);
@@ -51,11 +54,13 @@ export function MenuManagement() {
     };
 
     const handleEditItem = async (newFood: MenuItem) => {
-        const response = await fetch(`http://localhost:8080/api/${userEmail}/${newFood.id}`, {
+        const response = await fetch(`http://localhost:8080/api/${restaurantMail}/${newFood.id}`, {
             method: 'PUT',
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+
             },
             body: JSON.stringify(newFood),
         });
@@ -69,9 +74,13 @@ export function MenuManagement() {
     };
 
     const handleDeleteItem =  async (id : string) => {
-        const response = await fetch(`http://localhost:8080/api/${userEmail}/${id}`, {
+        const response = await fetch(`http://localhost:8080/api/menuManagement/${id}`, {
             method: 'DELETE',
-            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+
+            },
         });
 
         if (response.ok) {
