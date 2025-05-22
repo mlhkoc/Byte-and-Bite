@@ -28,3 +28,17 @@ export async function fetchReview(orderId: number) {
 
     return res.json(); // returns { rating, text, ... }
 }
+
+export async function fetchReviewsByRestaurant(restaurantId: number) {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${API_URL}/restaurant/${restaurantId}`, {
+        credentials: "include",
+        headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (!res.ok) {
+        throw new Error("Failed to fetch reviews for restaurant");
+    }
+
+    return res.json(); // expected to be an array of reviews
+}

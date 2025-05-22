@@ -62,7 +62,6 @@ function Restaurant() {
                             <MenuManagement />
                             <OrdersList />
                         </div>
-                        {showReviews && <Reviews onClose={() => setShowReviews(false)} />}
                     </>
                 )}
 
@@ -75,6 +74,12 @@ function Restaurant() {
                 {activeSection === 'orders' && (
                     <>
                         <OrdersList />
+                    </>
+                )}
+
+                {activeSection === 'reviews' && restaurant && (
+                    <>
+                        <Reviews restaurantId={restaurant.id} />
                     </>
                 )}
             </main>

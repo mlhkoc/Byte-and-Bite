@@ -12,6 +12,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.RequestBody;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.byteandbyte.fooddelivery.customer.CustomerRepository;
 import com.byteandbyte.fooddelivery.order.OrderRepository;
@@ -70,5 +73,22 @@ public class ReviewController {
         if (review == null)
             return ResponseEntity.notFound().build();
         return ResponseEntity.ok(review);
+    }
+
+    @GetMapping("/restaurant/{restaurantId}")
+    public ResponseEntity<List<Map<String, Object>>> getReviewsByRestaurant(@PathVariable Long restaurantId) {
+        List<Review> reviews = reviewRepository.findByRestaurantId(restaurantId);
+
+        List<Map<String, Object>> response = reviews.stream().map(r -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", r.getId());
+            map.put("rating", r.getRating());
+            map.put("text", r.getText());
+            map.put("timestamp", r.getTimestamp());
+            map.put("customerName", r.getCustomer().getName());
+            return map;
+        }).toList();
+
+        return ResponseEntity.ok(response);
     }
 }
