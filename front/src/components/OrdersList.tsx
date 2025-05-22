@@ -15,7 +15,6 @@ export function OrdersList() {
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`
-
             },
         })
 

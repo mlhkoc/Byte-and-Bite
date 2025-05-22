@@ -10,18 +10,23 @@ export default function OrderHistory() {
     const [reviews, setReviews] = useState<{ [orderId: number]: { rating: number; text: string } }>({});
     const [showReviewBox, setShowReviewBox] = useState<{ [orderId: number]: boolean }>({});
     const [submitted, setSubmitted] = useState<{ [orderId: number]: boolean }>({});
-    const { userEmail } = useAuth();
     const [showTicketBox, setShowTicketBox] = useState<{ [orderId: number]: boolean }>({});
     const [tickets, setTickets] = useState<{ [orderId: number]: string }>({});
     const [ticketSubmitted, setTicketSubmitted] = useState<{ [orderId: number]: boolean }>({});
 
     useEffect(() => {
+        const token = localStorage.getItem("token");
         const fetchOrdersWithRestaurants = async (email: string | null) => {
             if (!email) return;
             try {
                 const res = await fetch(`http://localhost:8080/api/orders/customer/${email}`, {
                     method: "GET",
                     credentials: "include",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+
+                    },
                 });
                 const orderData: Order[] = await res.json();
 
@@ -49,7 +54,7 @@ export default function OrderHistory() {
             }
         };
 
-        fetchOrdersWithRestaurants(userEmail);
+        fetchOrdersWithRestaurants(localStorage.getItem("user"));
     }, []);
 
     const toggleReviewBox = (orderId: number) => {
@@ -77,6 +82,8 @@ export default function OrderHistory() {
     };
 
     const handleSubmitReview = async (orderId: number) => {
+        const token = localStorage.getItem("token");
+
         const review = reviews[orderId];
         if (!review || !review.rating || !review.text) return;
 
@@ -84,7 +91,9 @@ export default function OrderHistory() {
             const res = await fetch("http://localhost:8080/api/reviews", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+
                 },
                 credentials: "include",
                 body: JSON.stringify({
@@ -115,12 +124,18 @@ export default function OrderHistory() {
 
     const handleSubmitTicket = async (orderId: number) => {
         const message = tickets[orderId];
+        const token = localStorage.getItem("token");
+
         if (!message) return;
 
         try {
             const res = await fetch("http://localhost:8080/api/tickets", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+
+                },
                 credentials: "include",
                 body: JSON.stringify({
                     orderId,
