@@ -4,9 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import com.byteandbyte.fooddelivery.order.Delivery;
-
 import java.util.ArrayList;
-import java.util.Date; // Import Date
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -14,10 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-// @Getter // Redundant with @Data
-// @Setter // Redundant with @Data
 public class Courier {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,14 +22,27 @@ public class Courier {
     private String email;
     private String passwordHash;
     private String phone;
-    private boolean isAvailable; // Current availability for taking orders
+    private boolean isAvailable; // Operasyonel durumu
 
     @Column(nullable = false)
-    private boolean approved = false; // For admin approval of registration
+    private boolean approved = false; // Kayıt onayı
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false)
     private Date submissionDate;
+
+    @Column(nullable = false)
+    private boolean active = true; // Onaylandıktan sonra varsayılan olarak aktif.
+
+    @Column(nullable = false)
+    private boolean banned = false; // Varsayılan olarak banlı değil.
+
+    @Column(length = 500)
+    private String banReason;
+
+    @Column(nullable = true) // Null olabilir, yani süresiz deaktif veya hiç deaktif edilmemiş
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date deactivationEndDate;
 
     @OneToMany(mappedBy = "courier", cascade = CascadeType.ALL)
     @JsonIgnore
@@ -44,6 +53,6 @@ public class Courier {
         if (this.submissionDate == null) {
             this.submissionDate = new Date();
         }
-        // 'approved' is already false by default
+        // approved kurye için varsayılan false
     }
 }

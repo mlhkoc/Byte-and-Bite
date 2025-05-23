@@ -1,21 +1,29 @@
+// AdminLayout.tsx
+
 import React from 'react';
 import {
     LayoutDashboard,
-    Users,
+    Users, // Bu zaten var, User Management için kullanılacak
     Utensils,
     Truck,
     BarChart,
     Settings,
-    LogOut
+    LogOut,
+    ShieldAlert, // Örnek olarak Ticket Management için farklı bir ikon
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+// import { useAuth } from '../../context/AuthContext'; // Eğer logout için kullanılacaksa
 
-type AdminSection = 'dashboard' | 'users' | 'restaurants' | 'couriers' | 'reports' | 'settings';
+// AdminSection tipine 'users' zaten ekliydi, eğer başka bölümler eklenecekse buraya da eklenir.
+// type AdminSection = 'dashboard' | 'users' | 'restaurants' | 'couriers' | 'reports' | 'settings' | 'tickets';
+// Yukarıdaki type Admin.tsx içinde tanımlı, burada tekrar tanımlamaya gerek yok.
+// Props'taki AdminSection tipini Admin.tsx'ten import edebiliriz veya eşleştiğinden emin olabiliriz.
+// Şimdilik Admin.tsx'teki type ile uyumlu olduğunu varsayıyorum.
 
 interface AdminLayoutProps {
     children: React.ReactNode;
-    activeSection: AdminSection;
-    onSectionChange: (section: AdminSection) => void;
+    activeSection: string; // Daha genel tutabiliriz veya Admin.tsx'teki type'ı import edebiliriz
+    onSectionChange: (section: string) => void; // Aynı şekilde
 }
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({
@@ -24,21 +32,25 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
                                                      onSectionChange
                                                  }) => {
     const navigate = useNavigate();
+    // const { logout } = useAuth(); // Eğer AuthContext'ten logout kullanılacaksa
 
     const navItems = [
         { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
-        { id: 'users', label: 'User Management', icon: <Users size={20} /> },
-        { id: 'restaurants', label: 'Restaurants', icon: <Utensils size={20} /> },
-        { id: 'couriers', label: 'Couriers', icon: <Truck size={20} /> },
+        { id: 'users', label: 'User Management', icon: <Users size={20} /> }, // Bu öğe zaten var veya eklenmeli
+        { id: 'pending-registrations', label: 'Pending Approvals', icon: <ShieldAlert size={20} /> }, // Dashboard yerine ayrı bir sayfa olabilir
+        // Diğer mevcut öğeler...
+        // { id: 'restaurants', label: 'Restaurants', icon: <Utensils size={20} /> }, // Eğer User Management'tan ayrı yönetilecekse
+        // { id: 'couriers', label: 'Couriers', icon: <Truck size={20} /> }, // Eğer User Management'tan ayrı yönetilecekse
         { id: 'reports', label: 'Reports', icon: <BarChart size={20} /> },
         { id: 'settings', label: 'Settings', icon: <Settings size={20} /> },
     ];
 
     const handleLogout = () => {
+        // logout(); // AuthContext'ten gelen logout
         localStorage.removeItem('token');
         localStorage.removeItem('role');
         localStorage.removeItem('user');
-        localStorage.removeItem('adminUsername');
+        // localStorage.removeItem('adminUsername'); // Bu eski yöntemdi
         navigate('/auth');
     };
 
@@ -55,7 +67,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
                         {navItems.map(item => (
                             <li key={item.id} className="mb-1">
                                 <button
-                                    onClick={() => onSectionChange(item.id as AdminSection)}
+                                    onClick={() => onSectionChange(item.id)}
                                     className={`flex items-center px-4 py-3 w-full text-left hover:bg-gray-100 transition-colors ${
                                         activeSection === item.id ? 'bg-gray-100 text-black font-medium' : 'text-gray-700'
                                     }`}

@@ -4,8 +4,7 @@ import com.byteandbyte.fooddelivery.cart.Cart;
 import jakarta.persistence.*;
 import lombok.*;
 import com.byteandbyte.fooddelivery.order.Order;
-
-import java.util.Date; // Import Date
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -25,12 +24,35 @@ public class Customer {
     private String phone;
     private int points;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.PERSIST)
+    @Column(nullable = false)
+    private boolean approved = true; // Müşteri için varsayılan onaylı
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(nullable = false)
+    private Date submissionDate;
+
+    @Column(nullable = false)
+    private boolean active = true; // Onaylandıktan sonra varsayılan olarak aktif.
+
+    @Column(nullable = false)
+    private boolean banned = false; // Varsayılan olarak banlı değil.
+
+    @Column(length = 500)
+    private String banReason;
+
+    @Column(nullable = true) // Null olabilir, yani süresiz deaktif veya hiç deaktif edilmemiş
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date deactivationEndDate;
+
+    @OneToMany(mappedBy = "customer")
     private List<Order> orders;
 
-
-
-    @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Cart cart;
-
+    @PrePersist
+    protected void onCreate() {
+        if (this.submissionDate == null) {
+            this.submissionDate = new Date();
+        }
+        // approved müşteri için zaten true
+        // active ve banned varsayılan değerlerini korur
+    }
 }
