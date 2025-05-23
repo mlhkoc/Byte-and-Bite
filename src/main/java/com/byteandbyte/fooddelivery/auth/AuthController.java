@@ -105,6 +105,19 @@ public class AuthController {
                     restaurant.setPhone(phone);
                     restaurant.setName(restaurantName); // Use restaurantName for Restaurant's name
                      // 'approved' and 'submissionDate' set by @PrePersist and default in AuthService
+                    String address = (String) payload.get("address");
+                    String cuisine = (String) payload.get("cuisine");
+                    String image = (String) payload.get("image");
+
+                     if (address == null || cuisine == null || image == null) {
+                            // Bu validasyon frontend'de de var ama backend'de de olması iyi.
+                            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                                 .body(Map.of("message", "Address, cuisine, and image URL are required for restaurants."));
+                        }
+                        restaurant.setAddress(address);
+                        restaurant.setCuisine(cuisine);
+                        restaurant.setImage(image);
+
                     authService.registerNewRestaurant(restaurant);
                     successMessage = "Restaurant registration request submitted. Waiting for admin approval.";
                     break;

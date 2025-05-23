@@ -12,12 +12,13 @@ interface Restaurant {
     id: number;
     name: string;
     cuisine: string;
-    price: string;
+    // price: string; // DTO'da price yok, minOrder var. Bu alan gerekiyorsa DTO'ya eklenmeli.
     rating: number;
     deliveryTime: string;
-    minOrder: string;
-    image: string;
-    isFavorite: boolean;
+    minOrder: number; // DTO'da double, burada string'di, number'a çevirdim.
+    image: string | null; // Resim null olabilir
+    isFavorite: boolean; // Bu frontend state'i, backend'den gelmiyor olabilir.
+    address?: string; // Yeni eklendi, opsiyonel olabilir
 }
 
 function Home() {
@@ -32,12 +33,18 @@ function Home() {
 
     const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
     useEffect(() => {
-        fetch('http://localhost:8080/api/restaurants', {
-            method: 'GET',
-            credentials: 'include',
-        })
-            .then((res) => res.json())
-            .then((data) => setRestaurants(data))
+        fetch('http://localhost:8080/api/restaurants') // credentials: 'include' GET isteklerinde genellikle gereksiz
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then((data: Restaurant[]) => { // Gelen veriyi Restaurant[] olarak tipleyin
+                // isFavorite alanını her restorana ekle (varsayılan false)
+                const restaurantsWithFavorite = data.map(r => ({ ...r, isFavorite: false, minOrder: Number(r.minOrder) }));
+                setRestaurants(restaurantsWithFavorite);
+            })
             .catch((err) => console.error("Failed to fetch restaurants", err));
     }, []);
 

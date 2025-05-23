@@ -14,6 +14,9 @@ interface FormDataInterface {
     rememberMe: boolean;
     role: 'customer' | 'restaurant' | 'courier';
     restaurantName?: string;
+    address?: string;        // YENİ: Restoran için
+    cuisine?: string;        // YENİ: Restoran için
+    image?: string;          // YENİ: Restoran için resim URL'si
 }
 
 function Auth() {
@@ -32,7 +35,10 @@ function Auth() {
         agreeToTerms: false,
         rememberMe: false,
         role: 'customer',
-        restaurantName: ''
+        restaurantName: '',
+        address: '',      // YENİ
+        cuisine: '',      // YENİ
+        image: ''         // YENİ
     };
 
     const [formData, setFormData] = useState<FormDataInterface>(initialFormData);
@@ -86,6 +92,7 @@ function Auth() {
         setPhoneNumberError('');
 
         if (!showLogin) { // Signup işlemi
+            // Temel validasyonlar
             const passwordRegex = /^(?=.*[A-Z])(?=.*\W).{8,}$/;
             if (!passwordRegex.test(formData.password)) {
                 setPasswordError('Password: 8+ chars, 1 uppercase, 1 special.');
@@ -96,8 +103,7 @@ function Auth() {
                 setEmailError('Invalid email format.');
                 return;
             }
-            // Submit sırasında son bir kez format kontrolü
-            if (!isValidPhoneNumberFormat(formData.phoneNumber)) {
+            if (!isValidPhoneNumberFormat(formData.phoneNumber)) { // isValidPhoneNumberFormat fonksiyonunuzun olduğunu varsayıyorum
                 setPhoneNumberError('Phone format: XXX XXX XX XX');
                 return;
             }
@@ -105,24 +111,65 @@ function Auth() {
                 alert("You must agree to the terms and conditions.");
                 return;
             }
-            if (formData.role === 'restaurant' && !formData.restaurantName?.trim()) {
-                alert("Restaurant name is required for restaurant role.");
+
+            // Role özel validasyonlar
+            if ((formData.role === 'customer' || formData.role === 'courier') && !formData.fullName.trim()) {
+                alert("Full name is required for customer and courier roles.");
                 return;
             }
 
+            if (formData.role === 'restaurant') {
+                if (!formData.restaurantName?.trim()) {
+                    alert("Restaurant name is required.");
+                    return;
+                }
+                if (!formData.address?.trim()) {
+                    alert("Restaurant address is required.");
+                    return;
+                }
+                if (!formData.cuisine?.trim()) {
+                    alert("Restaurant cuisine type is required.");
+                    return;
+                }
+                if (!formData.image?.trim()) {
+                    alert("Restaurant image URL is required.");
+                    return;
+                }
+                try {
+                    new URL(formData.image); // Basit URL format kontrolü
+                    if (!(formData.image.startsWith('http://') || formData.image.startsWith('https://'))) {
+                        throw new Error("URL must start with http:// or https://");
+                    }
+                } catch (_) {
+                    alert("Invalid image URL format. It must be a valid URL starting with http:// or https://.");
+                    return;
+                }
+                // Restoran için fullName (iletişim kişisi) opsiyonel olabilir, bu yüzden burada zorunluluk kontrolü yok.
+                // Eğer zorunluysa, yukarıdaki customer/courier kontrolüne benzer bir kontrol eklenebilir.
+            }
+
             try {
+                const payload: any = {
+                    email: formData.email,
+                    password: formData.password,
+                    phoneNumber: formData.phoneNumber.replace(/\s/g, ''), // Boşlukları temizle
+                    role: formData.role,
+                    // fullName hem customer/courier için hem de restoran için 'contact person name' olarak gönderilebilir.
+                    // Eğer restoran için fullName girilmediyse, backend null veya boş string alacak.
+                    fullName: formData.fullName.trim() || null, // Boşsa null gönder
+                };
+
+                if (formData.role === 'restaurant') {
+                    payload.restaurantName = formData.restaurantName;
+                    payload.address = formData.address;
+                    payload.cuisine = formData.cuisine;
+                    payload.image = formData.image;
+                }
+
                 const response = await fetch('http://localhost:8080/api/signup', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        ...formData,
-                        // Backend'e gönderirken boşlukları kaldırıp sadece rakamları göndermek daha iyi olabilir
-                        // Veya backend'in formatlı (boşluklu) almasını bekliyorsanız böyle bırakın.
-                        // Eğer backend sadece rakam bekliyorsa:
-                        phoneNumber: formData.phoneNumber.replace(/\s/g, '')
-                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
                 });
 
                 const resultData = await response.json();
@@ -131,11 +178,11 @@ function Auth() {
                     alert(resultData.message);
                     const emailForLogin = formData.email;
                     setShowLogin(true);
-                    navigate('/auth');
+                    navigate('/auth'); // URL'i /auth'a resetle (mode=signup kalksın)
                     setAnimationClass('fade-in');
-                    setFormData({
-                        ...initialFormData,
-                        email: emailForLogin,
+                    setFormData({ // Formu login için hazırla
+                        ...initialFormData, // Önce tamamen sıfırla (address, cuisine, image de sıfırlanır)
+                        email: emailForLogin, // Sadece e-postayı signup'tan al
                     });
                 } else {
                     alert(resultData.message || `Signup failed with status: ${response.status}`);
@@ -152,13 +199,8 @@ function Auth() {
             try {
                 const response = await fetch('http://localhost:8080/api/login', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        username: formData.email,
-                        password: formData.password
-                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: formData.email, password: formData.password }),
                 });
 
                 if (!response.ok) {
@@ -171,8 +213,8 @@ function Auth() {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('role', data.role);
                 localStorage.setItem('user', data.username);
-                setToken(data.token);
-                setIsLoggedIn(true);
+                setToken(data.token); // AuthContext'i güncelle
+                setIsLoggedIn(true);  // AuthContext'i güncelle
 
                 if (data.role === "ADMIN") navigate('/admin');
                 else if (data.role === "CUSTOMER") navigate('/');
@@ -235,20 +277,41 @@ function Auth() {
 
     const isFormValid = () => {
         if (showLogin) {
-            return !!(formData.email && formData.password);
+            return !!(formData.email && formData.password); // Login için sadece email ve şifre dolu mu diye bak
         }
+
         // Signup form validasyonu
         const passwordRegex = /^(?=.*[A-Z])(?=.*\W).{8,}$/;
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!passwordRegex.test(formData.password)) return false;
 
-        return (
-            formData.fullName &&
-            passwordRegex.test(formData.password) &&
-            emailRegex.test(formData.email) &&
-            isValidPhoneNumberFormat(formData.phoneNumber) && // Submit için son format kontrolü
-            formData.agreeToTerms &&
-            (formData.role === 'restaurant' ? !!formData.restaurantName?.trim() : true)
-        );
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(formData.email)) return false;
+
+        if (!isValidPhoneNumberFormat(formData.phoneNumber)) return false; // isValidPhoneNumberFormat fonksiyonunuzun olduğunu varsayıyorum
+
+        if (!formData.agreeToTerms) return false;
+
+        if (formData.role === 'customer' || formData.role === 'courier') {
+            if (!formData.fullName.trim()) return false;
+        }
+
+        if (formData.role === 'restaurant') {
+            if (!formData.restaurantName?.trim()) return false;
+            if (!formData.address?.trim()) return false;
+            if (!formData.cuisine?.trim()) return false;
+            if (!formData.image?.trim()) return false;
+            try {
+                new URL(formData.image); // Basit URL format kontrolü
+                if (!(formData.image.startsWith('http://') || formData.image.startsWith('https://'))) {
+                    return false; // URL http veya https ile başlamalı
+                }
+            } catch (_) {
+                return false; // Geçersiz URL formatı
+            }
+            // Restoran için fullName (iletişim kişisi) opsiyonel ise, buraya onun için bir kontrol eklemeye gerek yok
+            // Eğer zorunluysa: if (!formData.fullName?.trim()) return false;
+        }
+        return true; // Tüm kontrollerden geçerse form valid
     };
 
     const toggleView = () => {
@@ -466,7 +529,22 @@ function Auth() {
                                                 onChange={handleChange}
                                                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
                                             />
+                                            <div>
+                                                <label htmlFor="address" className="block text-sm font-medium text-gray-700">Restaurant Address</label>
+                                                <input id="address" name="address" type="text" required value={formData.address} onChange={handleChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+                                            </div>
+                                            <div>
+                                                <label htmlFor="cuisine" className="block text-sm font-medium text-gray-700">Cuisine Type</label>
+                                                <input id="cuisine" name="cuisine" type="text" placeholder="e.g., Italian, Turkish" required value={formData.cuisine} onChange={handleChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+                                            </div>
+                                            <div>
+                                                <label htmlFor="image" className="block text-sm font-medium text-gray-700">Restaurant Image URL</label>
+                                                <input id="image" name="image" type="url" placeholder="https://example.com/image.jpg" required value={formData.image} onChange={handleChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+                                            </div>
                                         </div>
+
+
+
                                     )}
 
                                     <div>
