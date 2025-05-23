@@ -7,48 +7,35 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.byteandbyte.fooddelivery.customer.Customer;
 import com.byteandbyte.fooddelivery.customer.CustomerRepository;
-// import com.byteandbyte.fooddelivery.customer.CustomerService; // Not strictly needed if using repo directly
 import com.byteandbyte.fooddelivery.restaurant.*;
 import com.byteandbyte.fooddelivery.courier.*;
-import org.springframework.transaction.annotation.Transactional; // Import Transactional
-
-// import java.util.Date; // Not needed if @PrePersist handles submissionDate
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthService {
 
     private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
-    // private final CustomerService customerService; // Can be removed if only using repo.findByEmail
-    // private final RestaurantService restaurantService; // Can be removed
     private final RestaurantRepository restaurantRepository;
-    // private final CourierService courierService; // Can be removed
     private final CourierRepository courierRepository;
-
 
     @Autowired
     public AuthService(CustomerRepository customerRepository, PasswordEncoder passwordEncoder,
-                       /*CustomerService customerService, RestaurantService restaurantService,*/
-                       RestaurantRepository restaurantRepository, /*CourierService courierService,*/
-                       CourierRepository courierRepository) {
+                       RestaurantRepository restaurantRepository, CourierRepository courierRepository) {
         this.customerRepository = customerRepository;
         this.passwordEncoder = passwordEncoder;
-        // this.customerService = customerService;
-        // this.restaurantService = restaurantService;
         this.restaurantRepository = restaurantRepository;
-        // this.courierService = courierService;
         this.courierRepository = courierRepository;
     }
 
-
     @Transactional
     public void registerNewCustomer(Customer customer) {
-        // Check if email exists
         if (customerRepository.findByEmail(customer.getEmail()).isPresent()) {
             throw new RuntimeException("Customer with email " + customer.getEmail() + " already exists.");
         }
         customer.setPasswordHash(passwordEncoder.encode(customer.getPasswordHash()));
-        // customer.setSubmissionDate(new Date()); // This will be handled by @PrePersist
+        customer.setApproved(true); // MÜŞTERİ İÇİN ONAY OTOMATİK OLARAK TRUE
+        // customer.setSubmissionDate(new Date()); // Bu @PrePersist ile zaten set ediliyor
         customerRepository.save(customer);
     }
 
@@ -58,8 +45,7 @@ public class AuthService {
             throw new RuntimeException("Courier with email " + courier.getEmail() + " already exists.");
         }
         courier.setPasswordHash(passwordEncoder.encode(courier.getPasswordHash()));
-        courier.setApproved(false);
-        // courier.setSubmissionDate(new Date()); // Handled by @PrePersist
+        courier.setApproved(false); // Kurye için onay beklenir
         courierRepository.save(courier);
     }
 
@@ -69,8 +55,7 @@ public class AuthService {
             throw new RuntimeException("Restaurant with email " + restaurant.getEmail() + " already exists.");
         }
         restaurant.setPasswordHash(passwordEncoder.encode(restaurant.getPasswordHash()));
-        restaurant.setApproved(false);
-        // restaurant.setSubmissionDate(new Date()); // Handled by @PrePersist
+        restaurant.setApproved(false); // Restoran için onay beklenir
         restaurantRepository.save(restaurant);
     }
 }
