@@ -8,7 +8,7 @@ const RestaurantProfilePage = () => {
   const handleSave = () => {
     // Şimdilik sadece frontend
     console.log({ name, address, imageUrl });
-    alert("Bilgiler kaydedildi!");
+    alert("Information saved!");
   };
 
   return (
