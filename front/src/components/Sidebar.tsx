@@ -29,7 +29,7 @@ export function Sidebar({ activeSection, onSectionChange}: SidebarProps) {
         { id: 'settings', label: 'Settings', icon: Settings },
         { id: 'delivery', label: 'Delivery Range', icon: MapPin },
         { id: 'hours', label: 'Business Hours', icon: Clock },
-        { id: 'profile', label: 'Restaurant Profile', icon: Store },
+        { id: 'restaurantProfile', label: 'Restaurant Profile', icon: Store },
         { id: 'logout', label: 'Logout', icon: LogOut },
 
     ];

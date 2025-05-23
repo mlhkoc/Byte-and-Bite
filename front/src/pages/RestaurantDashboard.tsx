@@ -5,6 +5,7 @@ import { Sidebar } from '../components/Sidebar';
 import { Stats } from '../components/Stats';
 import { Reviews } from '../components/Reviews';
 import {useNavigate} from "react-router-dom";
+import RestaurantProfilePage from '../pages/RestaurantProfilePage';
 
 interface Restaurant {
     id: number;
@@ -65,7 +66,11 @@ function Restaurant() {
                         {showReviews && <Reviews onClose={() => setShowReviews(false)} />}
                     </>
                 )}
-            </main>
+            
+                {activeSection === 'restaurantProfile' && (
+                    <RestaurantProfilePage />
+                )}
+    </main>
         </div>
     );
 }
