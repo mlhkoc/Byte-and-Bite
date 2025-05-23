@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, EyeOff, Utensils, User } from 'lucide-react'; // Added User icon
+import { Eye, EyeOff, Utensils } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import backgroundImage from '../assets/bnb.jpg';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-interface FormData {
+interface FormDataInterface {
     fullName: string;
     email: string;
     password: string;
@@ -22,41 +22,61 @@ function Auth() {
     const [showLogin, setShowLogin] = useState(true);
     const [animationClass, setAnimationClass] = useState('fade-in');
     const [searchParams] = useSearchParams();
-    const { setIsLoggedIn } = useAuth();
+    const { setIsLoggedIn, setToken } = useAuth();
 
-    const [formData, setFormData] = useState<FormData>({
+    const initialFormData: FormDataInterface = {
         fullName: '',
         email: '',
         password: '',
-        phoneNumber: '',
+        phoneNumber: '', // Başlangıçta boş
         agreeToTerms: false,
         rememberMe: false,
         role: 'customer',
         restaurantName: ''
-    });
+    };
+
+    const [formData, setFormData] = useState<FormDataInterface>(initialFormData);
 
     const [passwordError, setPasswordError] = useState<string>('');
     const [emailError, setEmailError] = useState<string>('');
     const [phoneNumberError, setPhoneNumberError] = useState<string>('');
 
-    const formatPhoneNumber = (value: string) => {
-        const cleaned = value.replace(/\D/g, '');
-        const limited = cleaned.slice(0, 10);
-        const match = limited.match(/^(\d{3})(\d{3})(\d{2})(\d{2})$/);
-        if (!match) return value; // Return original value if it doesn't match the full pattern yet, to allow typing
+    // Sadece sayıları alıp, sonra formatlayan bir yaklaşım
+    const formatPhoneNumberInput = (value: string): string => {
+        const cleaned = value.replace(/\D/g, ''); // Sadece rakamları al
+        const maxLength = 10; // Maksimum 10 rakam (alan kodu olmadan Türkiye için)
+        const truncated = cleaned.slice(0, maxLength);
 
         let formatted = '';
-        if (match[1]) formatted += match[1];
-        if (match[2]) formatted += ' ' + match[2];
-        if (match[3]) formatted += ' ' + match[3];
-        if (match[4]) formatted += ' ' + match[4];
+        if (truncated.length > 0) {
+            formatted += truncated.substring(0, 3);
+        }
+        if (truncated.length > 3) {
+            formatted += ' ' + truncated.substring(3, 6);
+        }
+        if (truncated.length > 6) {
+            formatted += ' ' + truncated.substring(6, 8);
+        }
+        if (truncated.length > 8) {
+            formatted += ' ' + truncated.substring(8, 10);
+        }
+        return formatted;
+    };
 
-        return formatted.trim();
+    // Telefon numarasının geçerli formatta olup olmadığını kontrol eder
+    const isValidPhoneNumberFormat = (value: string): boolean => {
+        const phoneRegex = /^\d{3} \d{3} \d{2} \d{2}$/;
+        return phoneRegex.test(value);
     };
 
     useEffect(() => {
         const mode = searchParams.get('mode');
-        setShowLogin(mode !== 'signup');
+        if (mode === 'signup') {
+            setShowLogin(false);
+            setFormData(initialFormData);
+        } else {
+            setShowLogin(true);
+        }
     }, [searchParams]);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -65,61 +85,70 @@ function Auth() {
         setEmailError('');
         setPhoneNumberError('');
 
-        // Check if it's admin login
-
-
-        if (!showLogin) { // Signup
+        if (!showLogin) { // Signup işlemi
             const passwordRegex = /^(?=.*[A-Z])(?=.*\W).{8,}$/;
             if (!passwordRegex.test(formData.password)) {
-                setPasswordError('Password must be at least 8 characters long, contain at least one uppercase letter and one special character.');
+                setPasswordError('Password: 8+ chars, 1 uppercase, 1 special.');
                 return;
             }
-
             const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             if (!emailRegex.test(formData.email)) {
-                setEmailError('Please enter a valid email address.');
+                setEmailError('Invalid email format.');
+                return;
+            }
+            // Submit sırasında son bir kez format kontrolü
+            if (!isValidPhoneNumberFormat(formData.phoneNumber)) {
+                setPhoneNumberError('Phone format: XXX XXX XX XX');
+                return;
+            }
+            if (!formData.agreeToTerms) {
+                alert("You must agree to the terms and conditions.");
+                return;
+            }
+            if (formData.role === 'restaurant' && !formData.restaurantName?.trim()) {
+                alert("Restaurant name is required for restaurant role.");
                 return;
             }
 
-            const phoneRegex = /^\d{3} \d{3} \d{2} \d{2}$/;
-            if (formData.phoneNumber && !phoneRegex.test(formData.phoneNumber)) { // phoneNumber might be optional
-                setPhoneNumberError('Please enter a valid phone number (e.g., 555 123 45 67).');
-                return;
-            }
             try {
                 const response = await fetch('http://localhost:8080/api/signup', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(formData),
+                    body: JSON.stringify({
+                        ...formData,
+                        // Backend'e gönderirken boşlukları kaldırıp sadece rakamları göndermek daha iyi olabilir
+                        // Veya backend'in formatlı (boşluklu) almasını bekliyorsanız böyle bırakın.
+                        // Eğer backend sadece rakam bekliyorsa:
+                        phoneNumber: formData.phoneNumber.replace(/\s/g, '')
+                    }),
                 });
 
+                const resultData = await response.json();
+
                 if (response.ok) {
-                    const resultData = await response.json();
-                    alert(resultData.message || 'Registration request submitted. Waiting for admin approval.');
-                    setShowLogin(true); // Switch to login view
+                    alert(resultData.message);
+                    const emailForLogin = formData.email;
+                    setShowLogin(true);
+                    navigate('/auth');
                     setAnimationClass('fade-in');
-                    // Clear form data for signup specific fields, keep email for convenience
-                    setFormData(prev => ({
-                        ...prev,
-                        fullName: '',
-                        password: '',
-                        phoneNumber: '',
-                        agreeToTerms: false,
-                        role: 'customer',
-                        restaurantName: '',
-                        // email: prev.email // Keep email
-                    }));
+                    setFormData({
+                        ...initialFormData,
+                        email: emailForLogin,
+                    });
                 } else {
-                    const errorData = await response.json();
-                    alert(errorData.message || 'Signup failed.');
+                    alert(resultData.message || `Signup failed with status: ${response.status}`);
                 }
             } catch (error) {
                 console.error("Signup error:", error);
                 alert('An error occurred during signup. Please try again.');
             }
-        } else { // Login
+        } else { // Login işlemi
+            if (!formData.email || !formData.password) {
+                alert("Email and password are required for login.");
+                return;
+            }
             try {
                 const response = await fetch('http://localhost:8080/api/login', {
                     method: 'POST',
@@ -127,125 +156,121 @@ function Auth() {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        username: formData.email, // API expects 'username'
+                        username: formData.email,
                         password: formData.password
                     }),
                 });
 
                 if (!response.ok) {
-                    const errorText = await response.text(); // Backend sends plain text error messages
-                    throw new Error(errorText || 'Login failed');
+                    const errorBody = await response.text();
+                    alert(errorBody || `Login failed with status: ${response.status}`);
+                    return;
                 }
 
                 const data = await response.json();
-
                 localStorage.setItem('token', data.token);
+                localStorage.setItem('role', data.role);
+                localStorage.setItem('user', data.username);
+                setToken(data.token);
                 setIsLoggedIn(true);
 
-                const role = data.role; // Should be "CUSTOMER", "RESTAURANT", "COURIER"
-                const username = data.username; // This is the email
-                localStorage.setItem('role' ,role);
-                localStorage.setItem('user', username); // Storing email as user identifier
-
-                if (role === "CUSTOMER") {
-                    navigate('/');
-                } else if (role === "RESTAURANT") {
-                    navigate(`/restaurant`);
-                } else if(role == "ADMIN") {
-                    localStorage.setItem('user', username);
-                    localStorage.setItem('role', role);
-                    navigate('/admin');
-                }
-
-                else if (role === "COURIER") {
-                    navigate(`/courier`);
-                } else {
-                    // Fallback or error if role is unexpected
+                if (data.role === "ADMIN") navigate('/admin');
+                else if (data.role === "CUSTOMER") navigate('/');
+                else if (data.role === "RESTAURANT") navigate(`/restaurant`);
+                else if (data.role === "COURIER") navigate(`/courier`);
+                else {
                     alert("Login successful, but role is unrecognized. Redirecting to home.");
                     navigate('/');
                 }
             } catch (error: any) {
                 console.error("Login error:", error);
-                alert(error.message || "Login failed. Please check your credentials.");
+                alert(error.message || "Login failed. Please check your credentials or network connection.");
             }
         }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const target = e.target as HTMLInputElement; // Type assertion
-        const { name, value, type } = target;
-        const checked = target.checked; // Explicitly get checked for checkboxes
+        const target = e.target as HTMLInputElement;
+        let { name, value, type } = target; // value'yu let yaptık
+        const checked = target.checked;
+
+        if (name === 'phoneNumber') {
+            value = formatPhoneNumberInput(value); // Gelen değeri formatla
+            // Anlık validasyon SADECE signup sırasında ve değer varsa
+            if (!showLogin && value) {
+                if (!isValidPhoneNumberFormat(value) && value.replace(/\s/g, '').length === 10) {
+                    // Eğer 10 rakam girilmişse ve format hala yanlışsa (bu pek olmamalı formatPhoneNumberInput ile)
+                    // veya kullanıcı formatı bozacak bir şey yaparsa (örneğin araya harf sokmaya çalışırsa formatPhoneNumberInput temizler)
+                    // Bu anlık hata mesajını daha dikkatli ayarlamak gerekebilir.
+                    // Belki de anlık hata mesajını sadece tam 10 rakam girildiğinde ve format yanlışsa göstermek daha iyi.
+                    // Şimdilik, submit sırasında ana validasyon var.
+                    setPhoneNumberError(''); // Anlık hatayı şimdilik kaldırıyorum, submit'e bırakıyorum
+                } else if (value.replace(/\s/g, '').length < 10) {
+                    setPhoneNumberError(''); // Henüz tam değilse hata gösterme
+                } else {
+                    setPhoneNumberError(''); // Format doğruysa veya daha az karakter varsa hata yok
+                }
+            } else if (!showLogin && !value) {
+                setPhoneNumberError(''); // Boşsa hata gösterme
+            }
+        }
 
         setFormData(prev => ({
             ...prev,
-            [name]: type === 'checkbox'
-                ? checked
-                : name === 'phoneNumber'
-                    ? formatPhoneNumber(value)
-                    : value,
+            [name]: type === 'checkbox' ? checked : value,
         }));
 
-        // Real-time validation (optional, can be kept or removed if submit validation is preferred)
-        if (name === 'password' && !showLogin) {
-            const passwordRegex = /^(?=.*[A-Z])(?=.*\W).{8,}$/;
-            setPasswordError(passwordRegex.test(value) ? '' : 'Password: 8+ chars, 1 uppercase, 1 special.');
-        }
-        if (name === 'email' && !showLogin) {
-            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-            setEmailError(emailRegex.test(value) ? '' : 'Invalid email format.');
-        }
-        if (name === 'phoneNumber' && !showLogin) { // only validate on signup
-            const phoneRegex = /^\d{3} \d{3} \d{2} \d{2}$/;
-            // Only show error if user has typed something and it's not yet valid
-            if (value && !phoneRegex.test(formatPhoneNumber(value))) {
-                setPhoneNumberError('Phone format: XXX XXX XX XX');
-            } else {
-                setPhoneNumberError('');
+        // Diğer anlık validasyonlar (sadece signup'ta)
+        if (!showLogin) {
+            if (name === 'password') {
+                const passwordRegex = /^(?=.*[A-Z])(?=.*\W).{8,}$/;
+                setPasswordError(passwordRegex.test(value) ? '' : 'Password: 8+ chars, 1 uppercase, 1 special.');
+            }
+            if (name === 'email') {
+                const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                setEmailError(emailRegex.test(value) ? '' : 'Invalid email format.');
             }
         }
     };
 
     const isFormValid = () => {
         if (showLogin) {
-            return formData.email && formData.password;
+            return !!(formData.email && formData.password);
         }
-
+        // Signup form validasyonu
         const passwordRegex = /^(?=.*[A-Z])(?=.*\W).{8,}$/;
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        const phoneRegex = /^\d{3} \d{3} \d{2} \d{2}$/;
 
         return (
             formData.fullName &&
             passwordRegex.test(formData.password) &&
             emailRegex.test(formData.email) &&
-            phoneRegex.test(formData.phoneNumber) && // Ensure phone number is also valid
+            isValidPhoneNumberFormat(formData.phoneNumber) && // Submit için son format kontrolü
             formData.agreeToTerms &&
-            (formData.role === 'restaurant' ? !!formData.restaurantName : true) // restaurant name required if role is restaurant
+            (formData.role === 'restaurant' ? !!formData.restaurantName?.trim() : true)
         );
     };
 
     const toggleView = () => {
         setAnimationClass('fade-out');
-        setPasswordError(''); // Clear errors on view toggle
+        setPasswordError('');
         setEmailError('');
         setPhoneNumberError('');
+        setFormData(initialFormData);
+
         setTimeout(() => {
-            setShowLogin(!showLogin);
+            const newShowLogin = !showLogin;
+            setShowLogin(newShowLogin);
+            if (newShowLogin) {
+                navigate('/auth');
+            } else {
+                navigate('/auth?mode=signup');
+            }
             setAnimationClass('fade-in');
-            // Clear form data when switching views
-            setFormData({
-                fullName: '',
-                email: '',
-                password: '',
-                phoneNumber: '',
-                agreeToTerms: false,
-                rememberMe: false,
-                role: 'customer',
-                restaurantName: ''
-            });
         }, 300);
     };
 
+    // JSX kısmı aynı kalacak (bir önceki cevaptaki gibi)
     return (
         <div className="min-h-screen flex items-center justify-center" style={{
             backgroundImage: `url(${backgroundImage})`,
@@ -255,6 +280,7 @@ function Auth() {
             <div className="max-w-md w-full mx-4">
                 <div className={`bg-white rounded-2xl shadow-xl overflow-hidden transition-all duration-500 ${animationClass}`}>
                     {showLogin ? (
+                        // LOGIN FORM
                         <div className="p-8">
                             <h2 className="text-2xl font-bold text-center mb-2">Welcome to Byte and Bite</h2>
                             <p className="text-gray-600 text-center text-sm mb-8">Your favorite meals are just a few clicks away</p>
@@ -289,6 +315,7 @@ function Auth() {
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}
                                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                                            aria-label={showPassword ? "Hide password" : "Show password"}
                                         >
                                             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                         </button>
@@ -319,14 +346,10 @@ function Auth() {
                                 <button onClick={toggleView} className="text-orange-600 hover:text-orange-500 font-medium">
                                     Create Account
                                 </button>
-                                <div className="mt-2 text-gray-600">
-                                    <span>For admin login use:</span><br />
-                                    <span>Email: <strong>admin</strong></span><br />
-                                    <span>Password: <strong>admin</strong></span>
-                                </div>
                             </div>
                         </div>
                     ) : (
+                        // SIGNUP FORM
                         <div className="p-8">
                             <div className="text-center">
                                 <div className="flex justify-center">
@@ -387,6 +410,7 @@ function Auth() {
                                                 type="button"
                                                 onClick={() => setShowPassword(!showPassword)}
                                                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                                                aria-label={showPassword ? "Hide password" : "Show password"}
                                             >
                                                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                             </button>
@@ -404,9 +428,10 @@ function Auth() {
                                             type="text"
                                             placeholder="e.g., 555 123 45 67"
                                             required
-                                            value={formData.phoneNumber}
+                                            value={formData.phoneNumber} // Formatlanmış değeri göster
                                             onChange={handleChange}
                                             className={`mt-1 block w-full px-3 py-2 border ${phoneNumberError ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                                            maxLength={13} // "XXX XXX XX XX" için (10 rakam + 3 boşluk)
                                         />
                                         {phoneNumberError && <p className="text-red-500 text-xs mt-1">{phoneNumberError}</p>}
                                     </div>

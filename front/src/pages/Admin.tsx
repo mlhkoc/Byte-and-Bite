@@ -1,35 +1,27 @@
+// Admin.tsx
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout.tsx';
-import AdminDashboard from '../components/AdminDashboard.tsx';
-import UserManagement from '../components/UserManagement.tsx'; // Assuming this exists
-import RestaurantManagement from '../components/RestaurantManagement.tsx'; // Assuming this exists
-import CourierManagement from '../components/CourierManagement.tsx'; // Assuming this exists
-import ReportsView from '../components/ReportsView.tsx'; // Assuming this exists
-import SettingsView from '../components/SettingsView.tsx'; // Assuming this exists
-// import { useAuth } from '../context/AuthContext'; // Not used here for admin status
+import AdminDashboard from '../components/AdminDashboard.tsx'; // Bu, pending approvals ve ban user'ı içeriyor
+import UserManagement from '../components/UserManagement.tsx'; // YENİ COMPONENT
+// import RestaurantManagement from '../components/RestaurantManagement.tsx'; // Bunlar UserManagement'a dahil edilebilir
+// import CourierManagement from '../components/CourierManagement.tsx';    // veya ayrı kalabilir
+import ReportsView from '../components/ReportsView.tsx';
+import SettingsView from '../components/SettingsView.tsx';
 
-type AdminSection = 'dashboard' | 'users' | 'restaurants' | 'couriers' | 'reports' | 'settings';
+// Bu type AdminLayout ile paylaşılabilir veya merkezi bir type dosyasında olabilir.
+type AdminSection = 'dashboard' | 'users' | 'pending-registrations' | 'reports' | 'settings'; // 'restaurants' ve 'couriers' yerine 'users' geldi.
 
 const Admin: React.FC = () => {
     const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
     const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
-    // const { token, role } = useAuth(); // If admin logged in via main login and had a token/role
 
     useEffect(() => {
-        // Check if user is admin
         const checkAdminStatus = () => {
-            // Current simple check for "admin" hardcoded login
             const token = localStorage.getItem('token');
             const role = localStorage.getItem('role');
             setIsAdmin(!!token && role === 'ADMIN');
-
-            // Example of a more robust check if admin logged in via JWT:
-            // const storedToken = localStorage.getItem('token');
-            // const storedRole = localStorage.getItem('role');
-            // setIsAdmin(!!storedToken && storedRole === 'ADMIN');
         };
-
         checkAdminStatus();
     }, []);
 
@@ -43,14 +35,16 @@ const Admin: React.FC = () => {
 
     const renderActiveSection = () => {
         switch (activeSection) {
-            case 'dashboard':
+            case 'dashboard': // Bu, pending approvals ve ban user'ı gösterebilir
                 return <AdminDashboard />;
-            case 'users':
+            case 'users': // YENİ BÖLÜM
                 return <UserManagement />;
-            case 'restaurants':
-                return <RestaurantManagement />;
-            case 'couriers':
-                return <CourierManagement />;
+            // case 'pending-registrations': // Eğer AdminDashboard'dan ayırmak isterseniz
+            //     return <PendingRegistrationsComponent />; // Ayrı bir component
+            // case 'restaurants': // Artık UserManagement altında
+            //     return <RestaurantManagement />;
+            // case 'couriers': // Artık UserManagement altında
+            //     return <CourierManagement />;
             case 'reports':
                 return <ReportsView />;
             case 'settings':
@@ -61,7 +55,7 @@ const Admin: React.FC = () => {
     };
 
     return (
-        <AdminLayout activeSection={activeSection} onSectionChange={setActiveSection}>
+        <AdminLayout activeSection={activeSection} onSectionChange={(section) => setActiveSection(section as AdminSection)}>
             {renderActiveSection()}
         </AdminLayout>
     );

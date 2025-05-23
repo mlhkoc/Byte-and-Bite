@@ -1,6 +1,6 @@
 package com.byteandbyte.fooddelivery.restaurant;
 
-import java.util.Date; // Import Date
+import java.util.Date;
 import java.util.List;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,11 +29,24 @@ public class Restaurant {
     private double rating;
 
     @Column(nullable = false)
-    private boolean approved = false; // For admin approval of registration
+    private boolean approved = false; // Restoran için onay beklenir
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false)
     private Date submissionDate;
+
+    @Column(nullable = false)
+    private boolean active = true; // Onaylandıktan sonra varsayılan olarak aktif.
+
+    @Column(nullable = false)
+    private boolean banned = false; // Varsayılan olarak banlı değil.
+
+    @Column(length = 500)
+    private String banReason;
+
+    @Column(nullable = true) // Null olabilir, yani süresiz deaktif veya hiç deaktif edilmemiş
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date deactivationEndDate;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     private List<Menu> menus;
@@ -46,6 +59,6 @@ public class Restaurant {
         if (this.submissionDate == null) {
             this.submissionDate = new Date();
         }
-        // 'approved' is already false by default
+        // approved restoran için varsayılan false
     }
 }

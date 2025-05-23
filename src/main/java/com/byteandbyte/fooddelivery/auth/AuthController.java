@@ -52,6 +52,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed: " + e.getMessage());
         }
 
+
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(request.getUsername());
         String role = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -85,7 +86,7 @@ public class AuthController {
                                      .body(Map.of("message", "Restaurant name is required for restaurant role."));
             }
 
-
+            String successMessage;
             switch (role.toLowerCase()) {
                 case "customer":
                     Customer customer = new Customer();
@@ -95,6 +96,7 @@ public class AuthController {
                     customer.setName(name);
                     // 'approved' and 'submissionDate' set by @PrePersist and default in AuthService
                     authService.registerNewCustomer(customer);
+                    successMessage = "Customer registration successful! You can now log in.";
                     break;
                 case "restaurant":
                     Restaurant restaurant = new Restaurant();
@@ -104,6 +106,7 @@ public class AuthController {
                     restaurant.setName(restaurantName); // Use restaurantName for Restaurant's name
                      // 'approved' and 'submissionDate' set by @PrePersist and default in AuthService
                     authService.registerNewRestaurant(restaurant);
+                    successMessage = "Restaurant registration request submitted. Waiting for admin approval.";
                     break;
                 case "courier":
                     Courier courier = new Courier();
@@ -114,6 +117,7 @@ public class AuthController {
                     courier.setAvailable(true); // Default operational availability, can be changed by courier
                      // 'approved' (for registration) and 'submissionDate' set by @PrePersist and default
                     authService.registerNewCourier(courier);
+                    successMessage = "Courier registration request submitted. Waiting for admin approval.";
                     break;
                 default:
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -121,7 +125,7 @@ public class AuthController {
             }
              // Consistent success response
             Map<String, String> response = new HashMap<>();
-            response.put("message", "Registration request submitted. Waiting for admin approval.");
+            response.put("message", successMessage);
             return ResponseEntity.ok(response);
 
         } catch (RuntimeException e) { // Catch specific exceptions from AuthService like "already exists"
