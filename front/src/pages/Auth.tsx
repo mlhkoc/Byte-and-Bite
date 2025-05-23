@@ -533,10 +533,29 @@ function Auth() {
                                                 <label htmlFor="address" className="block text-sm font-medium text-gray-700">Restaurant Address</label>
                                                 <input id="address" name="address" type="text" required value={formData.address} onChange={handleChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
                                             </div>
-                                            <div>
-                                                <label htmlFor="cuisine" className="block text-sm font-medium text-gray-700">Cuisine Type</label>
-                                                <input id="cuisine" name="cuisine" type="text" placeholder="e.g., Italian, Turkish" required value={formData.cuisine} onChange={handleChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
-                                            </div>
+                                                <div>
+                                                    <label htmlFor="cuisine" className="block text-sm font-medium text-gray-700">
+                                                        Cuisine Type
+                                                    </label>
+                                                    <select
+                                                        id="cuisine"
+                                                        name="cuisine"
+                                                        value={formData.cuisine}
+                                                        onChange={handleChange}
+                                                        required
+                                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                                    >
+                                                        <option value="">Select a cuisine</option>
+                                                        <option value="Pizza">Pizza</option>
+                                                        <option value="Burgers">Burgers</option>
+                                                        <option value="Sushi">Sushi</option>
+                                                        <option value="Chicken">Chicken</option>
+                                                        <option value="Desserts">Desserts</option>
+                                                        <option value="Döner">Döner</option>
+                                                        <option value="Kebap">Kebap</option>
+                                                        <option value="Thai">Thai</option>
+                                                    </select>
+                                                </div>
                                             <div>
                                                 <label htmlFor="image" className="block text-sm font-medium text-gray-700">Restaurant Image URL</label>
                                                 <input id="image" name="image" type="url" placeholder="https://example.com/image.jpg" required value={formData.image} onChange={handleChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />

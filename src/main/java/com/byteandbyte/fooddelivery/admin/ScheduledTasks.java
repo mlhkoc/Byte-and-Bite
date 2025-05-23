@@ -1,4 +1,4 @@
-package com.byteandbyte.fooddelivery.tasks;
+package com.byteandbyte.fooddelivery.admin;
 
 import com.byteandbyte.fooddelivery.admin.AdminService;
 import org.slf4j.Logger;
