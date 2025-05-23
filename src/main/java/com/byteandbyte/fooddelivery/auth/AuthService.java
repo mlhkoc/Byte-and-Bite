@@ -48,7 +48,6 @@ public class AuthService {
             throw new RuntimeException("Customer with email " + customer.getEmail() + " already exists.");
         }
         customer.setPasswordHash(passwordEncoder.encode(customer.getPasswordHash()));
-        customer.setApproved(false); // Explicitly set for clarity, though default is false
         // customer.setSubmissionDate(new Date()); // This will be handled by @PrePersist
         customerRepository.save(customer);
     }

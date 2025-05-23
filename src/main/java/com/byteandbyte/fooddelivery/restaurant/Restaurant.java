@@ -38,7 +38,7 @@ public class Restaurant {
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     private List<Menu> menus;
 
-    @OneToMany(mappedBy = "restaurant")
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     private List<Order> orders;
 
     @PrePersist
@@ -46,6 +46,5 @@ public class Restaurant {
         if (this.submissionDate == null) {
             this.submissionDate = new Date();
         }
-        // 'approved' is already false by default
     }
 }

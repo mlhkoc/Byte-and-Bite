@@ -6,8 +6,8 @@ import UserManagement from '../components/UserManagement.tsx'; // Assuming this 
 import RestaurantManagement from '../components/RestaurantManagement.tsx'; // Assuming this exists
 import CourierManagement from '../components/CourierManagement.tsx'; // Assuming this exists
 import ReportsView from '../components/ReportsView.tsx'; // Assuming this exists
-import SettingsView from '../components/SettingsView.tsx'; // Assuming this exists
-// import { useAuth } from '../context/AuthContext'; // Not used here for admin status
+import SettingsView from '../components/SettingsView.tsx';
+import TicketManagement from "../components/UserManagement.tsx"; // Assuming this exists
 
 type AdminSection = 'dashboard' | 'users' | 'restaurants' | 'couriers' | 'reports' | 'settings';
 
@@ -46,7 +46,7 @@ const Admin: React.FC = () => {
             case 'dashboard':
                 return <AdminDashboard />;
             case 'users':
-                return <UserManagement />;
+                return <TicketManagement />;
             case 'restaurants':
                 return <RestaurantManagement />;
             case 'couriers':

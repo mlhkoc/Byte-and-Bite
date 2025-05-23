@@ -41,8 +41,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         Optional<Admin> adminOpt = adminRepository.findByEmail(email);
         if (adminOpt.isPresent()) {
             Admin admin = adminOpt.get();
-            // Admin için 'approved' durumu kontrolü genellikle olmaz,
-            // adminler sisteme önceden tanımlanır ve her zaman aktiftir.
+
             return new User(
                     admin.getEmail(),
                     admin.getPasswordHash(),
@@ -58,13 +57,11 @@ public class CustomUserDetailsService implements UserDetailsService {
         Optional<Customer> customerOpt = customerRepository.findByEmail(email);
         if (customerOpt.isPresent()) {
             Customer customer = customerOpt.get();
-            if (!customer.isApproved()) {
-                throw new DisabledException("Müşteri hesabı '" + email + "' onay bekliyor veya reddedildi.");
-            }
+
             return new User(
                     customer.getEmail(),
                     customer.getPasswordHash(),
-                    customer.isApproved(),
+                    true,
                     true, true, true,
                     Collections.singletonList(new SimpleGrantedAuthority("ROLE_CUSTOMER"))
             );

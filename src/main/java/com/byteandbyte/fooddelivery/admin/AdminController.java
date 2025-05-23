@@ -1,6 +1,7 @@
 package com.byteandbyte.fooddelivery.admin;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,11 +60,7 @@ public class AdminController {
         return "Hello World! (Tickets - Not Implemented)";
     }
 
-    // This endpoint is now replaced by /pending-registrations
-    // @GetMapping("/requests")
-    // public String getRequests() {
-    //     return "Hello World! (Requests - Use /pending-registrations)";
-    // }
+
 
     @PostMapping("/solveticket")
     public String solveTicket() {
@@ -72,10 +69,17 @@ public class AdminController {
     }
 
     @PostMapping("/ban")
-    public String banUser() {
-        // Example: @RequestBody Map<String, String> payload (e.g., {"email": "user@example.com"})
-        // adminService.banUser(payload.get("email"));
-        return "Hello World! (Ban User - Not Implemented via API yet, connect to AdminService logic)";
+    public ResponseEntity<?> banUser(@RequestBody Map<String, String> payload) {
+        String email = payload.get("email");
+        try {
+            if (adminService.banUser(email)){
+                return ResponseEntity.ok(Map.of("message", email + " has been banned successfully"));
+            }
+            else return ResponseEntity.notFound().build();
+        }
+        catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     // This might be for an admin creating a user directly, distinct from user self-signup
