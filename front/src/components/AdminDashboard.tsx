@@ -29,7 +29,6 @@ const AdminDashboard: React.FC = () => {
         const token = localStorage.getItem('token');
         if (!token) {
             setError("Authentication token not found. Please log in.");
-            // navigate('/auth'); // Opsiyonel: Kullanıcıyı login sayfasına yönlendir
             return undefined;
         }
         return {
@@ -122,23 +121,21 @@ const AdminDashboard: React.FC = () => {
     // Ban User section handlers (Bu kısım için backend entegrasyonu yapılmadıysa mock olarak kalır)
     const handleBanUser = () => {
         if (emailToBan.trim() === '') return;
-        // TODO: Backend'e ban user isteği gönderilmeli (eğer backend'de bu endpoint varsa)
-        // Örnek:
-        // const headers = getAuthHeaders();
-        // if (!headers) return;
-        // fetch('http://localhost:8080/api/admin/ban', {
-        //     method: 'POST',
-        //     headers: headers,
-        //     body: JSON.stringify({ email: emailToBan })
-        // }).then(response => {
-        //     if (response.ok) {
-        //         setBannedUsers([{ email: emailToBan, time: 'just now' }, ...bannedUsers]);
-        //         setEmailToBan('');
-        //         alert('User banned successfully');
-        //     } else {
-        //         alert('Failed to ban user');
-        //     }
-        // }).catch(err => alert('Error banning user: ' + err.message));
+        const headers = getAuthHeaders();
+        if (!headers) return;
+        fetch('http://localhost:8080/api/admin/ban', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ email: emailToBan})
+        }).then(response => {
+            if (response.ok) {
+                setBannedUsers([{ email: emailToBan, time: 'just now' }, ...bannedUsers]);
+                setEmailToBan('');
+                alert('User banned successfully');
+            } else {
+                alert('Failed to ban user');
+            }
+        }).catch(err => alert('Error banning user: ' + err.message));
         console.warn("Ban user functionality is not fully implemented with backend yet.");
         setBannedUsers([{ email: emailToBan, time: 'just now' }, ...bannedUsers]);
         setEmailToBan('');
@@ -160,7 +157,7 @@ const AdminDashboard: React.FC = () => {
                 return { icon: <UserIcon size={18} className="text-green-600" />, title: 'Customer Registration', color: 'bg-green-50 border-green-100', iconBg: 'bg-green-100' };
             default:
                 // Bu durum olmamalı ama bir fallback
-                const exhaustiveCheck: never = type;
+                // const exhaustiveCheck: never = type;
                 return { icon: <UserIcon size={18} />, title: 'Registration Request', color: 'bg-gray-50 border-gray-100', iconBg: 'bg-gray-100' };
         }
     };
@@ -231,7 +228,6 @@ const AdminDashboard: React.FC = () => {
                 </div>
             </div>
 
-            {/* Ban User Section (Mock Data veya Backend'e bağlanacak) */}
             <div className="bg-white p-5 rounded-lg shadow-sm">
                 <h2 className="text-xl font-semibold mb-4">Ban User</h2>
                 <div className="flex mb-6">

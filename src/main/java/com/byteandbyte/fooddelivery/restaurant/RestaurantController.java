@@ -38,15 +38,16 @@ public class RestaurantController {
 
     @GetMapping("/restaurants")
     public List<RestaurantDTO> getAllRestaurants() {
-        return restaurantRepository.findAll()
-                .stream().map(this::toDTO)
+        return restaurantRepository.findAll().stream()
+                .filter(Restaurant::isApproved)
+                .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/restaurant")
     public RestaurantDTO getRestaurant(Principal principal) {
         Restaurant restaurant = restaurantRepository.findByEmail(principal.getName())
-            .orElseThrow(() -> new RuntimeException("Restaurant not foundfdcrtfcgfcgf"));
+            .orElseThrow(() -> new RuntimeException("Restaurant not found"));
         return toDTO(restaurant);
     }
 

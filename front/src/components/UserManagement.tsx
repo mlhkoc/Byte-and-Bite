@@ -1,161 +1,108 @@
-import React, { useState, useEffect } from 'react';
-import { Search, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { X, Menu } from 'lucide-react';
 
-// Mock data for users
-const mockUsers = [
-    { id: 1, name: 'John Doe', email: 'john.doe@email.com', role: 'customer', joinDate: '2023-11-15', status: 'active' },
-    { id: 2, name: 'Jane Smith', email: 'jane.smith@email.com', role: 'customer', joinDate: '2023-10-20', status: 'active' },
-    { id: 3, name: 'Mike Wilson', email: 'mike.wilson@email.com', role: 'courier', joinDate: '2023-09-05', status: 'banned' },
-    { id: 4, name: 'Sarah Johnson', email: 'sarah.j@email.com', role: 'restaurant', joinDate: '2023-08-12', status: 'active' },
-    { id: 5, name: 'David Brown', email: 'david.b@email.com', role: 'customer', joinDate: '2023-07-30', status: 'active' },
-    { id: 6, name: 'Emily Davis', email: 'emily.d@email.com', role: 'customer', joinDate: '2023-06-18', status: 'active' },
-];
+interface Ticket {
+    id: number;
+    orderId: number;
+    message: string;
+    status: string;
+    customerEmail: string;
+}
 
-const UserManagement: React.FC = () => {
-    const [users, setUsers] = useState(mockUsers);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filter, setFilter] = useState('all');
+const TicketManagement: React.FC = () => {
+    const [tickets, setTickets] = useState<Ticket[]>([]);
+    const [activeTicketId, setActiveTicketId] = useState<number | null>(null);
+    const token = localStorage.getItem("token")
 
-    const filteredUsers = users.filter(user => {
-        const matchesSearch =
-            user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    useEffect(() => {
+        const fetchTickets = async () => {
+            try {
+                const response = await fetch('http://localhost:8080/api/tickets',{
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
 
-        if (filter === 'all') return matchesSearch;
-        if (filter === 'banned') return matchesSearch && user.status === 'banned';
-        return matchesSearch && user.role === filter;
-    });
+                    },
+                });
+                const data = await response.json();
+                setTickets(data);
+            } catch (error) {
+                console.error('Error fetching tickets:', error);
+            }
+        };
+        fetchTickets();
+    }, []);
 
-    const handleBanUser = (id: number) => {
-        setUsers(users.map(user =>
-            user.id === id ? { ...user, status: user.status === 'banned' ? 'active' : 'banned' } : user
-        ));
-    };
+    const closeTicket = async (id: number) => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/tickets/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
 
-    const getRoleColor = (role: string) => {
-        switch (role) {
-            case 'restaurant': return 'bg-blue-100 text-blue-800';
-            case 'courier': return 'bg-indigo-100 text-indigo-800';
-            default: return 'bg-gray-100 text-gray-800';
+                },
+                body: JSON.stringify({
+
+                })
+            });
+            if (response.ok) {
+                setTickets(prev => prev.map(t => t.id === id ? { ...t, status: 'closed' } : t));
+            }
+        } catch (error) {
+            console.error('Error closing ticket:', error);
         }
     };
 
     return (
-        <div>
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">User Management</h1>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                {/* Search and filters */}
-                <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between gap-4">
-                    <div className="relative flex-1">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Search size={18} className="text-gray-400" />
+        <div className="p-6">
+            <h1 className="text-2xl font-bold mb-4">Ticket Management</h1>
+            <div className="space-y-4">
+                {tickets.map(ticket => (
+                    <div key={ticket.id} className="bg-white rounded-lg shadow p-4 relative">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <h2 className="text-lg font-semibold">{ticket.customerEmail}</h2>
+                                <p className="text-sm text-gray-600">{ticket.message}</p>
+                                <p className="text-xs text-gray-400 mt-1">Created: {new Date().toLocaleString()}</p>
+                                <p className={`mt-2 text-sm font-medium ${ticket.status === 'open' ? 'text-green-600' : 'text-red-600'}`}>{ticket.status.toUpperCase()}</p>
+                            </div>
+                            <div className="flex gap-2 items-start">
+                                <button
+                                    onClick={() => setActiveTicketId(ticket.id)}
+                                    className="text-gray-500 hover:text-gray-800"
+                                >
+                                    <Menu size={20} />
+                                </button>
+                                <button
+                                    onClick={() => closeTicket(ticket.id)}
+                                    className="bg-red-100 text-red-600 px-3 py-1 rounded-md hover:bg-red-200 text-sm"
+                                    disabled={ticket.status === 'closed'}
+                                >
+                                    Close
+                                </button>
+                            </div>
                         </div>
-                        <input
-                            type="text"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="Search users..."
-                            className="pl-10 pr-3 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
 
-                    <div className="flex">
-                        <select
-                            value={filter}
-                            onChange={(e) => setFilter(e.target.value)}
-                            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option value="all">All Users</option>
-                            <option value="customer">Customers</option>
-                            <option value="restaurant">Restaurants</option>
-                            <option value="courier">Couriers</option>
-                            <option value="banned">Banned Users</option>
-                        </select>
-                    </div>
-                </div>
+                        {activeTicketId === ticket.id && (
+                            <div className="absolute left-0 top-0 h-full w-64 bg-gray-50 border-r shadow-lg p-4 z-10">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-semibold">Admin Actions</h3>
+                                    <button onClick={() => setActiveTicketId(null)}>
+                                        <X size={20} className="text-gray-500 hover:text-gray-800" />
+                                    </button>
+                                </div>
+                                <ul className="space-y-2 text-sm">
+                                    <li><button className="text-blue-600 hover:underline">Refund</button></li>
 
-                {/* Users table */}
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Name
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Email
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Role
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Join Date
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Status
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Actions
-                            </th>
-                        </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredUsers.length > 0 ? (
-                            filteredUsers.map((user) => (
-                                <tr key={user.id} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="font-medium text-gray-900">{user.name}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-gray-500">{user.email}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getRoleColor(user.role)}`}>
-                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                      </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-gray-500">
-                                        {new Date(user.joinDate).toLocaleDateString()}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          user.status === 'active'
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
-                      }`}>
-                        {user.status === 'active' ? 'Active' : 'Banned'}
-                      </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <button
-                                            onClick={() => handleBanUser(user.id)}
-                                            className={`px-3 py-1 text-sm rounded-md ${
-                                                user.status === 'banned'
-                                                    ? 'bg-blue-100 text-blue-600 hover:bg-blue-200'
-                                                    : 'bg-red-100 text-red-600 hover:bg-red-200'
-                                            }`}
-                                        >
-                                            {user.status === 'banned' ? 'Unban' : 'Ban'}
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
-                                    No users found
-                                </td>
-                            </tr>
+                                </ul>
+                            </div>
                         )}
-                        </tbody>
-                    </table>
-                </div>
+                    </div>
+                ))}
             </div>
         </div>
     );
 };
 
-export default UserManagement;
+export default TicketManagement;

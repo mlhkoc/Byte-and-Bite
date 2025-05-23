@@ -1,9 +1,12 @@
 package com.byteandbyte.fooddelivery.food;
 
+import com.byteandbyte.fooddelivery.order.OrderItem;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import com.byteandbyte.fooddelivery.menu.Menu;
+
+import java.util.List;
 
 @Entity
 @Data
@@ -25,6 +28,8 @@ public class Food {
     @JoinColumn(name = "menu_id")
     @JsonIgnore
     private Menu menu; // A food item belongs to one menu
+
+
 
 
 }
