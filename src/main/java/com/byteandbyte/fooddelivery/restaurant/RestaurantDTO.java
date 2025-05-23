@@ -11,6 +11,7 @@ import lombok.*;
 public class RestaurantDTO {
     private Long id;
     private String name;
+    private String address;
     private String cuisine;
     private double rating;
     private String deliveryTime;
@@ -18,3 +19,5 @@ public class RestaurantDTO {
     private String image;
 
 }
+
+

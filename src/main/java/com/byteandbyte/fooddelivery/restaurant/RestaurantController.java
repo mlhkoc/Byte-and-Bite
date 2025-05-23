@@ -27,27 +27,32 @@ public class RestaurantController {
 
     public RestaurantDTO toDTO(Restaurant r) {
         Long id = r.getId();
-        String name = r.getName() != null ? r.getName() : "";
-        String cuisine = r.getCuisine() != null ? r.getCuisine() : "";
-        double rating = max(r.getRating(),0.0);
-        String deliveryTime = r.getDeliveryTime() != null ? r.getDeliveryTime() : "";
-        double minOrder = max(r.getMinOrder(),0.0);
-        String image = r.getImage() != null ? r.getImage() : "default.png"; // or null-safe
-        return new RestaurantDTO(id,name,cuisine,rating,deliveryTime,minOrder,image);
+                String name = r.getName() != null ? r.getName() : "N/A";
+                String cuisine = r.getCuisine() != null ? r.getCuisine() : "N/A";
+                double rating = Math.max(r.getRating(), 0.0);
+                String deliveryTime = r.getDeliveryTime() != null ? r.getDeliveryTime() : "N/A";
+                double minOrder = Math.max(r.getMinOrder(), 0.0);
+                String image = r.getImage(); // veya varsayılan resim: r.getImage() != null ? r.getImage() : "default.png";
+                String address = r.getAddress() != null ? r.getAddress() : "N/A";
+
+                return new RestaurantDTO(id, name, address, cuisine, rating, deliveryTime, minOrder, image);
     }
 
     @GetMapping("/restaurants")
     public List<RestaurantDTO> getAllRestaurants() {
-        return restaurantRepository.findAll().stream()
-                .filter(Restaurant::isApproved)
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+            return restaurantRepository.findAll()
+                    .stream()
+                    .filter(Restaurant::isApproved) // Sadece onaylanmış restoranları göster
+                    .filter(Restaurant::isActive)   // Sadece aktif restoranları göster
+                    .filter(r -> !r.isBanned())     // Banlı olmayan restoranları göster
+                    .map(this::toDTO)
+                    .collect(Collectors.toList());
     }
 
     @GetMapping("/restaurant")
     public RestaurantDTO getRestaurant(Principal principal) {
         Restaurant restaurant = restaurantRepository.findByEmail(principal.getName())
-            .orElseThrow(() -> new RuntimeException("Restaurant not found"));
+            .orElseThrow(() -> new RuntimeException("Restaurant not foundfdcrtfcgfcgf"));
         return toDTO(restaurant);
     }
 

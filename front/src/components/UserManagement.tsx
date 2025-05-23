@@ -541,4 +541,4 @@ const UserManagement: React.FC = () => {
     );
 };
 
-export default TicketManagement;
+export default UserManagement;
