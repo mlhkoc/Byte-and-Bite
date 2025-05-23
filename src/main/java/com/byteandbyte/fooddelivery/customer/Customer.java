@@ -1,5 +1,6 @@
 package com.byteandbyte.fooddelivery.customer;
 
+import com.byteandbyte.fooddelivery.cart.Cart;
 import jakarta.persistence.*;
 import lombok.*;
 import com.byteandbyte.fooddelivery.order.Order;

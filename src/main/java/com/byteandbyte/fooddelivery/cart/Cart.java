@@ -19,6 +19,7 @@ public class Cart {
     private Long id;
 
     @OneToOne
+    @JoinColumn(name = "customer_id", nullable = true)
     @JsonIgnore
     private Customer customer;
 

@@ -44,8 +44,9 @@ createRoot(document.getElementById('root')!).render(
                             <Route path="/profile" element={<ProfilePage />} />
                             <Route path="/logout" element={<LogoutPage />} />
                             <Route path="/orders" element={<OrderHistory />}/>
-                            <Route path="*" element={<NotFoundPage />}/>
                             <Route path="/admin" element={<Admin />} />
+                            <Route path="*" element={<NotFoundPage />}/>
+
 
                         </Routes>
                         <CartModal />

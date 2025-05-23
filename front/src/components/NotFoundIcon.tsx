@@ -1,5 +1,6 @@
 import React from 'react';
-import { FileQuestion, Search, X } from 'lucide-react';
+import { FileQuestion, Search, X } from 'lucide-react';￼
+
 
 type NotFoundIconProps = {
     size?: number;

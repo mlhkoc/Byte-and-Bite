@@ -29,7 +29,6 @@ export async function updateCustomer(email: string, customer: Customer,token: st
         credentials: "include", // optional since it's now public
         body: JSON.stringify(customer),
     });
-
     if (!res.ok) {
         throw new Error("Failed to update customer");
     }
