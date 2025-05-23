@@ -48,6 +48,7 @@ export interface User {
 }
 
 export interface Delivery {
+    amount?: number;
     id: string;
     restaurantName: string;
     address: string;

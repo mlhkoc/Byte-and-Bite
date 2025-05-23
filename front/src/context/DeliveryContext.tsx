@@ -139,13 +139,18 @@ export const DeliveryProvider: React.FC<DeliveryProviderProps> = ({ children }) 
       }
     }
   };
+  function toLocalISOString(date) {
+    const offset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - offset).toISOString().slice(0, 19);
+  }
+
 
   const markAsDelivered = async () => {
     if (currentDelivery) {
       const completed: Delivery = {
         ...currentDelivery,
         status: 'completed' as DeliveryStatus,
-        deliveryDate: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        deliveryDate: toLocalISOString(new Date()),
         rating: 5.0,
       };
 
